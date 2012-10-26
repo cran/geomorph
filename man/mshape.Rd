@@ -1,0 +1,36 @@
+\name{mshape}
+\alias{mshape}
+\title{Estimate mean shape for a set of aligned specimens}
+\usage{
+  mshape(A)
+}
+\arguments{
+  \item{A}{An array (p x k x n) containing GPA-aligned
+  coordinates for a set of specimens}
+}
+\description{
+  Estimate the mean shape for a set of aligned specimens
+}
+\details{
+  The function estimates the average landmark coordinates
+  for a set of aligned specimens. It is assumed that the
+  landmarks have previously been aligned using Generalized
+  Procrustes Analysis (GPA) [e.g., with
+  \code{\link{gpagen}}]. This function is described in
+  Claude (2008).
+}
+\examples{
+data(plethodon)
+Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
+
+mshape(Y.gpa$coords)   #mean (consensus) configuration
+}
+\author{
+  Julien Claude
+}
+\references{
+  Claude, J. 2008. Morphometrics with R. Springer, New
+  York.
+}
+\keyword{mshape}
+

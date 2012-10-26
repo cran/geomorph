@@ -1,0 +1,20 @@
+\docType{data}
+\name{plethspecies}
+\alias{plethspecies}
+\title{Average head shape and phylogenenetic relationships for several Plethodon salamander species}
+\description{
+  Average head shape and phylogenenetic relationships for
+  several Plethodon salamander species
+}
+\author{
+  Dean Adams
+}
+\references{
+  Phylogeny pruned from: Wiens et al. (2006). Evol.
+
+  Data from: Adams and Rohlf (2000); Adams et al. (2007);
+  Arif et al. (2007) Myers and Adams (2008)
+}
+\keyword{data}
+\keyword{datasets}
+

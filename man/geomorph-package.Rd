@@ -1,0 +1,19 @@
+\docType{package}
+\name{geomorph-package}
+\alias{geomorph}
+\alias{geomorph-package}
+\title{Geometric morphometric analsyes for 2D/3D data}
+\description{
+  Geometric morphometric analsyes for 2D/3D data
+}
+\author{
+  Dean C. Adams & Erik Otarola-Castillo
+
+  Functions in this package allow one to read, manipulate,
+  and digitize landmark data; generate shape variables via
+  Procrustes analysis for points, curves and surface data,
+  perform statistical analyses of shape variation and
+  covariation, and provide graphical depictions of shapes
+  and patterns of shape variation.
+}
+
