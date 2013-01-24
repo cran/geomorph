@@ -37,13 +37,13 @@
   Gidasqewski 2010). Significance testing is found by
   permuting the shape data among the tips of the phylogeny.
   A plot of the specimens in tangent space with the
-  phylogeny superimposed is included. Note that the method
-  can be slow as ancestral states must be estimated for
-  every iteration.
+  phylogeny superimposed is included, and ancestral states
+  are returned. Note that the method can be slow as
+  ancestral states must be estimated for every iteration.
 }
 \examples{
 data(plethspecies)
-Y.gpa<-gpagen(plethspecies$land)    #GPA-alignment
+Y.gpa<-gpagen(plethspecies$land,)    #GPA-alignment
 
 physignal(plethspecies$phy,Y.gpa$coords,iter=9)
 }

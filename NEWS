@@ -1,0 +1,42 @@
+		CHANGES IN GEOMORPH VERSION 1.1-0
+
+
+NEW FEATURES
+
+    o bilat.symmetry() function added
+
+    o writeland.tps() function added
+
+    o fixed.angle() function added
+
+    o compare.modular.partitions() generalized to allow 2 or more partitions
+
+    o morphol.integr() generalized to allow 2 or more partitions
+
+    o trajectory.analysis() re-written to accept formulas, allowing greater flexibility for motion analysis
+
+    o PLS scores added to output morphol.integr() 
+
+    o Ancestral states added to output physignal()
+
+    o Centroid size and allometry scores added as output in plotAllometry()
+
+    o PC scores added to output of plotTangentSpace()
+
+    o Option added to select PC axes for plot in plotTangentSpace()
+
+    o Option added to include specimen numbers to plotTangentSpace()
+
+BUG FIXES
+
+    o buildtemplate() positional error in plot between template and scan corrected
+
+    o digit.curves() error with passing objects to internal function corrected
+
+    o gpgen() occassional reflection issue corrected
+
+OTHER CHANGES
+
+    o read.morphologika() accepts greater variety of input file formats
+
+    o new example data added for trajectory.analysis() (motionpaths)

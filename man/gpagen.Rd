@@ -106,9 +106,9 @@ data(hummingbirds)
 #Matrix defining which points are semilandmarks (middle column) and in which directions they slide (columns 1 vs. 3)
 hummingbirds$curvepts
 
-gpagen(hummingbirds$land,curves=hummingbirds$curvepts)   #Using Procrustes Distance for sliding
+gpagen(hummingbirds$land,curves=hummingbirds$curvepts,)   #Using Procrustes Distance for sliding
 
-gpagen(hummingbirds$land,curves=hummingbirds$curvepts,ProcD=FALSE)   #Using bending energy for sliding
+gpagen(hummingbirds$land,curves=hummingbirds$curvepts,ProcD=FALSE,)   #Using bending energy for sliding
 
 #Example 3: points, curves and surfaces
 data(scallops)

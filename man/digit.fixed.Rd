@@ -28,6 +28,10 @@
   working directory using the specimen name, adding
   "fixedlmcoords.nts" as a suffix.
 
+  NOTE: To ensure a strong match between the scan and the
+  template, it is recommended that a reasonable number of
+  fixed points be used.
+
   \subsection{Digitizing}{ Digitizing using buildtemplate
   is interactive between landmark selection using a mouse
   (see below for instructions), and the R console. Once a

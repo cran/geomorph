@@ -4,7 +4,7 @@
 \usage{
   plotRefToTarget(M1, M2,
     method = c("TPS", "vector", "points"), mag = 1,
-    links = NULL)
+    links = NULL, ...)
 }
 \arguments{
   \item{M1}{Matrix of landmark coordinates for the first
@@ -21,6 +21,9 @@
 
   \item{links}{An optional matrix defining for links
   between landmarks}
+
+  \item{...}{Additional parameters to be passed to 'plot'
+  or 'plot3d'}
 }
 \description{
   Function plots shape differences between a reference and

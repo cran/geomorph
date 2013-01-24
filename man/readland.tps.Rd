@@ -29,10 +29,9 @@
   "LM3=". Landmark coordinates are multiplied by their
   scale factor if this is provided for all specimens. If
   one or more specimens are missing the scale factor,
-  landmarks are treated in their original units.
-
-  Note, the present version of this function reads *.tps
-  files that contain only landmark coordinates.
+  landmarks are treated in their original units.  NOTE: all
+  other information present in tps files (curves, comments,
+  variables, radii, etc.)  is ignored.
 }
 \author{
   Dean Adams
