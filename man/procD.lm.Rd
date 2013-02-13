@@ -2,11 +2,10 @@
 \alias{procD.lm}
 \title{Procrustes ANOVA/regression for shape data}
 \usage{
-  procD.lm(formula, data = NULL, iter = 999)
+  procD.lm(f1, data = NULL, iter = 999)
 }
 \arguments{
-  \item{formula}{A formula for the linear model (e.g.,
-  y~x1+x2)}
+  \item{f1}{A formula for the linear model (e.g., y~x1+x2)}
 
   \item{data}{An optional value specifying a data frame
   containing all data (not required)}
@@ -27,15 +26,18 @@
 \details{
   The function quantifies the relative amount of shape
   variation attributable to one or more factors in a linear
-  model and assesses this variation via permutation. In the
-  formula, 'y' specifies the response variables (shape
-  data), which must be in the form of a two-dimensional
-  data matrix of dimension (n x [p*k]), rather than a 3D
-  array.  It is assumed that the landmarks have previously
-  been aligned using Generalized Procrustes Analysis (GPA)
-  [e.g., with \code{\link{gpagen}}]. The function
+  model and assesses this variation via permutation. Data
+  input is specified by a formula (e.g., y~X), where 'y'
+  specifies the response variables (shape data), and 'X'
+  contains one or more independent variables (discrete or
+  continuous). The response matrix 'y' must be in the form
+  of a two-dimensional data matrix of dimension (n x
+  [p*k]), rather than a 3D array.  It is assumed that the
+  landmarks have previously been aligned using Generalized
+  Procrustes Analysis (GPA) [e.g., with
+  \code{\link{gpagen}}]. The function
   \code{\link{two.d.array}} can be used to obtain a
-  two-dimensional data matrix from a 3D array of landmark
+  two-dimensional data matrix from a 3D array oflandmark
   coordinates. The names specified for the independent (x)
   variables in the formula represent one or more vectors
   containing continuous data or factors. It is assumed that
@@ -74,7 +76,7 @@ procD.lm(y~plethodon$species*plethodon$site,iter=99)
 
 ### Regression example
 data(rats)
-rat.gpa<-gpagen(ratland)         #GPA-alignment
+rat.gpa<-gpagen(ratland,)         #GPA-alignment
 
 procD.lm(two.d.array(rat.gpa$coords)~rat.gpa$Csize,iter=99)
 }

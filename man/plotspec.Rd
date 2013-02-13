@@ -27,8 +27,8 @@
 data(Specimen4Raw)
 rawdat<-as.matrix(Specimen4Raw)
 data(scallops)
-digitdat<-scallops$coorddata[,,4]
-plotspec(specimen=rawdat,digitspec=digitdat,fixed=16)
+digitdat<-scallops$coorddata[,,1]
+plotspec(specimen=rawdat,digitspec=scallops$coorddata[,,1],fixed=16)
 }
 \author{
   \href{http://www.people.fas.harvard.edu/~eotarolacastillo}{Erik

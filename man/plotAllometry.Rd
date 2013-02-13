@@ -4,7 +4,7 @@
 \usage{
   plotAllometry(A, sz, groups = NULL,
     method = c("CAC", "RegScore", "PredLine"),
-    warpgrids = TRUE)
+    warpgrids = TRUE, label = FALSE)
 }
 \arguments{
   \item{A}{An array (p x k x n) containing landmark
@@ -22,6 +22,9 @@
   \item{warpgrids}{A logical value indicating whether
   deformation grids for small and large shapes should be
   displayed}
+
+  \item{label}{A logical value indicating whether labels
+  for each specimen should be displayed}
 }
 \description{
   Function plots allometry curves for a set of specimens
@@ -48,17 +51,18 @@
   values from a regression of shape on size, and plots the
   first principal component of the predicted values versus
   size as a stylized graphic of the allometric trend (Adams
-  and Nistri 2010). Optionally, deformation grids can be
-  requested, which display the shape of the smallest and
-  largest specimens relative to the average specimen (using
-  'warpgrid=T' or 'warpgrid=F'). Finally, if groups are
-  provided, the above approaches are implemented while
-  accounting for within-group patterns of covariation (see
-  references for explanation).
+  and Nistri 2010). For all methods, both centroid size and
+  allometry scores are returned. Optionally, deformation
+  grids can be requested, which display the shape of the
+  smallest and largest specimens relative to the average
+  specimen (using 'warpgrid=T' or 'warpgrid=F'). Finally,
+  if groups are provided, the above approaches are
+  implemented while accounting for within-group patterns of
+  covariation (see references for explanation).
 }
 \examples{
 data(rats)
-Y.gpa<-gpagen(ratland)    #GPA-alignment
+Y.gpa<-gpagen(ratland,)    #GPA-alignment
 
 #Using CAC for plot
 plotAllometry(Y.gpa$coords,Y.gpa$Csize,method="CAC")

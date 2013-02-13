@@ -28,12 +28,12 @@
   superimposed in this plot revealing how shape evolves
   (e.g., Rohlf 2002; Klingenberg and Gidaszewski 2010). The
   plot also displays the ancestral states for each node of
-  the phylogenetic tree, whose state values can optionally
-  be returned.
+  the phylogenetic tree, whose values can optionally be
+  returned.
 }
 \examples{
 data(plethspecies)
-Y.gpa<-gpagen(plethspecies$land)    #GPA-alignment
+Y.gpa<-gpagen(plethspecies$land,)    #GPA-alignment
 
 plotGMPhyloMorphoSpace(plethspecies$phy,Y.gpa$coords)
 }

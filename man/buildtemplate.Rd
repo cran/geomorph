@@ -52,6 +52,10 @@
   to select it again. This can be repeated until the user
   is comfortable with the landmark chosen.
 
+  NOTE: To ensure a strong match between the scan and the
+  template, it is recommended that a reasonable number of
+  fixed points be used.
+
   To digitize with a standard 3-button (PC) buildtemplate
   uses: \enumerate{ \item the RIGHT mouse button (primary)
   to select points to be digitized First, \item the LEFT

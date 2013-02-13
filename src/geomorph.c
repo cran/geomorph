@@ -43,6 +43,13 @@ void OPA(int p2in, int k2in, double RefMat[p2in][k2in], double S2Mat[p2in][k2in]
        }
      }
    }
+// Identify reflections: if det(YtX) < 0, then reflections exist 
+   double det;
+   if(k2 == 2){det = (YtX[0][0]*YtX[1][1])-(YtX[1][0]*YtX[0][1]);}  
+	  else{det = YtX[0][0]*YtX[1][1]*YtX[2][2] + YtX[0][1]*YtX[1][2]*YtX[2][0] +
+     YtX[0][2]*YtX[1][0]*YtX[2][1] - YtX[0][0]*YtX[1][2]*YtX[2][1] -
+     YtX[0][1]*YtX[1][0]*YtX[2][2] - YtX[0][2]*YtX[1][1]*YtX[2][0];}
+    
 // SVD of YtX
    double *Umat, *Vtrans, *Dmat; 
    Umat = (double *)R_alloc(k2*k2, sizeof(double));
@@ -70,6 +77,13 @@ void OPA(int p2in, int k2in, double RefMat[p2in][k2in], double S2Mat[p2in][k2in]
        V[i][j]=Vtrans[(j*k2)+i];
      }
    }
+  // Correct for reflections 
+   if(det<0){ 
+     for (i=0;i<k2;i++){
+	   U[i][k2-1] = -1*U[i][k2-1]; 
+     }
+   }    
+   //Assemble Rotation matrix (H)
    for (i=0;i<k2;i++){
      for (j=0;j<k2;j++){
        for (kk=0;kk<k2;kk++){

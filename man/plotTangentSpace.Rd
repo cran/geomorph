@@ -2,7 +2,8 @@
 \alias{plotTangentSpace}
 \title{Plot specimens in tangent space}
 \usage{
-  plotTangentSpace(A, warpgrids = TRUE)
+  plotTangentSpace(A, axis1 = 1, axis2 = 2,
+    warpgrids = TRUE, label = FALSE)
 }
 \arguments{
   \item{A}{An array (p x k x n) containing landmark
@@ -11,6 +12,15 @@
   \item{warpgrids}{A logical value indicating whether
   deformation grids for shapes along PC1 should be
   displayed}
+
+  \item{axis1}{A value indicating which PC axis should be
+  displayed as the X-axis (default = PC1)}
+
+  \item{axis2}{A value indicating which PC axis should be
+  displayed as the X-axis (default = PC2)}
+
+  \item{label}{A logical value indicating whether labels
+  for each specimen should be displayed}
 }
 \description{
   Function plots a set of Procrustes-aligned specimens in
@@ -18,12 +28,15 @@
 }
 \details{
   The function performs a principal compoments analysis of
-  shape variation and plots the first two dimensions of
-  tangent space for a set of Procrustes-aligned specimens.
-  The percent variation along each PC-axis is returned.
-  Additionally (and optionally), deformation grids can be
-  requested, which display the shape of specimens at the
-  ends of the range of variability along PC1.
+  shape variation and plots two dimensions of tangent space
+  for a set of Procrustes-aligned specimens (default is PC1
+  vs. PC2). The percent variation along each PC-axis is
+  returned. Additionally (and optionally), deformation
+  grids can be requested, which display the shape of
+  specimens at the ends of the range of variability along
+  PC1. The function returns a table summarizing the percent
+  variation explained by each pc axis, and the set of
+  principal component scores for all specimens.
 }
 \examples{
 data(plethodon)
