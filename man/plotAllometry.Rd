@@ -62,7 +62,7 @@
 }
 \examples{
 data(rats)
-Y.gpa<-gpagen(ratland,)    #GPA-alignment
+Y.gpa<-gpagen(ratland)    #GPA-alignment
 
 #Using CAC for plot
 plotAllometry(Y.gpa$coords,Y.gpa$Csize,method="CAC")

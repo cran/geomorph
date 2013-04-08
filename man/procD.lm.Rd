@@ -76,7 +76,7 @@ procD.lm(y~plethodon$species*plethodon$site,iter=99)
 
 ### Regression example
 data(rats)
-rat.gpa<-gpagen(ratland,)         #GPA-alignment
+rat.gpa<-gpagen(ratland)         #GPA-alignment
 
 procD.lm(two.d.array(rat.gpa$coords)~rat.gpa$Csize,iter=99)
 }

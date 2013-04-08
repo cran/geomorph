@@ -1,5 +1,11 @@
-		CHANGES IN GEOMORPH VERSION 1.1-0
+		CHANGES IN GEOMORPH VERSION 1.1-1
 
+    o Removed dependency in physignal() on getAncStates() from geiger, which is no longer supported
+
+    o Removed dependency in plotGMPhyloMorphoSpace() on getAncStates() from geiger, which is no longer supported
+
+
+		CHANGES IN GEOMORPH VERSION 1.1-0
 
 NEW FEATURES
 

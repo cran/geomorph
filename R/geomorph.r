@@ -9,19 +9,8 @@
 #'  of shape variation and covariation, and provide graphical depictions of shapes and patterns of
 #'  shape variation.
 #' 
+##' @import rgl ape phytools vegan calibrate jpeg
 NULL
-
-is_installed <- function(mypkg) is.element(mypkg, installed.packages()[,1])
-load_or_install<-function(package_names){
-  for(package_name in package_names)  {
-    if(!is_installed(package_name))    {
-      install.packages(package_name,repos="http://cran.us.r-project.org")
-    }
-    library(package_name,character.only=TRUE,quietly=TRUE,verbose=FALSE)
-  }
-}
-lib.list<-c("MASS","ape","geiger","calibrate","jpeg","rgl","vegan")
-load_or_install(lib.list)
 
 #' Landmark data from dataset plethodon
 #'
@@ -471,7 +460,7 @@ readmulti.nts<-function(filelist){
 #'   of landmark dimensions, and n is the number of specimens}
 #'   \item{dataframe}{If Morphologika headers "[labels]" and "[labelvalues]" are present read.morphologika returns the above p x k x n array and a dataframe containing specimen specific information stored in file}
 read.morphologika<-function(file,plot=FALSE){
-  require(rgl);require(geomorph)
+  require(rgl)
   mfile<-scan(file,what="character",sep = "\n",strip.white = TRUE,quiet=TRUE)
   tab<-length(grep("\t",mfile))
   com<-length(grep(",",mfile))
@@ -716,7 +705,6 @@ fixed.angle<-function(A,art.pt=NULL,angle.pts=NULL,rot.pts=NULL,angle=0){
 #' gpagen(A=scallops$coorddata, curves=scallops$curvslide, surfaces=scallops$surfslide) #Using Procrustes Distance for sliding
 #' @useDynLib geomorph
 gpagen<-function(A, Proj=TRUE,ProcD=TRUE,ShowPlot=TRUE,curves = NULL, surfaces = NULL,pointscale=1){
-  require(MASS)
   if (length(dim(A))!=3){
     stop("Data matrix not a 3D array (see 'arrayspecs').")  }
   if(length(grep("-999",A))!=0){
@@ -1054,12 +1042,12 @@ compare.modular.partitions<-function(A,landgroups,iter=999){
 #'   and homoplasy in morphometric data. Syst. Biol. 59:245-261.
 #' @examples
 #' data(plethspecies) 
-#' Y.gpa<-gpagen(plethspecies$land,)    #GPA-alignment    
+#' Y.gpa<-gpagen(plethspecies$land)    #GPA-alignment    
 #'
-#' physignal(plethspecies$phy,Y.gpa$coords,iter=9)
+#' physignal(plethspecies$phy,Y.gpa$coords,iter=5)
 physignal<-function(phy,A,iter=999){
+  require(phytools)
   require(ape)
-  require(geiger)
   if (length(dim(A))!=3){
     stop("Data matrix not a 3D array (see 'arrayspecs').")  }
   if(length(grep("-999",A))!=0){
@@ -1080,7 +1068,7 @@ physignal<-function(phy,A,iter=999){
   SSC.o<-NULL
   anc.states<-matrix(NA, nrow=(nrow(x)-1), ncol=ncol(x))
     for (i in 1:ncol(x)){
-      anc.states[,i]<-getAncStates(x[,i],phy) }
+      anc.states[,i]<-fastAnc(phy,x[,i]) }
     dist.mat<-as.matrix(dist(rbind(as.matrix(x),as.matrix(anc.states)))^2)   
     SSC.o<-0
     for (i in 1:nrow(phy$edge)){
@@ -1092,7 +1080,7 @@ physignal<-function(phy,A,iter=999){
     SSC.r<-NULL
     anc.states<-matrix(NA, nrow=(nrow(x)-1), ncol=ncol(x))
     for (i in 1:ncol(x.r)){
-      anc.states[,i]<-getAncStates(x.r[,i],phy) }
+      anc.states[,i]<-fastAnc(phy,x.r[,i]) }
       dist.mat.r<-as.matrix(dist(rbind(as.matrix(x.r),as.matrix(anc.states)))^2)   
       SSC.r<-0
       for (i in 1:nrow(phy$edge)){
@@ -1153,7 +1141,7 @@ physignal<-function(phy,A,iter=999){
 #'
 #' ### Regression example
 #' data(rats)
-#' rat.gpa<-gpagen(ratland,)         #GPA-alignment
+#' rat.gpa<-gpagen(ratland)         #GPA-alignment
 #'
 #' procD.lm(two.d.array(rat.gpa$coords)~rat.gpa$Csize,iter=99)
 procD.lm<-function(f1,data=NULL,iter=999){
@@ -1428,16 +1416,16 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
 #' @examples
 #' #1: Estimate trajectories from LS means in 2-factor model
 #' data(plethodon) 
-#' Y.gpa<-two.d.array(gpagen(plethodon$land,)$coords)    #GPA-alignment coords in 2D array
+#' Y.gpa<-two.d.array(gpagen(plethodon$land)$coords)    #GPA-alignment coords in 2D array
 #'
-#' trajectory.analysis(Y.gpa~plethodon$species*plethodon$site,iter=99)
+#' trajectory.analysis(Y.gpa~plethodon$species*plethodon$site,iter=15)
 #'
 #' #2: Compare motion trajectories
 #' data(motionpaths) 
 #'
 #' #Motion paths represented by 5 time points per motion 
 #'
-#' trajectory.analysis(motionpaths$trajectories~motionpaths$groups,estimate.traj=FALSE, traj.pts=5,iter=99)
+#' trajectory.analysis(motionpaths$trajectories~motionpaths$groups,estimate.traj=FALSE, traj.pts=5,iter=15)
 trajectory.analysis<-function(f1,data=NULL,estimate.traj=TRUE,traj.pts=NULL,iter=99){
   require(vegan)
   form.in<-formula(f1)
@@ -1836,12 +1824,12 @@ plotTangentSpace<-function(A,axis1=1, axis2=2,warpgrids=TRUE,label=FALSE){
 #'   P. Forey, eds. Morphology, shape, and phylogeny. Taylor & Francis, London.
 #' @examples
 #' data(plethspecies) 
-#' Y.gpa<-gpagen(plethspecies$land,)    #GPA-alignment    
+#' Y.gpa<-gpagen(plethspecies$land)    #GPA-alignment    
 #'
 #' plotGMPhyloMorphoSpace(plethspecies$phy,Y.gpa$coords)
 plotGMPhyloMorphoSpace<-function(phy,A,labels=TRUE,ancStates=T){
   require(ape)
-  require(geiger)
+  require(phytools)
   require(calibrate)
   if (length(dim(A))!=3){
     stop("Data matrix not a 3D array (see 'arrayspecs').")  }
@@ -1863,7 +1851,7 @@ plotGMPhyloMorphoSpace<-function(phy,A,labels=TRUE,ancStates=T){
   names<-row.names(x)
   anc.states<-NULL
   for (i in 1:ncol(x)){
-    tmp<-getAncStates(x[,i],phy)  
+    tmp<-fastAnc(phy,x[,i])  
     anc.states<-cbind(anc.states,tmp)   }
   colnames(anc.states)<-NULL
   all.data<-rbind(x,anc.states)  
@@ -1928,7 +1916,7 @@ plotGMPhyloMorphoSpace<-function(phy,A,labels=TRUE,ancStates=T){
 
 #' @examples
 #' data(rats) 
-#' Y.gpa<-gpagen(ratland,)    #GPA-alignment
+#' Y.gpa<-gpagen(ratland)    #GPA-alignment
 #' 
 #' #Using CAC for plot
 #' plotAllometry(Y.gpa$coords,Y.gpa$Csize,method="CAC")
@@ -2747,7 +2735,8 @@ curves2d<-function(file, nsliders){
 #' plotspec(specimen=rawdat,digitspec=scallops$coorddata[,,1],fixed=16)
 #' @author \href{http://www.people.fas.harvard.edu/~eotarolacastillo}{Erik Otarola-Castillo} and \href{http://www.public.iastate.edu/~dcadams}{Dean Adams}
 plotspec<-function(specimen,digitspec,fixed){
-  require(rgl);specimen<-scale(specimen,scale=FALSE)
+  require(rgl)
+  specimen<-scale(specimen,scale=FALSE)
   if (is.null(dim(specimen))) stop ("File is not 3D matrix")
   if (dim(specimen)[2]!=3) stop ("File is not 3D matrix") 
   if (is.null(dim(digitspec))) stop ("Digitized file is not 3D matrix")

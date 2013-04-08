@@ -33,7 +33,7 @@
 }
 \examples{
 data(plethspecies)
-Y.gpa<-gpagen(plethspecies$land,)    #GPA-alignment
+Y.gpa<-gpagen(plethspecies$land)    #GPA-alignment
 
 plotGMPhyloMorphoSpace(plethspecies$phy,Y.gpa$coords)
 }
