@@ -7,10 +7,10 @@ citEntry(entry="Article",
 	journal = "Methods in Ecology and Evolution",
   	year = "2013",
 	volume = "4",
-	pages = "In Press",
+	pages = "393-399",
 
         textVersion = paste("Adams, D.C., and E. Otarola-Castillo. 2013. geomorph:",
 			" an R package for the collection and analysis of geometric",
-			" morphometric shape data. Methods in Ecology and Evolution. 4: In Press.",sep=""))
+			" morphometric shape data. Methods in Ecology and Evolution. 4:393-399.",sep=""))
 
 citFooter("As geomorph is evolving quickly, you may want to cite also its version number (found with 'library(help = geomorph)').")

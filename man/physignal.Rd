@@ -43,9 +43,9 @@
 }
 \examples{
 data(plethspecies)
-Y.gpa<-gpagen(plethspecies$land,)    #GPA-alignment
+Y.gpa<-gpagen(plethspecies$land)    #GPA-alignment
 
-physignal(plethspecies$phy,Y.gpa$coords,iter=9)
+physignal(plethspecies$phy,Y.gpa$coords,iter=5)
 }
 \author{
   Dean Adams
