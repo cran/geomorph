@@ -1,3 +1,38 @@
+		CHANGES IN GEOMORPH VERSION 1.1-2
+
+NEW FEATURES
+
+    o pairwiseD.test() function added
+
+    o bilat.symmetry() output includes symmetric and asymmetric shape components
+
+BUG FIXES 
+
+    o Corrected readland.tps() to allow for non-numeric ID and reading a single specimen per file
+
+    o Corrected landmark plotting issue and added greater directory flexibility in curves2D() 
+
+    o Added greater directory flexibility and fixed header output in digitize2D() 
+
+    o Added greater flexibility in reading distinct file formats in read.morphologika()
+
+    o Corrected angle calculations in fixed.angle()
+
+    o Corrected plotting of deformations grids in plotTangentSpace()
+ 
+    o Corrected ancestral state output in physignal() and PlotGMPhyloMorphoSpace()
+
+OTHER CHANGES
+
+    o Adjusted plotting routines in morphol.integr() to be compatible with new CRAN guidelines
+
+    o Adjusted plotting routines in bilat.symmetry() to be compatible with new CRAN guidelines
+
+    o Alternative ancestral state reconstruction and tests for bifurcating tree implemeneted in physignal()
+
+    o Alternative ancestral state reconstruction and tests for bifurcating tree implemeneted in PlotGMPhyloMorphoSpace()
+
+
 		CHANGES IN GEOMORPH VERSION 1.1-1
 
     o Removed dependency in physignal() on getAncStates() from geiger, which is no longer supported

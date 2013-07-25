@@ -48,9 +48,17 @@
   'gpagen'}
 }
 \value{
-  Function returns a Procrustes ANOVA table assessing
-  patterns of shape asymmetry, and size asymmetry (when
-  object.sym=FALSE).
+  Function returns a list with the following components:
+  \item{aligned}{Procrustes aligned coordinates (when
+  GPAoutput=TRUE)} \item{csize}{Centroid size of aligned
+  specimens (when GPAoutput=TRUE)} \item{symm.shape}{The
+  symmetric component of shape variation of the aligned
+  specimens} \item{asymm.shape}{The asymmetric component of
+  shape variation of the aligned specimens}
+  \item{ANOVA.shape}{Procrustes ANOVA table assessing
+  passterns of shape asymmetry}
+  \item{ANOVA.size}{Procrustes ANOVA table assessing
+  passterns of shape asymmetry (when object.sym=FALSE)}
 }
 \description{
   Function performs an analysis of directional and
@@ -109,7 +117,8 @@
 #Example of matching symmetry
 
 data(mosquito)
-bilat.symmetry(mosquito$wingshape,ind=mosquito$ind,side=mosquito$side,replicate=mosquito$replicate,object.sym=FALSE)
+bilat.symmetry(mosquito$wingshape,ind=mosquito$ind,side=mosquito$side,
+replicate=mosquito$replicate,object.sym=FALSE)
 
 #Example of object symmetry
 

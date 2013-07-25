@@ -2,7 +2,7 @@
 \alias{physignal}
 \title{Assessing phylogenetic signal in morphometric data}
 \usage{
-  physignal(phy, A, iter = 999)
+  physignal(phy, A, iter = 249)
 }
 \arguments{
   \item{phy}{A phylogenetic tree of type 'phylo'}
@@ -34,7 +34,7 @@
   transformations of the phylogeny.  Phylogenetic signal is
   estimated as the sum of squared changes (SSC) in shape
   along all branches of the phylogeny (Klingenberg and
-  Gidasqewski 2010). Significance testing is found by
+  Gidaszewski 2010). Significance testing is found by
   permuting the shape data among the tips of the phylogeny.
   A plot of the specimens in tangent space with the
   phylogeny superimposed is included, and ancestral states

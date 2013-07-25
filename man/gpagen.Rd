@@ -103,16 +103,21 @@ points(mshape(gpagen(plethodon$land)$coords),pch=22,col="red",bg="red",cex=1.2)
 #Example 2: points and semilandmarks on curves
 data(hummingbirds)
 
-#Matrix defining which points are semilandmarks (middle column) and in which directions they slide (columns 1 vs. 3)
+#Matrix defining which points are semilandmarks (middle column)
+#and in which directions they slide (columns 1 vs. 3)
+
 hummingbirds$curvepts
 
-gpagen(hummingbirds$land,curves=hummingbirds$curvepts,)   #Using Procrustes Distance for sliding
+#Using Procrustes Distance for sliding
+gpagen(hummingbirds$land,curves=hummingbirds$curvepts,)
 
-gpagen(hummingbirds$land,curves=hummingbirds$curvepts,ProcD=FALSE,)   #Using bending energy for sliding
+#Using bending energy for sliding
+gpagen(hummingbirds$land,curves=hummingbirds$curvepts,ProcD=FALSE,)
 
 #Example 3: points, curves and surfaces
 data(scallops)
-gpagen(A=scallops$coorddata, curves=scallops$curvslide, surfaces=scallops$surfslide) #Using Procrustes Distance for sliding
+#Using Procrustes Distance for sliding
+gpagen(A=scallops$coorddata, curves=scallops$curvslide, surfaces=scallops$surfslide)
 }
 \author{
   Dean Adams

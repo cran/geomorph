@@ -9,20 +9,7 @@
 #'  of shape variation and covariation, and provide graphical depictions of shapes and patterns of
 #'  shape variation.
 #' 
-##' @import rgl ape phytools vegan calibrate jpeg
-NULL
-
-#' Landmark data from dataset plethodon
-#'
-#' @name plethland
-#' @docType data
-#' @author Dean Adams
-#' @references Adams, D. C. 2004. Character displacement via aggressive interference in Appalachian salamanders. 
-#' Ecology. 85:2664-2670.
-#' @references Adams, D.C. 2010. Parallel evolution of character displacement driven by competitive selection 
-#' in terrestrial salamanders. BMC Evolutionary Biology. 10(72)1-10.
-#' @keywords data
-#' @seealso \code{\link{plethodon}}
+##' @import rgl ape vegan calibrate jpeg
 NULL
 
 #' Landmark data from Plethodon salamander heads
@@ -264,37 +251,36 @@ read.ply<-function(file){
 #'   contains names for each specimen, which are obtained from the image names in the *.tps file. 
 #' @references  Rohlf, F. J. 2010. tpsRelw: Relative warps analysis. Version 1.49. Department of Ecology 
 #'   and Evolution, State University of New York at Stony Brook, Stony Brook, NY.
-readland.tps<-function(file){			
-  tpsfile<-scan(file=file,what="char",sep="\n",quiet=TRUE)
-  lmdata<-grep("LM",tpsfile) 
-  n<-nspecs<-length(lmdata)
-  land.dim<-length(grep("LM=",tpsfile[lmdata[1]]))  #2D/3D check
-  if(land.dim!=0) {nland<-as.numeric(sub("LM=","",tpsfile[lmdata]))}
-  if(land.dim==0) {nland<-as.numeric(sub("LM3=","",tpsfile[lmdata]))}
-  if (max(nland)-min(nland)!=0){
-    stop("Number of landmarks not the same for all specimens.")  }
-  p<-nland[1]
-  k<-ifelse(land.dim!=0,2,3)
-  imscale<-as.numeric(sub("SCALE=","",tpsfile[grep("SCALE",tpsfile)])) 
-  if (is.null(imscale)){imscale=array(1,nspecs)}          
-  if (length(imscale)!= nspecs){print("Not all specimens have scale. Using scale = 1.0")}          
-  if(length(imscale)!= nspecs) {imscale=array(1,nspecs)}  
-  landdata<-matrix(NA,nrow=(p*n),ncol=k)				#extract landmark coordinates, multiply by scale factor
-  for(i in 1:n){
-    for(j in 1:p){
-      tmp<-gsub("\\t"," ",tpsfile[lmdata[i]+j])  #replace tabs with spaces
-      tmp<-as.numeric(unlist(strsplit(tmp,split=" +")))*imscale[i]
-      landdata[((i-1)*p)+j,]<-tmp; rownames(landdata)<-NULL
+readland.tps<-function (file){
+  tpsfile <- scan(file = file, what = "char", sep = "\n", quiet = TRUE)
+  lmdata <- grep("LM", tpsfile)
+  n <- nspecs <- length(lmdata)
+  land.dim <- length(grep("LM=", tpsfile[lmdata[1]]))
+  if (land.dim != 0) {nland <- as.numeric(sub("LM=", "", tpsfile[lmdata])) }
+  if (land.dim == 0) {nland <- as.numeric(sub("LM3=", "", tpsfile[lmdata])) }
+  if (max(nland) - min(nland) != 0) {stop("Number of landmarks not the same for all specimens.") }
+  p <- nland[1]
+  k <- ifelse(land.dim != 0, 2, 3)
+  imscale <- as.numeric(sub("SCALE=", "", tpsfile[grep("SCALE", tpsfile)]))
+  if (is.null(imscale)) {imscale = array(1, nspecs)}
+  if (length(imscale) != nspecs) {print("Not all specimens have scale. Using scale = 1.0")}
+  if (length(imscale) != nspecs) {imscale = array(1, nspecs)}
+  landdata <- matrix(NA, nrow = (p * n), ncol = k)
+  for (i in 1:n) {
+    for (j in 1:p) {
+      tmp <- gsub("\\t", " ", tpsfile[lmdata[i] + j])
+      tmp <- as.numeric(unlist(strsplit(tmp, split = " +"))) *imscale[i]
+      landdata[((i - 1) * p) + j, ] <- tmp; rownames(landdata) <- NULL
     }
   }
-  coords<-arrayspecs(landdata,p,k)
-  imageID<-(sub("IMAGE=","",tpsfile[grep("IMAGE",tpsfile)]))  
-  imageID<-sub(".jpg","",imageID); imageID<-sub(".tif","",imageID)
-  imageID<-sub(".bmp","",imageID); imageID<-sub(".tiff","",imageID);
-  imageID<-sub(".jpeg","",imageID); imageID<-sub(".jpe","",imageID);
-  ID<-as.numeric(sub("ID=","",tpsfile[grep("ID",tpsfile)])) 
-  dimnames(coords)[[3]]<-imageID
-  return(coords=coords)
+  coords <- arrayspecs(landdata, p, k)
+  imageID <- (sub("IMAGE=", "", tpsfile[grep("IMAGE", tpsfile)]))
+  imageID <- sub(".jpg", "", imageID); imageID <- sub(".tif", "", imageID)
+  imageID <- sub(".bmp", "", imageID); imageID <- sub(".tiff", "", imageID)
+  imageID <- sub(".jpeg", "", imageID); imageID <- sub(".jpe", "", imageID)
+  ID <-sub("ID=", "", tpsfile[grep("ID", tpsfile)])  
+  dimnames(coords)[[3]] <- as.list(imageID)          
+  return(coords = coords)
 }
 
 #' Write landmark data to tps file
@@ -460,7 +446,7 @@ readmulti.nts<-function(filelist){
 #'   of landmark dimensions, and n is the number of specimens}
 #'   \item{dataframe}{If Morphologika headers "[labels]" and "[labelvalues]" are present read.morphologika returns the above p x k x n array and a dataframe containing specimen specific information stored in file}
 read.morphologika<-function(file,plot=FALSE){
-  require(rgl)
+  require(rgl);require(geomorph)
   mfile<-scan(file,what="character",sep = "\n",strip.white = TRUE,quiet=TRUE)
   tab<-length(grep("\t",mfile))
   com<-length(grep(",",mfile))
@@ -502,12 +488,23 @@ read.morphologika<-function(file,plot=FALSE){
   } else {
     coords2<-array(NA,c(lms,dims,inds),dimnames=list(NULL,NULL,rep(paste("Specimen",1:inds))))
   }  
-  incoords<-(coords + 1)
-  coords3<-matrix(NA,nrow=inds,ncol=dims*lms)
-  for(i in 1:(inds)){
-    incoords<-c(incoords,incoords[i] + lms + 1)
-    coords2[,,i]<-matrix(as.numeric(sapply(1:lms,strfun,dat=as.matrix(mfile[incoords[i]:((incoords[i]+lms-1))]))),ncol=dims,byrow=TRUE)
-    if(attributes==TRUE){coords3[i,]<-as.numeric(sapply(1:lms,strfun,dat=as.matrix(mfile[incoords[i]:((incoords[i]+lms-1))])))}
+  if(suppressWarnings(sum(is.na(as.numeric(as.matrix(unlist(strsplit(mfile[coords]," ")))))))>0){
+    incoords<-(coords + 1)
+    coords3<-matrix(NA,nrow=inds,ncol=dims*lms)
+    for(i in 1:inds){
+      incoords<-c(incoords,incoords[i] + lms + 1)
+      coords2[,,i]<-matrix(as.numeric(sapply(1:lms,strfun,dat=as.matrix(mfile[incoords[i]:((incoords[i]+lms-1))]))),ncol=dims,byrow=TRUE)    
+      if(attributes==TRUE){coords3[i,]<-as.numeric(sapply(1:lms,strfun,dat=as.matrix(mfile[incoords[i]:((incoords[i]+lms-1))])))}       
+    } 
+  }  
+  if(suppressWarnings(sum(is.na(as.numeric(as.matrix(unlist(strsplit(mfile[coords]," ")))))))==0){
+    incoords<-(coords)
+    coords3<-matrix(NA,nrow=inds,ncol=dims*lms)
+    for(i in 1:inds){
+      incoords<-c(incoords,incoords[i] + lms)
+      coords2[,,i]<-matrix(as.numeric(sapply(1:lms,strfun,dat=as.matrix(mfile[incoords[i]:((incoords[i]+lms-1))]))),ncol=dims,byrow=TRUE)    
+      if(attributes==TRUE){coords3[i,]<-as.numeric(sapply(1:lms,strfun,dat=as.matrix(mfile[incoords[i]:((incoords[i]+lms-1))])))}        
+    } 
   }  
   if(plot==TRUE){
     coords23<-coords2
@@ -572,6 +569,7 @@ estimate.missing<-function(ref,target){
 #' @param angle.pts A vector containing numbers specifying which two points used to define the angle (one per subset)
 #' @param rot.pts A vector containing numbers specifying which landmarks are in the subset to be rotated
 #' @param angle An optional value specifying the additional amount by which the rotation should be augmented (in radians)
+#' @param degrees A logical value specifying whether the additional rotation angle is expressed in degrees or radians (radians is default)
 #' @author Dean Adams
 #' @return Function returns a (p x k x n) array of landmark coordinates. 
 #' @export
@@ -582,7 +580,7 @@ estimate.missing<-function(ref,target){
 #'
 #' data(plethspecies) 
 #' fixed.angle(plethspecies$land,art.pt=1,angle.pts=c(5,6),rot.pts=c(2,3,4,5))
-fixed.angle<-function(A,art.pt=NULL,angle.pts=NULL,rot.pts=NULL,angle=0){
+fixed.angle<-function(A,art.pt=NULL,angle.pts=NULL,rot.pts=NULL,angle=0,degrees = FALSE){
   if (length(dim(A))!=3){
     stop("Data matrix 1 not a 3D array (see 'arrayspecs').")  }
   if(length(grep("-999",A))!=0){
@@ -590,18 +588,19 @@ fixed.angle<-function(A,art.pt=NULL,angle.pts=NULL,rot.pts=NULL,angle=0){
   n<-dim(A)[3];   k<-dim(A)[2];  p<-dim(A)[1]
   if (k!=2){
     stop("Method presently implemented for two-dimensional data only.")}
-  if (angle>pi*2){
-    stop("Additional angle must be specified in radians.")}
-  if (angle< -pi*2){
-    stop("Additional angle must be specified in radians.")}
+  if (degrees == FALSE & angle>pi*2){
+    stop("Angle was specified in degrees (use degrees = T).")}
+  if (degrees == FALSE & angle< -pi*2){
+    stop("Angle was specified in degrees (use degrees = T).")}
   angl<-array(NA,dim=n)
   for (i in 1:n){   
-    A[,,i]<-A[,,i]-A[art.pt,,i]
-    angl[i]<-  acos((t(A[angle.pts[1],,i])/sqrt(sum(A[angle.pts[1],,i]^2)))%*%
-                  (A[angle.pts[2],,i]/sqrt(sum(A[angle.pts[2],,i]^2))))
+    A[,,i]<-t(t(A[,,i])-A[art.pt,,i])  
+    angl[i]<-  acos((A[angle.pts[1],,i]/sqrt(sum(A[angle.pts[1],,i]^2)))%*%
+                      (A[angle.pts[2],,i]/sqrt(sum(A[angle.pts[2],,i]^2))))
   }  
-  dev.angle<- (angl-mean(angl))+angle 
-    if(A[angle.pts[1],1,1]>0){dev.angle<- -1*dev.angle}
+  if(degrees ==TRUE)  angle = angle*pi/180
+  dev.angle<- (angl-mean(angl))+angle
+  if(A[angle.pts[1],1,1]<0){dev.angle<- -1*dev.angle}
   for (i in 1:n){   
     r = matrix(c(cos(dev.angle[i]),-sin(dev.angle[i]),
                  sin(dev.angle[i]),cos(dev.angle[i])),2) 
@@ -609,6 +608,7 @@ fixed.angle<-function(A,art.pt=NULL,angle.pts=NULL,rot.pts=NULL,angle=0){
   }  
   return(A)
 }
+
 
 #' Generalized Procrustes analyis of points, curves, and surfaces
 #'
@@ -693,16 +693,21 @@ fixed.angle<-function(A,art.pt=NULL,angle.pts=NULL,rot.pts=NULL,angle=0){
 #' #Example 2: points and semilandmarks on curves
 #' data(hummingbirds)
 #'
-#' #Matrix defining which points are semilandmarks (middle column) and in which directions they slide (columns 1 vs. 3)
+#' #Matrix defining which points are semilandmarks (middle column) 
+#' #and in which directions they slide (columns 1 vs. 3)
+#'
 #' hummingbirds$curvepts    
 #'
-#' gpagen(hummingbirds$land,curves=hummingbirds$curvepts,)   #Using Procrustes Distance for sliding
+#' #Using Procrustes Distance for sliding
+#' gpagen(hummingbirds$land,curves=hummingbirds$curvepts,)   
 #' 
-#' gpagen(hummingbirds$land,curves=hummingbirds$curvepts,ProcD=FALSE,)   #Using bending energy for sliding
+#' #Using bending energy for sliding
+#' gpagen(hummingbirds$land,curves=hummingbirds$curvepts,ProcD=FALSE,)   
 #'
 #' #Example 3: points, curves and surfaces
 #' data(scallops)
-#' gpagen(A=scallops$coorddata, curves=scallops$curvslide, surfaces=scallops$surfslide) #Using Procrustes Distance for sliding
+#' #Using Procrustes Distance for sliding
+#' gpagen(A=scallops$coorddata, curves=scallops$curvslide, surfaces=scallops$surfslide) 
 #' @useDynLib geomorph
 gpagen<-function(A, Proj=TRUE,ProcD=TRUE,ShowPlot=TRUE,curves = NULL, surfaces = NULL,pointscale=1){
   if (length(dim(A))!=3){
@@ -793,7 +798,6 @@ gpagen<-function(A, Proj=TRUE,ProcD=TRUE,ShowPlot=TRUE,curves = NULL, surfaces =
 #'
 #' #Morphological integration using RV
 #' morphol.integr(Y.gpa$coords,landgroups=land.gps,WithinConfig=TRUE,method="RV",iter=99)
-
 morphol.integr<-function(A,WithinConfig=FALSE,A2=NULL,landgroups=NULL,method=c("PLS","RV"),iter=999){
   method <- match.arg(method)
   if (length(dim(A))!=3){
@@ -851,10 +855,9 @@ morphol.integr<-function(A,WithinConfig=FALSE,A2=NULL,landgroups=NULL,method=c("
     integ.val[iter+1]=integ.obs
     P.val<-P.val/(iter+1)
     if(method=="PLS"){
-      X11()
+      par(mfrow=c(1,2))
       hist(integ.val,30,freq=TRUE,col="gray",xlab="PLS Correlation")
-      arrows(integ.obs,50,integ.obs,5,length=0.1,lwd=2)
-      X11()
+        arrows(integ.obs,50,integ.obs,5,length=0.1,lwd=2)
       plot(XScores,YScores,pch=21,bg="black",asp=1,main="PLS Plot")
       return(list(x.scores=XScores,y.scores=YScores,PLS.corr=integ.obs,pvalue=P.val))
     }
@@ -884,7 +887,7 @@ morphol.integr<-function(A,WithinConfig=FALSE,A2=NULL,landgroups=NULL,method=c("
     RV.obs<- sum(diag(S12%*%S21))/sqrt(sum(diag(S11%*%S11))*sum(diag(S22%*%S22)))                         
     pls<-svd(S12)
     U<-pls$u; V<-pls$v
-
+    
     XScores<-x%*%U[,1]; YScores<-y%*%V[,1]
     PLS.obs<-cor(XScores,YScores)
     integ.obs<-ifelse(method=="PLS",PLS.obs,RV.obs)
@@ -910,10 +913,9 @@ morphol.integr<-function(A,WithinConfig=FALSE,A2=NULL,landgroups=NULL,method=c("
     integ.val[iter+1]=integ.obs
     P.val<-P.val/(iter+1)
     if(method=="PLS"){
-      X11()
+      par(mfrow=c(1,2))
       hist(integ.val,30,freq=TRUE,col="gray",xlab="PLS Correlation")
-      arrows(integ.obs,50,integ.obs,5,length=0.1,lwd=2)
-      X11()
+        arrows(integ.obs,50,integ.obs,5,length=0.1,lwd=2)
       plot(XScores,YScores,pch=21,bg="black",asp=1,main="PLS Plot")
       return(list(x.scores=XScores,y.scores=YScores,PLS.corr=integ.obs,pvalue=P.val))
     }
@@ -924,6 +926,7 @@ morphol.integr<-function(A,WithinConfig=FALSE,A2=NULL,landgroups=NULL,method=c("
     }
   }
 }
+
 
 #' Compare modular signal to alternative landmark subsets
 #'
@@ -958,7 +961,8 @@ morphol.integr<-function(A,WithinConfig=FALSE,A2=NULL,landgroups=NULL,method=c("
 #' @examples
 #' data(plethodon) 
 #' Y.gpa<-gpagen(plethodon$land)    #GPA-alignment    
-#' land.gps<-c("A","A","A","A","A","B","B","B","B","B","B","B") #landmarks on the skull and mandible assigned to partitions
+#'  #landmarks on the skull and mandible assigned to partitions
+#' land.gps<-c("A","A","A","A","A","B","B","B","B","B","B","B") 
 #'
 #' compare.modular.partitions(Y.gpa$coords,land.gps,iter=99)
 #' #Result implies that the skull and mandible are not independent modules
@@ -1024,7 +1028,7 @@ compare.modular.partitions<-function(A,landgroups,iter=999){
 #'   using Generalized Procrustes Analysis (GPA) [e.g., with \code{\link{gpagen}}]. To assess phylogenetic 
 #'   signal under alternative models, first consider branch-length transformations of the phylogeny.  
 #'   Phylogenetic signal is estimated  as the sum of squared changes (SSC) in 
-#'   shape along all branches of the phylogeny (Klingenberg and Gidasqewski 2010). Significance testing 
+#'   shape along all branches of the phylogeny (Klingenberg and Gidaszewski 2010). Significance testing 
 #'   is found by permuting the shape data among the tips of the phylogeny. A plot of the specimens in tangent 
 #'   space with the phylogeny superimposed is included, and ancestral states are returned. Note that the 
 #'   method can be slow as ancestral states must be estimated for every iteration.
@@ -1045,8 +1049,7 @@ compare.modular.partitions<-function(A,landgroups,iter=999){
 #' Y.gpa<-gpagen(plethspecies$land)    #GPA-alignment    
 #'
 #' physignal(plethspecies$phy,Y.gpa$coords,iter=5)
-physignal<-function(phy,A,iter=999){
-  require(phytools)
+physignal<-function(phy,A,iter=249){
   require(ape)
   if (length(dim(A))!=3){
     stop("Data matrix not a 3D array (see 'arrayspecs').")  }
@@ -1054,6 +1057,8 @@ physignal<-function(phy,A,iter=999){
     stop("Data matrix contains missing values. Estimate these first(see 'estimate.missing').")  }
   if (class(phy) != "phylo") 
     stop("tree must be of class 'phylo.'")
+  if (!is.binary.tree(phy)) 
+    stop("tree is not fully bifurcating.")
   if(is.null(dimnames(A)[[3]])){
     stop("Data matrix does not include taxa names as dimnames for 3rd dimension.")  }
   N<-length(phy$tip.label)
@@ -1064,31 +1069,37 @@ physignal<-function(phy,A,iter=999){
     stop("Data matrix missing some taxa present on the tree.")
   if(length(match(phy$tip.label,rownames(x)))!=N) 
     stop("Tree missing some taxa in the data matrix.")
-  x<-x[phy$tip.label, ]	
+  x<-x[phy$tip.label, ]  
   SSC.o<-NULL
   anc.states<-matrix(NA, nrow=(nrow(x)-1), ncol=ncol(x))
-    for (i in 1:ncol(x)){
-      anc.states[,i]<-fastAnc(phy,x[,i]) }
-    dist.mat<-as.matrix(dist(rbind(as.matrix(x),as.matrix(anc.states)))^2)   
-    SSC.o<-0
-    for (i in 1:nrow(phy$edge)){
-      SSC.o<-SSC.o+dist.mat[phy$edge[i,1],phy$edge[i,2]]    }
+  for (i in 1:ncol(x)){
+    options(warn=-1)  
+    anc.states[,i]<-as.vector(ace(x[,i], compute.brlen(phy,1), type="continuous", method="ML")$ace)}
+  dist.mat<-as.matrix(dist(rbind(as.matrix(x),as.matrix(anc.states)))^2)   
+  SSC.o<-0
+  for (i in 1:nrow(phy$edge)){
+    SSC.o<-SSC.o+dist.mat[phy$edge[i,1],phy$edge[i,2]]    }
   P.val<-1
-  for(i in 1:iter){
+  SSC.val<-rep(0,iter)
+  for(ii in 1:iter){
     x.r<-x[sample(nrow(x)),]	
     row.names(x.r)<-row.names(x)
     SSC.r<-NULL
-    anc.states<-matrix(NA, nrow=(nrow(x)-1), ncol=ncol(x))
+    anc.states.r<-matrix(NA, nrow=(nrow(x)-1), ncol=ncol(x))
     for (i in 1:ncol(x.r)){
-      anc.states[,i]<-fastAnc(phy,x.r[,i]) }
-      dist.mat.r<-as.matrix(dist(rbind(as.matrix(x.r),as.matrix(anc.states)))^2)   
-      SSC.r<-0
-      for (i in 1:nrow(phy$edge)){
-        SSC.r<-SSC.r+dist.mat.r[phy$edge[i,1],phy$edge[i,2]]    }
-      P.val<-ifelse(SSC.r<=SSC.o, P.val+1,P.val) 
+      options(warn=-1)  
+      anc.states.r[,i]<-as.vector(ace(x.r[,i], compute.brlen(phy,1), type="continuous", method="ML")$ace)}
+    dist.mat.r<-as.matrix(dist(rbind(as.matrix(x.r),as.matrix(anc.states.r)))^2)   
+    SSC.r<-0
+    for (i in 1:nrow(phy$edge)){
+      SSC.r<-SSC.r+dist.mat.r[phy$edge[i,1],phy$edge[i,2]]    }
+    P.val<-ifelse(SSC.r<=SSC.o, P.val+1,P.val) 
+    SSC.val[ii]<-SSC.r
   }  
   P.val<-P.val/(iter+1)
   plotGMPhyloMorphoSpace(phy,A,ancStates=FALSE)
+  hist(SSC.val,30,freq=TRUE,col="gray",xlab="Phylogenetic Signal")
+  arrows(SSC.o,50,SSC.o,5,length=0.1,lwd=2)
   return(list(phy.signal=SSC.o,pvalue=P.val,anc.states=anc.states))
 }
 
@@ -1168,6 +1179,7 @@ procD.lm<-function(f1,data=NULL,iter=999){
   SS.tot<-sum(dist(predict(lm(Y~mod.mat)))^2)/(nrow(Y))+
     sum(dist(resid(lm(Y~mod.mat)))^2)/(nrow(Y))
   df.tot<-nrow(Y)-1
+  MS.tot<-SS.tot/df.tot
   P.val<-array(1,dim=length(SS.obs))
   for(i in 1:iter){
     SS.tmp<-SS.r<-array()
@@ -1181,11 +1193,66 @@ procD.lm<-function(f1,data=NULL,iter=999){
   }
   P.val<-P.val/(iter+1)
   anova.tab<-cbind(df,SS.obs,MS,P.val)
-  anova.tab<-rbind(anova.tab,c(df.tot,SS.tot,NA,NA))
+  anova.tab<-rbind(anova.tab,c(df.tot,SS.tot,MS.tot,NA))
   rownames(anova.tab)<-c(colnames(attr(Terms, "factors")), "Total")
   return(anova.tab)
 }
 
+#' Pairwise Group Comarisons
+#'
+#' Function performs pairwise comparisons among groups using the Euclidean distances among group means.
+#'
+#' The function performs pairwise comparisons to identify shape among groups. The function is designed as a post-hoc
+#' test to Procrustes ANOVA, where the latter has identified significant shape variation explained by a grouping factor. 
+#' The function takes as input the shape data (y), and a grouping factor (x). It then estimates the Euclidean distances 
+#' among group means, which are used as test values. These are then statistically evaluated through permutation, 
+#' where the rows of the shape matrix are randomized relative to the grouping variable. 
+#'
+#' The input for the shape data (y) must be in the form of a two-dimensional data matrix of dimension (n x [p*k]), 
+#' rather than a 3D array.  It is assumed that the landmarks have previously 
+#'   been aligned using Generalized Procrustes Analysis (GPA) [e.g., with \code{\link{gpagen}}]. The function
+#'   \code{\link{two.d.array}} can be used to obtain a two-dimensional data matrix from a 3D array oflandmark
+#'   coordinates. 
+#'
+#' @param y A two-dimensional array of shape data
+#' @param x A factor defining groups
+#' @param iter Number of iterations for permutation test
+#' @keywords PairwiseD.test
+#' @export
+#' @author Dean Adams
+#' @return Function returns a list with the following components: 
+#'   \item{Dist.obs}{A matrix of Euclidean distances among group means}
+#'   \item{Prob.Dist}{A matrix of pairwise significance levels based on permutation}
+#' @examples
+#' data(plethodon) 
+#' Y.gpa<-gpagen(plethodon$land)    #GPA-alignment    
+#' y<-two.d.array(Y.gpa$coords)
+#' ### Procrustes ANOVA
+#' procD.lm(y~plethodon$species,iter=99)
+#'
+#' ### Pairwise comparisons
+#' pairwiseD.test(y,plethodon$species,iter=99)
+pairwiseD.test<-function(y,x,iter=999){
+  if (length(dim(y))!=2){
+    stop("Response matrix (shape) not a 2D array. Use 'two.d.array' first.")  } 
+  if(length(grep("-999",y))!=0){
+    stop("Response data matrix (shape) contains missing values. Estimate these first(see 'estimate.missing').")  }
+  if(!is.factor(x)){
+    stop("X-variable is not a factor.")}
+  yhat.obs<-predict(lm(y~x))
+  lsmeans.obs <- rowsum(yhat.obs, x)/as.vector(table(x))     
+  D.obs<-as.matrix(dist(lsmeans.obs))   
+  PDist<-array(1, dim=c(dim(lsmeans.obs)[1],dim(lsmeans.obs)[1]))
+  for(i in 1:iter){
+    y.r<-y[sample(nrow(y)),] 
+    yhat.rand<-predict(lm(y.r~x))
+    lsmeans.rand <- rowsum(yhat.rand, x)/as.vector(table(x))     
+    D.rand<-as.matrix(dist(lsmeans.rand))   
+    PDist<-ifelse(D.rand>=D.obs, PDist+1, PDist)
+  }
+  PDist<-PDist/(iter+1)
+  return(list(Dist.obs=D.obs,Prob.Dist=PDist))
+}
 
 #' Analysis of bilateral symmetry
 #'
@@ -1232,7 +1299,13 @@ procD.lm<-function(f1,data=NULL,iter=999){
 #' @keywords bilat.symmetry
 #' @export
 #' @author Dean Adams
-#' @return Function returns a Procrustes ANOVA table assessing patterns of shape asymmetry, and size asymmetry (when object.sym=FALSE).
+#' @return Function returns a list with the following components: 
+#'   \item{aligned}{Procrustes aligned coordinates (when GPAoutput=TRUE)}
+#'   \item{csize}{Centroid size of aligned specimens (when GPAoutput=TRUE)}
+#'   \item{symm.shape}{The symmetric component of shape variation of the aligned specimens}
+#'   \item{asymm.shape}{The asymmetric component of shape variation of the aligned specimens}
+#'   \item{ANOVA.shape}{Procrustes ANOVA table assessing passterns of shape asymmetry}
+#'   \item{ANOVA.size}{Procrustes ANOVA table assessing passterns of shape asymmetry (when object.sym=FALSE)}
 #' @references Klingenberg, C.P. and G.S. McIntyre. 1998. Quantitative genetics of geometric shape in the mouse mandible. Evolution. 55:2342-2352.
 #' @references Mardia, K.V., F.L. Bookstein, and I.J. Moreton. 2000. Statistical assessment of bilateral symmetry of shapes. Biometrika. 87:285-300.
 #' @references Klingenberg, C.P., M. Barluenga, and A. Meyer. 2002. Shape analysis of symmetric structures: quantifying variation among
@@ -1241,7 +1314,8 @@ procD.lm<-function(f1,data=NULL,iter=999){
 #' #Example of matching symmetry
 #'
 #' data(mosquito)
-#' bilat.symmetry(mosquito$wingshape,ind=mosquito$ind,side=mosquito$side,replicate=mosquito$replicate,object.sym=FALSE)
+#' bilat.symmetry(mosquito$wingshape,ind=mosquito$ind,side=mosquito$side,
+#' replicate=mosquito$replicate,object.sym=FALSE)
 #'
 #' #Example of object symmetry
 #'
@@ -1259,23 +1333,23 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
   if(object.sym==FALSE){
     if(is.null(side)){stop("Sides not specified.")}  
     side<-as.factor(side)
-    gpa.res<-gpagen(A,ShowPlot=FALSE,...)
+    gpa.res<-gpagen(A,ShowPlot=FALSE)
     shape<-two.d.array(gpa.res$coords)
     f1<-"shape~ind*side"; if(!is.null(replicate)){f1<-paste(f1,"ind:side:replicate",sep="+")}
     f1<-as.formula(f1)
     f2<-"gpa.res$Csize~ind*side"; if(!is.null(replicate)){f2<-paste(f2,"ind:side:replicate",sep="+")}
     f2<-as.formula(f2)
     res.shape<-procD.lm(f1,iter=1)
-      res.shape[1,1]<-(nind-1)*shpsp;res.shape[2,1]<-shpsp; res.shape[3,1]<-(nind-1)*shpsp
-      if(!is.null(replicate)){res.shape[4,1]<-(nrep-1)*nind*2*shpsp}
-      res.shape[,3]<-res.shape[,2]/res.shape[,1] 
-      F<-array(NA,nrow(res.shape)); F[1]<-res.shape[1,3]/res.shape[3,3]
-        F[2]<-res.shape[2,3]/res.shape[3,3]; if(!is.null(replicate)){F[3]<-res.shape[3,3]/res.shape[4,3]}
+    res.shape[1,1]<-(nind-1)*shpsp;res.shape[2,1]<-shpsp; res.shape[3,1]<-(nind-1)*shpsp
+    if(!is.null(replicate)){res.shape[4,1]<-(nrep-1)*nind*2*shpsp}
+    res.shape[,3]<-res.shape[,2]/res.shape[,1] 
+    F<-array(NA,nrow(res.shape)); F[1]<-res.shape[1,3]/res.shape[3,3]
+    F[2]<-res.shape[2,3]/res.shape[3,3]; if(!is.null(replicate)){F[3]<-res.shape[3,3]/res.shape[4,3]}
     P<-array(NA,nrow(res.shape)); P[1]<-1-pf(F[1],res.shape[1,1],res.shape[3,1])
-     P[2]<-1-pf(F[2],res.shape[2,1],res.shape[3,1]); if(!is.null(replicate)){
-       P[3]<-1-pf(F[3],res.shape[3,1],res.shape[4,1])}
-     res.shape<-cbind(res.shape[,-4],F,P)
-       colnames(res.shape)[4]<-"F.Goodall";colnames(res.shape)[5]<-"P.param"
+    P[2]<-1-pf(F[2],res.shape[2,1],res.shape[3,1]); if(!is.null(replicate)){
+      P[3]<-1-pf(F[3],res.shape[3,1],res.shape[4,1])}
+    res.shape<-cbind(res.shape[,-4],F,P)
+    colnames(res.shape)[4]<-"F.Goodall";colnames(res.shape)[5]<-"P.param"
     res.shape<-res.shape[-nrow(res.shape),]
     res.size<-summary(aov(f2))[[1]]; res.size<-res.size[,(1:3)]   
     F<-array(NA,nrow(res.size)); F[1]<-res.size[1,3]/res.size[3,3]
@@ -1284,21 +1358,38 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
     P[2]<-1-pf(F[2],res.size[2,1],res.size[3,1]); if(!is.null(replicate)){
       P[3]<-1-pf(F[3],res.size[3,1],res.size[4,1])}
     res.size<-cbind(res.size,F,P);  if(!is.null(replicate)){res.size<-res.size[(1:4),];
-      rownames(res.size)[4]<-"replicate"}
+                                                            rownames(res.size)[4]<-"replicate"}
     DA.mns <- arrayspecs((rowsum(predict(lm(shape~side)), 
                                  side)/as.vector(table(side))),p,k,byLand=FALSE)
     MSCP.FA<-summary(manova(lm(f1)))$SS[[3]]/res.shape[3,1]
     eig.FA<-eigen(MSCP.FA); PC1.eigval<-eig.FA$values[1]/sum(eig.FA$values)
     PC1<-shape%*%eig.FA$vec[,1]
     FA.mns<-arrayspecs((rbind(shape[which.min(PC1),],shape[which.max(PC1),])),p,k,byLand=FALSE) 
-    if (k==2){ X11() }
-    plotAllSpecimens(gpa.res$coords)
-    if (k==2){ X11() }
-    plotRefToTarget(DA.mns[,,1],DA.mns[,,2],method=plot.method,mag=mag,main="Directional Asymmetry")
-    if (k==2){ X11() }
-    plotRefToTarget(FA.mns[,,1],FA.mns[,,2],method=plot.method,mag=mag,main="Fluctuating Asymmetry")
-    if(GPAoutput==FALSE){return(list(PC1.FA=PC1.eigval,ANOVA.size=res.size,ANOVA.Shape=res.shape))}
-    if(GPAoutput==TRUE){return(list(aligned=gpa.res$coords,PC1.FA=PC1.eigval,ANOVA.size=res.size,ANOVA.Shape=res.shape,csize=gpa.res$Csize))}
+    mn.shape<-mshape(gpa.res$coords)
+    symm.component<-arrayspecs(predict(lm(shape~ind)),p,k,byLand=FALSE)
+    asymm.component<-array(data=NA,dim=c(p,k,n))     
+    for (i in 1:n){ asymm.component[,,i]<-(gpa.res$coords[,,i]-symm.component[,,i]) + mn.shape}
+    if(k==2){  
+      #2d plots
+      par(mfrow=c(2,2),oma=c(1.5,0,1.5,0))
+      plotAllSpecimens(symm.component)
+      plotAllSpecimens(asymm.component)
+      plotRefToTarget(DA.mns[,,1],DA.mns[,,2],method=plot.method,mag=mag,main="Directional Asymmetry")
+      plotRefToTarget(FA.mns[,,1],FA.mns[,,2],method=plot.method,mag=mag,main="Fluctuating Asymmetry")
+      mtext("Symmetric Shape Component (left) and Asymmetric Shape Component (right)",outer = TRUE,side=3)
+      mtext("Mean directional (left) and fluctuating (right) asymmetry",side = 1, outer = TRUE)
+    }
+    if (k==3){
+     #3d plots
+     par(mfrow=c(2,2),oma=c(1.5,0,1.5,0)) 
+     plotRefToTarget(DA.mns[,,1],DA.mns[,,2],method=plot.method,mag=mag,main="Directional Asymmetry")
+     plotRefToTarget(FA.mns[,,1],FA.mns[,,2],method=plot.method,mag=mag,main="Fluctuating Asymmetry")
+     mtext("Mean directional (first plot) and fluctuating (second plot) asymmetry",side = 1, outer = TRUE)
+    }    
+    if(GPAoutput==FALSE){return(list(symm.shape=symm.component,asymm.shape=asymm.component, 
+		ANOVA.size=res.size,ANOVA.Shape=res.shape))}
+    if(GPAoutput==TRUE){return(list(aligned=gpa.res$coords,csize=gpa.res$Csize,symm.shape=symm.component,asymm.shape=asymm.component,
+		ANOVA.size=res.size,ANOVA.Shape=res.shape))}    
   }
   if(object.sym==TRUE){
     npairs<-nrow(land.pairs); nl<-p-2*npairs
@@ -1313,40 +1404,56 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
     A2[,1,]<-A2[,1,]*-1
     A<-array(c(A,A2), c(p,k, 2*n))
     ind<-rep(ind,2);side<-gl(2,n); if(!is.null(replicate)){replicate<-rep(replicate,2)}
-    gpa.res<-gpagen(A,...)
+    gpa.res<-gpagen(A,ShowPlot = FALSE)
     shape<-two.d.array(gpa.res$coords)    
     f1<-"shape~ind*side"; if(!is.null(replicate)){f1<-paste(f1,"ind:side:replicate",sep="+")}
     f1<-as.formula(f1)
     res.shape<-procD.lm(f1,iter=1)
-      res.shape[,2]<-res.shape[,2]/2 
-      res.shape[2,1]<-ifelse(k==2,((2*npairs+nl-2)),((3*npairs+nl-3)))
-        res.shape[1,1]<-res.shape[3,1]<-(nind-1)*res.shape[2,1]
-        if(k==3){res.shape[1,1]=res.shape[1,1]+((nind-1)*(nl-1))}
-      if(!is.null(replicate)){res.shape[4,1]<-(nrep-1)*nind*shpsp}
-      res.shape[,3]<-res.shape[,2]/res.shape[,1]  
-        F<-array(NA,nrow(res.shape)); F[1]<-res.shape[1,3]/res.shape[3,3]
-      F[2]<-res.shape[2,3]/res.shape[3,3]; if(!is.null(replicate)){F[3]<-res.shape[3,3]/res.shape[4,3]}
-      P<-array(NA,nrow(res.shape)); P[1]<-1-pf(F[1],res.shape[1,1],res.shape[3,1])
-      P[2]<-1-pf(F[2],res.shape[2,1],res.shape[3,1]); if(!is.null(replicate)){
+    res.shape[,2]<-res.shape[,2]/2 
+    res.shape[2,1]<-ifelse(k==2,((2*npairs+nl-2)),((3*npairs+nl-3)))
+    res.shape[1,1]<-res.shape[3,1]<-(nind-1)*res.shape[2,1]
+    if(k==3){res.shape[1,1]=res.shape[1,1]+((nind-1)*(nl-1))}
+    if(!is.null(replicate)){res.shape[4,1]<-(nrep-1)*nind*shpsp}
+    res.shape[,3]<-res.shape[,2]/res.shape[,1]  
+    F<-array(NA,nrow(res.shape)); F[1]<-res.shape[1,3]/res.shape[3,3]
+    F[2]<-res.shape[2,3]/res.shape[3,3]; if(!is.null(replicate)){F[3]<-res.shape[3,3]/res.shape[4,3]}
+    P<-array(NA,nrow(res.shape)); P[1]<-1-pf(F[1],res.shape[1,1],res.shape[3,1])
+    P[2]<-1-pf(F[2],res.shape[2,1],res.shape[3,1]); if(!is.null(replicate)){
       P[3]<-1-pf(F[3],res.shape[3,1],res.shape[4,1])}
-      res.shape<-cbind(res.shape[,-4],F,P)
-      res.shape<-res.shape[-nrow(res.shape),]
-      colnames(res.shape)[4]<-"F.Goodall";colnames(res.shape)[5]<-"P.param"
-      if(!is.null(replicate)){rownames(res.shape)[4]<-"replicate=error"}  
+    res.shape<-cbind(res.shape[,-4],F,P)
+    res.shape<-res.shape[-nrow(res.shape),]
+    colnames(res.shape)[4]<-"F.Goodall";colnames(res.shape)[5]<-"P.param"
+    if(!is.null(replicate)){rownames(res.shape)[4]<-"replicate=error"}  
     DA.mns <- arrayspecs((rowsum(predict(lm(shape~side)), 
                                  side)/as.vector(table(side))),p,k,byLand=FALSE)
     MSCP.FA<-summary(manova(lm(f1)))$SS[[3]]/res.shape[3,1]
     eig.FA<-eigen(MSCP.FA); PC1.eigval<-eig.FA$values[1]/sum(eig.FA$values)
     PC1<-shape%*%eig.FA$vec[,1]
     FA.mns<-arrayspecs((rbind(shape[which.min(PC1),],shape[which.max(PC1),])),p,k,byLand=FALSE) 
-    if (k==2){ X11() }
-    plotAllSpecimens(gpa.res$coords)
-    if (k==2){ X11() }
-    plotRefToTarget(DA.mns[,,1],DA.mns[,,2],method=plot.method,mag=mag,main="Directional Asymmetry")
-    if (k==2){ X11() }
-    plotRefToTarget(FA.mns[,,1],FA.mns[,,2],method=plot.method,mag=mag,main="Fluctuating Asymmetry")
-    if(GPAoutput==FALSE){return(list(PC1.FA=PC1.eigval,ANOVA.Shape=res.shape))}
-    if(GPAoutput==TRUE){return(list(aligned=gpa.res$coords,PC1.FA=PC1.eigval,ANOVA.Shape=res.shape,csize=gpa.res$Csize))}
+    symm.component<-arrayspecs(predict(lm(shape~ind)),p,k,byLand=FALSE)
+    asymm.component<-array(data=NA,dim=c(p,k,n))  
+    mn.shape<-mshape(gpa.res$coords)
+    for (i in 1:n){ asymm.component[,,i]<-(gpa.res$coords[,,i]-symm.component[,,i]) + mn.shape}
+    if(k==2){  
+      #2d plots
+      par(mfrow=c(2,2),oma=c(1.5,0,1.5,0))
+      plotAllSpecimens(symm.component)
+      plotAllSpecimens(asymm.component)
+      plotRefToTarget(DA.mns[,,1],DA.mns[,,2],method=plot.method,mag=mag,main="Directional Asymmetry")
+      plotRefToTarget(FA.mns[,,1],FA.mns[,,2],method=plot.method,mag=mag,main="Fluctuating Asymmetry")
+      mtext("Symmetric Shape Component (left) and Asymmetric Shape Component (right)",outer = TRUE,side=3)
+      mtext("Mean directional (left) and fluctuating (right) asymmetry",side = 1, outer = TRUE)
+    }
+    if (k==3){
+      #3d plots
+      par(mfrow=c(1,2),oma=c(1.5,0,1.5,0)) 
+      plotRefToTarget(DA.mns[,,1],DA.mns[,,2],method=plot.method,mag=mag,main="Directional Asymmetry")
+      plotRefToTarget(FA.mns[,,1],FA.mns[,,2],method=plot.method,mag=mag,main="Fluctuating Asymmetry")
+      mtext("Mean directional (first plot) and fluctuating (second plot) asymmetry",side = 1, outer = TRUE)
+    }
+    if(GPAoutput==FALSE){return(list(symm.shape=symm.component,asymm.shape=asymm.component,ANOVA.Shape=res.shape))}
+    if(GPAoutput==TRUE){return(list(aligned=gpa.res$coords,csize=gpa.res$Csize,symm.shape=symm.component,asymm.shape=asymm.component,
+		ANOVA.Shape=res.shape))}
   }
 }
 
@@ -1416,7 +1523,7 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
 #' @examples
 #' #1: Estimate trajectories from LS means in 2-factor model
 #' data(plethodon) 
-#' Y.gpa<-two.d.array(gpagen(plethodon$land)$coords)    #GPA-alignment coords in 2D array
+#' Y.gpa<-two.d.array(gpagen(plethodon$land)$coords)    
 #'
 #' trajectory.analysis(Y.gpa~plethodon$species*plethodon$site,iter=15)
 #'
@@ -1425,7 +1532,8 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
 #'
 #' #Motion paths represented by 5 time points per motion 
 #'
-#' trajectory.analysis(motionpaths$trajectories~motionpaths$groups,estimate.traj=FALSE, traj.pts=5,iter=15)
+#' trajectory.analysis(motionpaths$trajectories~motionpaths$groups,
+#' estimate.traj=FALSE, traj.pts=5,iter=15)
 trajectory.analysis<-function(f1,data=NULL,estimate.traj=TRUE,traj.pts=NULL,iter=99){
   require(vegan)
   form.in<-formula(f1)
@@ -1544,17 +1652,10 @@ trajectory.analysis<-function(f1,data=NULL,estimate.traj=TRUE,traj.pts=NULL,iter
 #' @keywords plotAllSpecimens
 #' @author Dean Adams
 #' @examples
-#' # Example 1: Two-dimensional landmark data
 #' data(plethodon) 
 #' Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
 #'
 #' plotAllSpecimens(Y.gpa$coords,links=plethodon$links)
-#'
-#' # Example 2: Three-dimensional landmark data
-#' data(scallops)
-#' Y.gpa<-gpagen(A=scallops$coorddata, curves=scallops$curvslide, surfaces=scallops$surfslide)
-#'
-#' plotAllSpecimens(Y.gpa$coords)
 plotAllSpecimens<-function(A,mean=TRUE,links=NULL,pointscale=1,meansize=2){
   require(rgl)
   if (length(dim(A))!=3){
@@ -1751,54 +1852,55 @@ plotRefToTarget<-function(M1,M2,method=c("TPS","vector","points"),mag=1.0,links=
 #' ref<-mshape(Y.gpa$coords)
 #' 
 #' plotTangentSpace(Y.gpa$coords)
-plotTangentSpace<-function(A,axis1=1, axis2=2,warpgrids=TRUE,label=FALSE){
-  if (length(dim(A))!=3){
-    stop("Data matrix not a 3D array (see 'arrayspecs').")  }
-  if(length(grep("-999",A))!=0){
-    stop("Data matrix contains missing values. Estimate these first(see 'estimate.missing').")  }
-  k<-dim(A)[2]
-  p<-dim(A)[1]
-  n<-dim(A)[3]
-  ref<-mshape(A)
-  x<-two.d.array(A)
-  names<-row.names(x)
-  pc.res<-prcomp(x)
-  pcdata<-pc.res$x  	
-  if(warpgrids==F){
-    plot(pcdata[,axis1],pcdata[,axis2],asp=1,pch=21,bg="black",cex=2,xlab="Axis 1",ylab="Axis 2")
-    segments(min(pcdata[,axis1]), 0, max(pcdata[,axis1]), 0,lty=2,lwd=1)
-    segments(0,min(pcdata[,axis2]),0, max(pcdata[,axis2]),lty=2,lwd=1)
-      if(label ==T){text(pcdata[,axis1],pcdata[,axis2],seq(1,n),adj=c(-.7,-.7))}
+plotTangentSpace<-function (A, axis1 = 1, axis2 = 2, warpgrids = TRUE, label = FALSE){
+  if (length(dim(A)) != 3) {
+    stop("Data matrix not a 3D array (see 'arrayspecs').") }
+  if (length(grep("-999", A)) != 0) {
+    stop("Data matrix contains missing values. Estimate these first(see 'estimate.missing').") }
+  k <- dim(A)[2]
+  p <- dim(A)[1]
+  n <- dim(A)[3]
+  ref <- mshape(A)
+  x <- two.d.array(A)
+  names <- row.names(x)
+  pc.res <- prcomp(x)
+  pcdata <- pc.res$x
+  if (warpgrids == F) {
+    plot(pcdata[, axis1], pcdata[, axis2], asp = 1, pch = 21,bg = "black", cex = 2, xlab = "Axis 1", ylab = "Axis 2")
+    segments(min(pcdata[, axis1]), 0, max(pcdata[, axis1]), 0, lty = 2, lwd = 1)
+    segments(0, min(pcdata[, axis2]), 0, max(pcdata[, axis2]), lty = 2, lwd = 1)
+    if (label == T) {text(pcdata[, axis1], pcdata[, axis2], seq(1, n), adj = c(-0.7, -0.7)) }
   }
-  if(warpgrids==T){
-    if(k==2){  
-      layout(t(matrix(c(2,1,1,1,1,1,1,1,3),3,3)))  
+  if (warpgrids == T) {
+    if (k == 2) {
+      layout(t(matrix(c(2, 1, 1, 1, 1, 1, 1, 1, 3), 3,3)))
     }
-    plot(pcdata[,axis1],pcdata[,axis2],asp=1,pch=21,bg="black",cex=2,xlab="Axis 1",ylab="Axis 2")
-     segments(min(pcdata[,axis1]), 0, max(pcdata[,axis1]), 0,lty=2,lwd=1)
-     segments(0,min(pcdata[,axis2]),0, max(pcdata[,axis2]),lty=2,lwd=1)
-     if(label ==T){text(pcdata[,axis1],pcdata[,axis2],seq(1,n),adj=c(-.7,-.7))}
-      pc.min<-c(min(pcdata[,axis1]),rep(0,dim(pcdata)[2]-1))
-      pc.max<-c(max(pcdata[,axis1]),rep(0,dim(pcdata)[2]-1))
-     shape.min<-arrayspecs(as.matrix(pc.min%*%(t(pc.res$rotation))),
-	 p,k,byLand=FALSE)[,,1] + ref
-     shape.max<-arrayspecs(as.matrix(pc.max%*%(t(pc.res$rotation))),
-	 p,k,byLand=FALSE)[,,1] + ref
-    if(k==2){
-      arrows(min(pcdata[,axis1]),(.7*max(pcdata[,axis2])),min(pcdata[,axis1]),0,length=0.1,lwd=2)
-      arrows(max(pcdata[,axis1]),(.7*min(pcdata[,axis2])),max(pcdata[,axis1]),0,length=.1,lwd=2)
-      tps(ref,shape.min,20)
-      tps(ref,shape.max,20)
+    plot(pcdata[, axis1], pcdata[, axis2], asp = 1, pch = 21,bg = "black", cex = 2, xlab = "Axis 1", ylab = "Axis 2")
+      segments(min(pcdata[, axis1]), 0, max(pcdata[, axis1]), 0, lty = 2, lwd = 1)
+      segments(0, min(pcdata[, axis2]), 0, max(pcdata[, axis2]), lty = 2, lwd = 1)
+      if (label == T) {text(pcdata[, axis1], pcdata[, axis2], seq(1, n), adj = c(-0.7, -0.7))}
+      pcaxis.min <- min(pcdata[, axis1]); pcaxis.max <- max(pcdata[, axis1])
+      pc.min<-pc.max<-rep(0, dim(pcdata)[2])
+      pc.min[axis1]<-pcaxis.min; pc.max[axis1]<-pcaxis.max
+      shape.min <- arrayspecs(as.matrix(pc.min %*% (t(pc.res$rotation))), 
+                            p, k, byLand = FALSE)[, , 1] + ref
+      shape.max <- arrayspecs(as.matrix(pc.max %*% (t(pc.res$rotation))), 
+                            p, k, byLand = FALSE)[, , 1] + ref
+    if (k == 2) {
+      arrows(min(pcdata[, axis1]), (0.7 * max(pcdata[,axis2])), min(pcdata[, axis1]), 0, length = 0.1,lwd = 2)
+      arrows(max(pcdata[, axis1]), (0.7 * min(pcdata[,axis2])), max(pcdata[, axis1]), 0, length = 0.1,lwd = 2)
+      tps(ref, shape.min, 20)
+      tps(ref, shape.max, 20)
     }
-    if(k==3){
+    if (k == 3) {
       open3d()
-      plot3d(shape.min,type="s",col="gray",main="Axis1 negative",size=1.25,aspect=FALSE)
+      plot3d(shape.min, type = "s", col = "gray", main = "Axis1 negative",size = 1.25, aspect = FALSE)
       open3d()
-      plot3d(shape.max,type="s",col="gray",main="Axis1 positive",size=1.25,aspect=FALSE)
+      plot3d(shape.max, type = "s", col = "gray", main = "Axis1 positive", size = 1.25, aspect = FALSE)
     }
-  layout(1)  #reset plot layout
+    layout(1)
   }
-  return(list(pc.summary=summary(pc.res), pc.scores=pcdata))
+  return(list(pc.summary = summary(pc.res), pc.scores = pcdata))
 }
 
 
@@ -1829,7 +1931,6 @@ plotTangentSpace<-function(A,axis1=1, axis2=2,warpgrids=TRUE,label=FALSE){
 #' plotGMPhyloMorphoSpace(plethspecies$phy,Y.gpa$coords)
 plotGMPhyloMorphoSpace<-function(phy,A,labels=TRUE,ancStates=T){
   require(ape)
-  require(phytools)
   require(calibrate)
   if (length(dim(A))!=3){
     stop("Data matrix not a 3D array (see 'arrayspecs').")  }
@@ -1837,6 +1938,8 @@ plotGMPhyloMorphoSpace<-function(phy,A,labels=TRUE,ancStates=T){
     stop("Data matrix contains missing values. Estimate these first(see 'estimate.missing').")  }
   if (class(phy) != "phylo") 
     stop("tree must be of class 'phylo.'")
+  if (!is.binary.tree(phy)) 
+    stop("tree is not fully bifurcating.")
   if(is.null(dimnames(A)[[3]])){
     stop("Data matrix does not include taxa names as dimnames for 3rd dimension.")  }
   N<-length(phy$tip.label)
@@ -1851,7 +1954,7 @@ plotGMPhyloMorphoSpace<-function(phy,A,labels=TRUE,ancStates=T){
   names<-row.names(x)
   anc.states<-NULL
   for (i in 1:ncol(x)){
-    tmp<-fastAnc(phy,x[,i])  
+    tmp<-as.vector(ace(x[,i], compute.brlen(phy,1), type="continuous", method="ML")$ace)
     anc.states<-cbind(anc.states,tmp)   }
   colnames(anc.states)<-NULL
   all.data<-rbind(x,anc.states)  
@@ -2376,7 +2479,7 @@ buildtemplate<-function(specimen, fixed, surface.sliders)    {
 #' @references Bookstein, F. J. 1997 Landmark Methods for Forms without Landmarks: Morphometrics of 
 #' Group Differences in Outline Shape. Medical Image Analysis 1(3):225-243.
 digit.curves<-function(n, curves)    {
-  library(rgl)  
+  require(rgl)  
   template<-as.matrix(read.table("template.txt",header=TRUE))
   lm<-cbind(index<-1:n,template[1:n,])
   clear3d();plot3d(template[-(1:n),],size=3,col="darkgray",xlab="x",ylab="y",zlab="z",aspect=FALSE)
@@ -2616,7 +2719,7 @@ editTemplate<-function(template, fixed, n){
 #' landmark points can be digitized using the LEFT mouse button. When selection of n landmarks is completed, 
 #' an ".nts" file is created in working directory using the specimen name, adding "2dcoords.nts" as a suffix.
 #'
-#' @param file Name of jpeg file in working directory (can include path) to be digitized. File names can be 
+#' @param file Name of jpeg file to be digitized. File names can be 
 #' written in manually, including paths, or obtained using directory/file manipulation functions 
 #' e.g., \code{\link{list.files}}
 #' @seealso \code{\link{list.files}}
@@ -2629,8 +2732,8 @@ editTemplate<-function(template, fixed, n){
 #' @author Erik Otarola-Castillo and Dean Adams
 digitize2d<-function(file, nlandmarks,scale){
   require(jpeg)
-  specimen<-readJPEG(spec.name<-basename(file), native = T)
-  spec.name<-unlist(strsplit(spec.name, "\\."))[1]
+  spec.name<-unlist(strsplit(basename(file), "\\."))[1]
+  specimen<-readJPEG(file, native = T)  
   plot(seq(0,dim(specimen)[2],length.out=10),seq(0,dim(specimen)[1],length.out=10), type='n',xlab="x",ylab="y",asp=1,tck=0,xaxt="n",yaxt="n")
   rasterImage(specimen, 1, 1,dim(specimen)[2],  dim(specimen)[1])
   cat("set scale =",scale,"\n")
@@ -2638,13 +2741,12 @@ digitize2d<-function(file, nlandmarks,scale){
   cat("select landmarks 1:",nlandmarks,"\n",sep="")
   selected<-matrix(unlist(locator(n = nlandmarks, type ="p",col="black",cex=4,pch=21,bg="red")),dimnames=list(paste("LM",seq(1,nlandmarks)),c("x","y")),ncol=2)
   output<-selected/dime
-  cat(paste('"',spec.name,sep=""),file=paste(spec.name,"2dcoords.nts",sep=""),sep="\n")
-  cat(paste(1,dim(output)[1],2,0,"dim=2"),file=paste(spec.name,"2dcoords.nts",sep=""),sep="\n",append=TRUE)
-  write.table(output,file=paste(spec.name,"2dcoords.nts",sep=""),col.names= FALSE, row.names = FALSE,sep="  ",append=TRUE) 
-  write.table(dime,file=paste(spec.name,"scale.txt",sep=""),col.names = FALSE, row.names = FALSE,sep="  ",append=TRUE)
+  path<-paste(sub(basename(file),"",file),spec.name,sep="")
+  cat(paste('"',spec.name,sep=""),file=paste(path,"_2dcoords.nts",sep=""),sep="\n")
+  cat(paste(1,1,dim(output)[1]*dim(output)[2],0,"dim=2"),file=paste(path,"_2dcoords.nts",sep=""),sep="\n",append=TRUE)
+  write.table(output,file=paste(path,"_2dcoords.nts",sep=""),col.names= FALSE, row.names = FALSE,sep="  ",append=TRUE) 
   return(list(SCALE=dime,LANDMARKS=output))
 }
-
 
 # picscale is called by digitize2d
 picscale<- function(scale){
@@ -2678,16 +2780,16 @@ picscale<- function(scale){
 #' @export
 #' @keywords digicurves
 #' @author Erik Otarola-Castillo and Dean Adams
-#' @references  Bookstein, F. J. 1991	Morphometric Tools for Landmark Data: Geometry and Biology. 
+#' @references  Bookstein, F. J. 1991  Morphometric Tools for Landmark Data: Geometry and Biology. 
 #' Cambridge University Press, New York.
 #' @references Bookstein, F. J. 1997 Landmark Methods for Forms without Landmarks: Morphometrics of 
 #' Group Differences in Outline Shape. Medical Image Analysis 1(3):225-243.
 curves2d<-function(file, nsliders){
-  lm<-readland.nts(spec.name<-basename(file))
-  lm<-matrix(lm,ncol=dim(lm)[2])
-  spec.name<-unlist(strsplit(spec.name, "\\."))[1]
-  plot(lm[,1],lm[,2],cex=1,pch=21,bg="white")
-  text(lm[,1],lm[,2],label=paste("LM",1:dim(lm)[1]),adj=.5,pos=1)
+  spec.name<-unlist(strsplit(basename(file), "\\."))[1]
+  lm<-readland.nts(file)[,,1]
+  lm <- matrix(lm, ncol = dim(lm)[2], byrow=F)  
+  plot(lm[,1],lm[,2],cex=1,pch=21,bg="white",xlim=range(lm),ylim=range(lm),asp=1)
+  text(lm[,1],lm[,2],label=paste("LM",1:dim(lm)[1]),adj=.5,pos=4)
   selected<-matrix(NA,ncol=3,nrow=nsliders)
   select<-NULL
   for(i in 1:nsliders){
@@ -2704,15 +2806,15 @@ curves2d<-function(file, nsliders){
       if(j==3){
         arrows(lm[selected[i,j],][1],lm[selected[i,j],][2],lm[selected[i,j-1],][1],lm[selected[i,j-1],][2]
                ,col="red",lwd=2,length=.15,code=1)
-        #lines(rbind(lm[selected[i,j],],lm[selected[i,j-1],]),col="red",lwd=2)
       } else { NA
-      }     
+      } 
     }
   }
   output<-selected
-  cat(paste('"sliders',sep=""),file=paste("sliders.nts",sep=""),sep="\n")
-  cat(paste(1,dim(output)[1],3,0, "dim=3"),file="sliders.nts",sep="\n",append=TRUE)
-  write.table(output,file="sliders.nts",col.names = FALSE, row.names = FALSE,sep="  ",append=TRUE)
+  path<-paste(sub(basename(file),"",file),spec.name,sep="")
+  cat(paste('"sliders',sep=""),file=paste(path,"sliders.nts",sep=""),sep="\n")
+  cat(paste(1,dim(output)[1],3,0, "dim=3"),file=paste(path,"sliders.nts",sep=""),sep="\n",append=TRUE)
+  write.table(output,file=paste(path,"sliders.nts",sep=""),col.names = FALSE, row.names = FALSE,sep=" ",append=TRUE)
   return(list(sliders=output))
 }
 
@@ -2747,6 +2849,7 @@ plotspec<-function(specimen,digitspec,fixed){
 }
 
 curvfunc<-function(n,curves,template,index,curslid){ # REVISED
+  require(rgl)
   for (i in 1:curves)      {
     curslid.temp<-selected<-NULL
     for (j in 1:3)				{
@@ -2798,7 +2901,7 @@ curvfunc<-function(n,curves,template,index,curslid){ # REVISED
 #'   \item{coords}{The x,y,z coordinates of the .vrml surface}
 #'   \item{triangles}{Triangle facet connections between coordinate points (if available)}
 read.vrml<-function(file,plotspec=TRUE,plottri=TRUE,write.nts=FALSE) {
-  library(rgl)
+  require(rgl)
   spec<-basename(file)
   spec.name<-unlist(strsplit(spec, "\\."))[1]
   b<-scan(spec,what="character",skip=0,sep="",quiet=T)

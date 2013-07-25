@@ -100,7 +100,7 @@
 \examples{
 #1: Estimate trajectories from LS means in 2-factor model
 data(plethodon)
-Y.gpa<-two.d.array(gpagen(plethodon$land)$coords)    #GPA-alignment coords in 2D array
+Y.gpa<-two.d.array(gpagen(plethodon$land)$coords)
 
 trajectory.analysis(Y.gpa~plethodon$species*plethodon$site,iter=15)
 
@@ -109,7 +109,8 @@ data(motionpaths)
 
 #Motion paths represented by 5 time points per motion
 
-trajectory.analysis(motionpaths$trajectories~motionpaths$groups,estimate.traj=FALSE, traj.pts=5,iter=15)
+trajectory.analysis(motionpaths$trajectories~motionpaths$groups,
+estimate.traj=FALSE, traj.pts=5,iter=15)
 }
 \author{
   Dean Adams
