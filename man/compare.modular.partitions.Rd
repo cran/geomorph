@@ -56,7 +56,8 @@
 \examples{
 data(plethodon)
 Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
-land.gps<-c("A","A","A","A","A","B","B","B","B","B","B","B") #landmarks on the skull and mandible assigned to partitions
+ #landmarks on the skull and mandible assigned to partitions
+land.gps<-c("A","A","A","A","A","B","B","B","B","B","B","B")
 
 compare.modular.partitions(Y.gpa$coords,land.gps,iter=99)
 #Result implies that the skull and mandible are not independent modules

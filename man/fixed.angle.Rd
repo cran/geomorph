@@ -3,7 +3,7 @@
 \title{Rotate a subset of 2D landmarks to common articulation angle}
 \usage{
   fixed.angle(A, art.pt = NULL, angle.pts = NULL,
-    rot.pts = NULL, angle = 0)
+    rot.pts = NULL, angle = 0, degrees = FALSE)
 }
 \arguments{
   \item{A}{An array (p x k x n) containing landmark
@@ -22,6 +22,10 @@
   \item{angle}{An optional value specifying the additional
   amount by which the rotation should be augmented (in
   radians)}
+
+  \item{degrees}{A logical value specifying whether the
+  additional rotation angle is expressed in degrees or
+  radians (radians is default)}
 }
 \value{
   Function returns a (p x k x n) array of landmark

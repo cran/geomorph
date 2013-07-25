@@ -5,10 +5,9 @@
   digitize2d(file, nlandmarks, scale)
 }
 \arguments{
-  \item{file}{Name of jpeg file in working directory (can
-  include path) to be digitized. File names can be written
-  in manually, including paths, or obtained using
-  directory/file manipulation functions e.g.,
+  \item{file}{Name of jpeg file to be digitized. File names
+  can be written in manually, including paths, or obtained
+  using directory/file manipulation functions e.g.,
   \code{\link{list.files}}}
 
   \item{nlandmarks}{Number of landmarks to be digitized.}

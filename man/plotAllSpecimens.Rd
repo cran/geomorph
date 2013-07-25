@@ -39,17 +39,10 @@
   three-dimensional data.
 }
 \examples{
-# Example 1: Two-dimensional landmark data
 data(plethodon)
 Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
 
 plotAllSpecimens(Y.gpa$coords,links=plethodon$links)
-
-# Example 2: Three-dimensional landmark data
-data(scallops)
-Y.gpa<-gpagen(A=scallops$coorddata, curves=scallops$curvslide, surfaces=scallops$surfslide)
-
-plotAllSpecimens(Y.gpa$coords)
 }
 \author{
   Dean Adams
