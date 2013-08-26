@@ -66,10 +66,7 @@
   on many Macintosh machines. }
 }
 \author{
-  \href{http://www.people.fas.harvard.edu/~eotarolacastillo}{Erik
-  Otarola-Castillo} and
-  \href{http://www.public.iastate.edu/~dcadams}{Dean
-  Adams}.
+  Erik Otarola-Castillo
 }
 \references{
   Bookstein, F. J. 1991 Morphometric Tools for Landmark

@@ -17,9 +17,7 @@
   undesirable points.
 }
 \author{
-  \href{http://www.people.fas.harvard.edu/~eotarolacastillo}{Erik
-  Otarola-Castillo} and
-  \href{http://www.public.iastate.edu/~dcadams}{Dean Adams}
+  Erik Otarola-Castillo
 }
 \keyword{editTemplate}
 

@@ -440,13 +440,12 @@ readmulti.nts<-function(filelist){
 #' @param plot Logical should (unaligned) specimens be plotted? Defaults to FALSE.
 #' @export
 #' @keywords read.morphologika
-#' @author Erik Otarola-Castillo and Dean Adams
+#' @author Erik Otarola-Castillo
 #' @return Function returns a list with the following components:
 #'   \item{coords}{If Morphologika headers "[labels]" and "[labelvalues]" are not present in the file, function only returns a (p x k x n) array, where p is the number of landmark points, k is the number 
 #'   of landmark dimensions, and n is the number of specimens}
 #'   \item{dataframe}{If Morphologika headers "[labels]" and "[labelvalues]" are present read.morphologika returns the above p x k x n array and a dataframe containing specimen specific information stored in file}
 read.morphologika<-function(file,plot=FALSE){
-  require(rgl);require(geomorph)
   mfile<-scan(file,what="character",sep = "\n",strip.white = TRUE,quiet=TRUE)
   tab<-length(grep("\t",mfile))
   com<-length(grep(",",mfile))
@@ -1050,7 +1049,6 @@ compare.modular.partitions<-function(A,landgroups,iter=999){
 #'
 #' physignal(plethspecies$phy,Y.gpa$coords,iter=5)
 physignal<-function(phy,A,iter=249){
-  require(ape)
   if (length(dim(A))!=3){
     stop("Data matrix not a 3D array (see 'arrayspecs').")  }
   if(length(grep("-999",A))!=0){
@@ -1535,7 +1533,6 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
 #' trajectory.analysis(motionpaths$trajectories~motionpaths$groups,
 #' estimate.traj=FALSE, traj.pts=5,iter=15)
 trajectory.analysis<-function(f1,data=NULL,estimate.traj=TRUE,traj.pts=NULL,iter=99){
-  require(vegan)
   form.in<-formula(f1)
   Terms<-terms(form.in)
   y<-eval(form.in[[2]],parent.frame())
@@ -1657,7 +1654,6 @@ trajectory.analysis<-function(f1,data=NULL,estimate.traj=TRUE,traj.pts=NULL,iter
 #'
 #' plotAllSpecimens(Y.gpa$coords,links=plethodon$links)
 plotAllSpecimens<-function(A,mean=TRUE,links=NULL,pointscale=1,meansize=2){
-  require(rgl)
   if (length(dim(A))!=3){
     stop("Data matrix not a 3D array (see 'arrayspecs').")  }
   if(length(grep("-999",A))!=0){
@@ -1741,7 +1737,6 @@ plotAllSpecimens<-function(A,mean=TRUE,links=NULL,pointscale=1,meansize=2){
 #' ref<-mshape(Y.gpa$coords)
 #' plotRefToTarget(ref,Y.gpa$coords[,,1],method="points")
 plotRefToTarget<-function(M1,M2,method=c("TPS","vector","points"),mag=1.0,links=NULL,...){
-  require(rgl)
   method <- match.arg(method)
   if(length(grep("-999",M1))!=0){
     stop("Data contains missing values. Estimate these first(see 'estimate.missing').")  }
@@ -1930,8 +1925,6 @@ plotTangentSpace<-function (A, axis1 = 1, axis2 = 2, warpgrids = TRUE, label = F
 #'
 #' plotGMPhyloMorphoSpace(plethspecies$phy,Y.gpa$coords)
 plotGMPhyloMorphoSpace<-function(phy,A,labels=TRUE,ancStates=T){
-  require(ape)
-  require(calibrate)
   if (length(dim(A))!=3){
     stop("Data matrix not a 3D array (see 'arrayspecs').")  }
   if(length(grep("-999",A))!=0){
@@ -1954,6 +1947,7 @@ plotGMPhyloMorphoSpace<-function(phy,A,labels=TRUE,ancStates=T){
   names<-row.names(x)
   anc.states<-NULL
   for (i in 1:ncol(x)){
+    options(warn=-1)  
     tmp<-as.vector(ace(x[,i], compute.brlen(phy,1), type="continuous", method="ML")$ace)
     anc.states<-cbind(anc.states,tmp)   }
   colnames(anc.states)<-NULL
@@ -2398,7 +2392,7 @@ trajplot<-function(Data,M){
 #' 
 #' @export
 #' @keywords template buildtemplate
-#' @author \href{http://www.people.fas.harvard.edu/~eotarolacastillo}{Erik Otarola-Castillo} and \href{http://www.public.iastate.edu/~dcadams}{Dean Adams}.
+#' @author Erik Otarola-Castillo
 #' @return Function returns a matrix containing the x,y,z coordinates of the down sampled points, which can be 
 #' used as a template for digitizing other surface scans using the function \code{\link{digitsurface}}. Additionally, 
 #' the file 'template.txt' is generated, and an NTS file with the name of the specimen containing the digitized 
@@ -2406,7 +2400,6 @@ trajplot<-function(Data,M){
 #' @references Gunz P, Mitteroecker P, & Bookstein FJ (2005) Semilandmarks in Three Dimensions. Modern Morphometrics in Physical Anthropology, ed Slice DE (Springer-Verlag, New York), pp 73-98.
 #' @references Mitteroecker P & Gunz P (2009) Advances in Geometric Morphometrics. Evolutionary Biology 36(2):235-247.
 buildtemplate<-function(specimen, fixed, surface.sliders)    {
-  require(rgl)
   spec.name<-deparse(substitute(specimen))
   if (is.null(dim(specimen))) stop ("File is not 3D matrix")
   if (dim(specimen)[2]!=3) stop ("File is not 3D matrix")
@@ -2471,7 +2464,7 @@ buildtemplate<-function(specimen, fixed, surface.sliders)    {
 #' @export
 #' @seealso  \code{\link{digitsurface}}, \code{\link{gpagen}}
 #' @keywords digicurves
-#' @author \href{http://www.people.fas.harvard.edu/~eotarolacastillo}{Erik Otarola-Castillo} and \href{http://www.public.iastate.edu/~dcadams}{Dean Adams}.
+#' @author Erik Otarola-Castillo
 #' @return Function returns a matrix containing the landmark adress of the curve sliders, indicating the points between which the selected point will "slide".  
 #' In addition, the function returns a .csv file to be used by \code{\link{gpagen}} during GPA.
 #' @references  Bookstein, F. J. 1991  Morphometric Tools for Landmark Data: Geometry and Biology. 
@@ -2479,7 +2472,6 @@ buildtemplate<-function(specimen, fixed, surface.sliders)    {
 #' @references Bookstein, F. J. 1997 Landmark Methods for Forms without Landmarks: Morphometrics of 
 #' Group Differences in Outline Shape. Medical Image Analysis 1(3):225-243.
 digit.curves<-function(n, curves)    {
-  require(rgl)  
   template<-as.matrix(read.table("template.txt",header=TRUE))
   lm<-cbind(index<-1:n,template[1:n,])
   clear3d();plot3d(template[-(1:n),],size=3,col="darkgray",xlab="x",ylab="y",zlab="z",aspect=FALSE)
@@ -2535,9 +2527,8 @@ digit.curves<-function(n, curves)    {
 #' @param index logical: whether selected landmark addresses should be returned
 #' @export
 #' @keywords digifix
-#' @author Erik Otarola-Castillo and Dean Adams
+#' @author Erik Otarola-Castillo
 digit.fixed<-function(specimen, fixed, index=FALSE)    {
-  require(rgl)
   spec.name<-deparse(substitute(specimen))
   if (is.null(dim(specimen))) stop ("File is not 3D matrix")
   if (dim(specimen)[2]!=3) stop ("File is not 3D matrix")
@@ -2637,9 +2628,8 @@ digit.fixed<-function(specimen, fixed, index=FALSE)    {
 #' @references Mitteroecker P & Gunz P (2009) Advances in Geometric Morphometrics. Evolutionary Biology 36(2):235-247.                                                 
 #' @export 
 #' @keywords digitsurface
-#' @author \href{http://www.people.fas.harvard.edu/~eotarolacastillo}{Erik Otarola-Castillo} and \href{http://www.public.iastate.edu/~dcadams}{Dean Adams}
+#' @author Erik Otarola-Castillo
 digitsurface<-function(specimen, fixed)    {
-  require(rgl)
   if (is.null(dim(specimen))) stop ("File is not 3D matrix")
   if (dim(specimen)[2]!=3) stop ("File is not 3D matrix")
   spec.name<-deparse(substitute(specimen))
@@ -2656,7 +2646,6 @@ digitsurface<-function(specimen, fixed)    {
     # nei[i]<-which.min(sqrt((template.tps[i,1]-spec.surfs[,1])^2+(template.tps[i,2]-spec.surfs[,2])^2))[1] # 2D NN delete/keep after discussion
     nei[i]<-which.min(sqrt((template.tps[i,1]-spec.surfs[,1])^2+(template.tps[i,2]-spec.surfs[,2])^2+(template.tps[i,3]-spec.surfs[,3])^2))[1] #3D NN
     sliders[i,]<-spec.surfs[nei[i],]
-    #  lines3d(rbind(spec.surfs[nei[i],] ,template.tps[i,]),col=i,lwd=3) # eoc testing only delete from final copy
     spec.surfs<-spec.surfs[-nei[i],]  
   }
   clear3d(); plot3d(specimen[,1],specimen[,2],specimen[,3],size=.1,aspect=F,type="p")
@@ -2677,9 +2666,8 @@ digitsurface<-function(specimen, fixed)    {
 #' @param n Number of points to be removed 
 #' @export
 #' @keywords editTemplate
-#' @author \href{http://www.people.fas.harvard.edu/~eotarolacastillo}{Erik Otarola-Castillo} and \href{http://www.public.iastate.edu/~dcadams}{Dean Adams}
+#' @author Erik Otarola-Castillo
 editTemplate<-function(template, fixed, n){
-  require(rgl)
   if (is.null(dim(template))) stop ("File is not 3D matrix")
   if (dim(template)[2]!=3) stop ("File is not 3D matrix")
   spec.name<-deparse(substitute(template))
@@ -2729,9 +2717,8 @@ editTemplate<-function(template, fixed, n){
 #' @return Returns text file with the distance in scale
 #' @export
 #' @keywords digitize2d
-#' @author Erik Otarola-Castillo and Dean Adams
+#' @author Erik Otarola-Castillo
 digitize2d<-function(file, nlandmarks,scale){
-  require(jpeg)
   spec.name<-unlist(strsplit(basename(file), "\\."))[1]
   specimen<-readJPEG(file, native = T)  
   plot(seq(0,dim(specimen)[2],length.out=10),seq(0,dim(specimen)[1],length.out=10), type='n',xlab="x",ylab="y",asp=1,tck=0,xaxt="n",yaxt="n")
@@ -2779,7 +2766,7 @@ picscale<- function(scale){
 #' semilandmarks will "slide". e.g., "4 3 2", semilandmar 3 will slide between 4 and 2. 
 #' @export
 #' @keywords digicurves
-#' @author Erik Otarola-Castillo and Dean Adams
+#' @author Erik Otarola-Castillo
 #' @references  Bookstein, F. J. 1991  Morphometric Tools for Landmark Data: Geometry and Biology. 
 #' Cambridge University Press, New York.
 #' @references Bookstein, F. J. 1997 Landmark Methods for Forms without Landmarks: Morphometrics of 
@@ -2835,9 +2822,8 @@ curves2d<-function(file, nsliders){
 #' data(scallops)
 #' digitdat<-scallops$coorddata[,,1]
 #' plotspec(specimen=rawdat,digitspec=scallops$coorddata[,,1],fixed=16)
-#' @author \href{http://www.people.fas.harvard.edu/~eotarolacastillo}{Erik Otarola-Castillo} and \href{http://www.public.iastate.edu/~dcadams}{Dean Adams}
+#' @author Erik Otarola-Castillo
 plotspec<-function(specimen,digitspec,fixed){
-  require(rgl)
   specimen<-scale(specimen,scale=FALSE)
   if (is.null(dim(specimen))) stop ("File is not 3D matrix")
   if (dim(specimen)[2]!=3) stop ("File is not 3D matrix") 
@@ -2849,7 +2835,6 @@ plotspec<-function(specimen,digitspec,fixed){
 }
 
 curvfunc<-function(n,curves,template,index,curslid){ # REVISED
-  require(rgl)
   for (i in 1:curves)      {
     curslid.temp<-selected<-NULL
     for (j in 1:3)				{
@@ -2896,12 +2881,11 @@ curvfunc<-function(n,curves,template,index,curslid){ # REVISED
 #' @param write.nts Logical should .nts file be created. Defaults to FALSE.
 #' @export
 #' @keywords read.vrml
-#' @author Erik Otarola-Castillo and Dean Adams
+#' @author Erik Otarola-Castillo
 #' @return Function returns a list with the following components:
 #'   \item{coords}{The x,y,z coordinates of the .vrml surface}
 #'   \item{triangles}{Triangle facet connections between coordinate points (if available)}
 read.vrml<-function(file,plotspec=TRUE,plottri=TRUE,write.nts=FALSE) {
-  require(rgl)
   spec<-basename(file)
   spec.name<-unlist(strsplit(spec, "\\."))[1]
   b<-scan(spec,what="character",skip=0,sep="",quiet=T)
@@ -2941,7 +2925,7 @@ read.vrml<-function(file,plotspec=TRUE,plottri=TRUE,write.nts=FALSE) {
     }     
     colnames(zz)<-c("x","y","z")
     if(plotspec==TRUE){
-    plot3d(zz[,1],zz[,2],zz[,3],xlab=paste(spec.name,"_x",sep=""),ylab=paste(spec.name,"_y",sep=""),zlab=paste(spec.name,"_z",sep=""),size=1,col="black",aspect=FALSE)
+      plot3d(zz[,1],zz[,2],zz[,3],xlab=paste(spec.name,"_x",sep=""),ylab=paste(spec.name,"_y",sep=""),zlab=paste(spec.name,"_z",sep=""),size=1,col="black",aspect=FALSE)
     }     
     if(plottri==TRUE & plotspec==TRUE & length(tri)>0){
       rgl.triangles(zz[t(triang),])
@@ -2958,7 +2942,7 @@ read.vrml<-function(file,plotspec=TRUE,plottri=TRUE,write.nts=FALSE) {
     coor<-length(co)
     co.tri<-tri[1]+2
     if (length(tri)>0){
-      co.tri<-tri[i]+2
+      co.tri<-tri[1]+2
       newrange.tri<-b[co.tri:length(b)]
       en.tri<-which(b[co.tri:length(b)]=="]")[1]-1
       tria<-as.matrix(newrange.tri[1:en.tri])
@@ -2995,6 +2979,6 @@ read.vrml<-function(file,plotspec=TRUE,plottri=TRUE,write.nts=FALSE) {
   if (length(tri)>0){
     return(list(coords=zz,triangles=triang))
   } else {
-      return(zz)
-    }
+    return(zz)
+  }
 }

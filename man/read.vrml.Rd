@@ -50,7 +50,7 @@
   .nts coordinate file.
 }
 \author{
-  Erik Otarola-Castillo and Dean Adams
+  Erik Otarola-Castillo
 }
 \seealso{
   \code{\link{list.files}}

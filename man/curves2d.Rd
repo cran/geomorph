@@ -40,7 +40,7 @@
   The LEFT mouse button is used to select points.
 }
 \author{
-  Erik Otarola-Castillo and Dean Adams
+  Erik Otarola-Castillo
 }
 \references{
   Bookstein, F. J. 1991 Morphometric Tools for Landmark
