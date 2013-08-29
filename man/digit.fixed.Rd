@@ -64,7 +64,7 @@
   on many Macintosh machines. }
 }
 \author{
-  Erik Otarola-Castillo and Dean Adams
+  Erik Otarola-Castillo
 }
 \keyword{digifix}
 

@@ -40,7 +40,7 @@
   adding "2dcoords.nts" as a suffix.
 }
 \author{
-  Erik Otarola-Castillo and Dean Adams
+  Erik Otarola-Castillo
 }
 \seealso{
   \code{\link{list.files}}

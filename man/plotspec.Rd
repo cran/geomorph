@@ -31,9 +31,7 @@ digitdat<-scallops$coorddata[,,1]
 plotspec(specimen=rawdat,digitspec=scallops$coorddata[,,1],fixed=16)
 }
 \author{
-  \href{http://www.people.fas.harvard.edu/~eotarolacastillo}{Erik
-  Otarola-Castillo} and
-  \href{http://www.public.iastate.edu/~dcadams}{Dean Adams}
+  Erik Otarola-Castillo
 }
 \keyword{plotspec}
 
