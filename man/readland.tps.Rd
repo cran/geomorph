@@ -44,7 +44,7 @@ contained in tps files (curves, comments, variables, radii,
 etc.)  is ignored.
 }
 \author{
-Dean Adams
+Dean Adams & Emma Sherratt
 }
 \references{
 Rohlf, F. J. 2010. tpsRelw: Relative warps analysis.

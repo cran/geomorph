@@ -26,7 +26,8 @@ template file.
 Function edits a 'template.txt' file made by
 \code{\link{buildtemplate}}, which must be in current
 working directory.  Function overwrites 'template.txt' in
-working directory with edited version.
+working directory with edited version. Use
+read.table("template.txt", header = T).
 \subsection{Selection}{ Choosing which landmarks will be
 deleted involves landmark selection using a mouse in the
 rgl plot window. With a standard 3-button (PC)

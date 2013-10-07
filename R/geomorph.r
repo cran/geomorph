@@ -9,7 +9,13 @@
 #'  of shape variation and covariation, and provide graphical depictions of shapes and patterns of
 #'  shape variation.
 #' 
-#' @import rgl ape vegan calibrate jpeg geiger
+#' @import rgl 
+#' @importFrom geiger sim.char
+#' @importFrom calibrate textxy
+#' @importFrom jpeg readJPEG
+#' @importFrom vegan adonis
+#' @importFrom ape is.binary.tree ace compute.brlen vcv.phylo summary.phylo Ntip
+
 NULL
 
 #' Landmark data from Plethodon salamander heads
@@ -269,8 +275,7 @@ read.ply <- function (file, ShowSpecimen = TRUE)
 #' @param specID a character specifying whether to extract the specimen ID names from the ID or IMAGE lines (default is "None").
 #' @export
 #' @keywords readland.tps
-#' @export
-#' @author Dean Adams
+#' @author Dean Adams & Emma Sherratt
 #' @return Function returns a (p x k x n) array, where p is the number of landmark points, k is the number 
 #'   of landmark dimensions (2 or 3), and n is the number of specimens. The third dimension of this array 
 #'   contains names for each specimen, which are obtained from the image names in the *.tps file. 
@@ -279,18 +284,20 @@ read.ply <- function (file, ShowSpecimen = TRUE)
 readland.tps<-function (file, specID=c("None","ID","imageID")){
   specID <- match.arg(specID)
   tpsfile <- scan(file = file, what = "char", sep = "\n", quiet = TRUE)
-  lmdata <- grep("LM", tpsfile)
+  lmdata <- grep("LM=", tpsfile)
+    if (length(lmdata)==0){ 
+      lmdata <- grep("LM3=", tpsfile) 
+      nland <- as.numeric(sub("LM3=", "", tpsfile[lmdata]))
+      k <- 3
+      } else {nland <- as.numeric(sub("LM=", "", tpsfile[lmdata])) 
+      k <- 2}
   n <- nspecs <- length(lmdata)
-  land.dim <- length(grep("LM=", tpsfile[lmdata[1]]))
-  if (land.dim != 0) {nland <- as.numeric(sub("LM=", "", tpsfile[lmdata])) }
-  if (land.dim == 0) {nland <- as.numeric(sub("LM3=", "", tpsfile[lmdata])) }
   if (max(nland) - min(nland) != 0) {stop("Number of landmarks not the same for all specimens.") }
   p <- nland[1]
-  k <- ifelse(land.dim != 0, 2, 3)
   imscale <- as.numeric(sub("SCALE=", "", tpsfile[grep("SCALE", tpsfile)]))
-  if (is.null(imscale)) {imscale = array(1, nspecs)}
-  if (length(imscale) != nspecs) {print("Not all specimens have scale. Using scale = 1.0")}
-  if (length(imscale) != nspecs) {imscale = array(1, nspecs)}
+    if (is.null(imscale)) {imscale = array(1, nspecs)}
+    if (length(imscale) != nspecs) {print("Not all specimens have scale. Using scale = 1.0")}
+    if (length(imscale) != nspecs) {imscale = array(1, nspecs)}
   landdata <- matrix(NA, nrow = (p * n), ncol = k)
   for (i in 1:n) {
     for (j in 1:p) {
@@ -305,18 +312,18 @@ readland.tps<-function (file, specID=c("None","ID","imageID")){
     imageID <- (sub("IMAGE=", "", tpsfile[grep("IMAGE", tpsfile)]))
     if (length(imageID) ==0) {print("No name given under IMAGE=. Specimen names not extracted") }
     else if (length(imageID) !=0){
-    imageID <- sub(".jpg", "", imageID); imageID <- sub(".tif", "", imageID)
-    imageID <- sub(".bmp", "", imageID); imageID <- sub(".tiff", "", imageID)
-    imageID <- sub(".jpeg", "", imageID); imageID <- sub(".jpe", "", imageID)
-    dimnames(coords)[[3]] <- as.list(imageID) 
-    print("Specimen names extracted from line IMAGE=") }
+      imageID <- sub(".jpg", "", imageID); imageID <- sub(".tif", "", imageID)
+      imageID <- sub(".bmp", "", imageID); imageID <- sub(".tiff", "", imageID)
+      imageID <- sub(".jpeg", "", imageID); imageID <- sub(".jpe", "", imageID)
+      dimnames(coords)[[3]] <- as.list(imageID) 
+      print("Specimen names extracted from line IMAGE=") }
   }
   if(specID=="ID"){
     ID <-sub("ID=", "", tpsfile[grep("ID", tpsfile)])  
     if (length(ID) ==0) {print("No name given under ID=. Specimen names not extracted") }
     else if (length(ID) !=0){
-    dimnames(coords)[[3]] <- as.list(ID)  
-    print("Specimen names extracted from line ID=") }
+      dimnames(coords)[[3]] <- as.list(ID)  
+      print("Specimen names extracted from line ID=") }
   } 
   return(coords = coords)
 }
@@ -332,7 +339,6 @@ readland.tps<-function (file, specID=c("None","ID","imageID")){
 #' @param file Name of the *.tps file to be created
 #' @export
 #' @keywords writeland.tps
-#' @export
 #' @author Dean Adams
 writeland.tps<-function(A, file){
   n<-dim(A)[3]
@@ -428,7 +434,7 @@ readland.nts<-function(file){
 #'   require quotes (") and .nts/.NTS suffix.
 #' @keywords readmulti.nts
 #' @export
-#' @author Dean Adams
+#' @author Dean Adams & Emma Sherratt
 #' @return Function returns a (p x k x n) array, where p is the number of landmark points, k is 
 #'   the number of landmark dimensions (2 or 3), and n is the number of specimens. The third dimension 
 #'   of this array contains names for each specimen, which are obtained from the original file names. 
@@ -440,7 +446,7 @@ readmulti.nts<-function(filelist){
   for (i in 1:n){
     ntsfile<-scan(file=filelist[i],what="char",quote="",sep="\n",strip.white=TRUE,comment.char="\"",quiet=TRUE)
     comment <- grep("\'", ntsfile)
-    if (comment != 0){
+    if (length(comment) != 0){
       ntsfile<-scan(file=file,what="char",quote="",sep="\n",strip.white=TRUE,comment.char="\'",quiet=TRUE)
     }
     header<-unlist(strsplit(ntsfile[1]," "))
@@ -1138,6 +1144,8 @@ compare.evol.rates<-function(phy,A,gp,iter=999 ){
     stop("Data matrix contains missing values. Estimate these first(see 'estimate.missing').")  }
   if(!is.factor(gp)){
     stop("gp is not a factor.")}
+  if (is.null(names(gp))){
+    stop("Factor contains no names. Use names() to assign specimen names to group factor.")}
   if (class(phy) != "phylo") 
     stop("tree must be of class 'phylo.'")
   if(is.null(dimnames(A)[[3]])){
@@ -1968,7 +1976,6 @@ plotTangentSpace<-function (A, axis1 = 1, axis2 = 2, warpgrids = TRUE, label = F
   n <- dim(A)[3]
   ref <- mshape(A)
   x <- two.d.array(A)
-  names <- row.names(x)
   pc.res <- prcomp(x)
   pcdata <- pc.res$x
   if (warpgrids == F) {
@@ -2169,9 +2176,9 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
   }
   if(!is.null(groups)){
     groups<-as.factor(groups)    
+    if(is.null(names(groups))){
+      print("No specimen names in grouping variable. Assuming specimens in same order.")  }
   }
-  if(is.null(names(groups))){
-    print("No specimen names in grouping variable. Assuming specimens in same order.")  }
   if(is.null(rownames(y))==FALSE && is.null(names(groups))==FALSE){
     mtch<-y[is.na( match(rownames(y),names(groups)))]
     if (length(mtch)>0){stop("Specimen names in data set don't match those in grouping variable.")  }
@@ -2372,7 +2379,7 @@ csize<-function(A)				#J. Claude 2008
 #' mshape(Y.gpa$coords)   #mean (consensus) configuration
 mshape<-function(A){apply(A,c(1,2),mean)}	
 
-pPsup<-function(M1,M2){				#J. Claude 2008
+pPsup<-function(M1,M2){				#J. Claude 2008# MODIFIED BY DCA: 2/2014
   k<-ncol(M1)
   Z1<-trans(csize(M1)[[2]])
   Z2<-trans(csize(M2)[[2]])
@@ -2381,9 +2388,10 @@ pPsup<-function(M1,M2){				#J. Claude 2008
   sig<-sign(det(t(Z2)%*%Z1))
   Delt[k]<-sig*abs(Delt[k]); V[,k]<-sig*V[,k]
   Gam<-U%*%t(V)
-  beta<-sum(Delt)
-  list(Mp1=beta*Z1%*%Gam,Mp2=Z2,rotation=Gam,scale=beta,
-       df=sqrt(1-beta^2))}
+  # beta<-sum(Delt)   #commented out: retain size-scaling (DCA)
+#  list(Mp1=beta*Z1%*%Gam,Mp2=Z2,rotation=Gam,scale=beta,
+#       df=sqrt(1-beta^2))}
+  list(Mp1=Z1%*%Gam,Mp2=Z2,rotation=Gam)}    #simplify output and remove size re-scaling (DCA) 
 
 pgpa<-function(A)				#J. Claude 2008	
 {p<-dim(A)[1]; k<-dim(A)[2]; n<-dim(A)[3]  
@@ -2647,16 +2655,17 @@ buildtemplate<-function(spec, fixed, surface.sliders, ptsize = 1)    {
 #' Group Differences in Outline Shape. Medical Image Analysis 1(3):225-243.
 define.sliders.3d<-function(spec, nsliders,surfsliders=FALSE)    {
   spec.name <- deparse(substitute(spec))
+  rownames(spec) <- c(1:nrow(spec)) 
   checkmat <- is.matrix(spec)
   if (checkmat==FALSE) { stop("Input must be a p-x-k matrix of landmark coordinates")}
   checkdim <- dim(spec)[2]
-  if (checkdim==2) {stop("Input must be a p-x-k matrix of two-dimensional landmark coordinates") }
+  if (checkdim==2) {stop("Input must be a p-x-k matrix of three-dimensional landmark coordinates") }
   if (surfsliders == TRUE){
     surf <- as.matrix(read.csv("surfslide.csv", header=T))
     spec <- spec[-surf,]
   }
   n <- dim(spec)[1]
-  index <- 1:n
+  index <- as.numeric(rownames(spec))
   clear3d();plot3d(spec,size=5,col="black",xlab="x",ylab="y",zlab="z",aspect=FALSE)
   text3d(spec, texts=index,cex=1,adj=c(2,1))  
   curveslide<-NULL 
@@ -2686,18 +2695,18 @@ define.sliders.3d<-function(spec, nsliders,surfsliders=FALSE)    {
 
 
 
-#' Deprecated functions in geomorph
+#' Defunct functions in geomorph
 #'
-#' The following functions have been deprecated in geomorph
+#' The following functions are no longer supported in geomorph
 #'
-#' This function has been deprecated. Below shows the original function and the replacement function.
+#' This function is now defunct. Below shows the original function and the replacement function.
 #'
 #' curves2d:  use define.sliders.2d
 #'
 #' digit.curves: use define.sliders.3d
 #' @export
 digit.curves<-function()    {
-  .Deprecated(define.sliders.3d)
+  .Defunct(define.sliders.3d)
 }
 
 #' Digitize 3D landmarks
@@ -2926,7 +2935,7 @@ digitsurface<-function(spec, fixed, ptsize = 1)    {
 #' An interactive function to remove landmarks from a 3D template file. 
 #' 
 #' Function edits a 'template.txt' file made by \code{\link{buildtemplate}}, which must be in current working directory.
-#'  Function overwrites 'template.txt' in working directory with edited version.
+#'  Function overwrites 'template.txt' in working directory with edited version. Use read.table("template.txt", header = T).
 #' \subsection{Selection}{ 
 #' Choosing which landmarks will be deleted involves landmark selection using a mouse in the rgl plot window. 
 #' With a standard 3-button (PC) buildtemplate uses:
@@ -2956,8 +2965,8 @@ digitsurface<-function(spec, fixed, ptsize = 1)    {
 #' @keywords editTemplate
 #' @author Erik Otarola-Castillo & Emma Sherratt
 editTemplate<-function(template, fixed, n){
-  if (is.null(dim(template))) stop ("File is not 3D matrix")
-  if (dim(template)[2]!=3) stop ("File is not 3D matrix")
+  if (is.null(dim(template))) stop ("File is not a matrix of 3D coordinates.")
+  if (dim(template)[2]!=3) stop ("File is not a matrix of 3D coordinates.")
   spec.name<-deparse(substitute(template))
   clear3d();plot3d(template[-(1:fixed[1]),],size=7,col="blue",aspect=FALSE)
   points3d(template[(1:fixed),],size=10,color="red",add=TRUE)  
@@ -3006,17 +3015,18 @@ editTemplate<-function(template, fixed, n){
 #'  When selection of n landmarks is completed, an ".nts" file is created in working directory using the specimen name, adding ".nts" as a suffix.
 #' }
 #' }
-#' @param file Name of jpeg file to be digitized. File names can be 
+#' @param spec Name of jpeg file to be digitized. File names can be 
 #' written in manually, including paths, or obtained using directory/file manipulation functions 
 #' e.g., \code{\link{list.files}}
 #' @seealso \code{\link{list.files}}, 
 #' @param nlandmarks Number of landmarks to be digitized.
 #' @param scale Length of scale placed in image.
 #' @return Function writes to the working directory an NTS file with the name of the specimen and .nts suffix containing the landmark coordinates.   
-#' Function also returns to console an n x 2 matrix containing the x,y coordinates of the digitized landmarks.  
+#' Function also returns to console an n x 2 matrix containing the x,y coordinates of the digitized landmarks. 
+#' @export 
 #' @keywords digitize2d
 #' @author Erik Otarola-Castillo & Emma Sherratt
-digitize2d<-function(file, nlandmarks, scale){
+digitize2d<-function(spec, nlandmarks, scale){
   spec.name<-unlist(strsplit(basename(file), "\\."))[1]
   specimen<-readJPEG(file, native = T)  
   plot(seq(0,dim(specimen)[2],length.out=10),seq(0,dim(specimen)[1],length.out=10), type='n',xlab="x",ylab="y",asp=1,tck=0,xaxt="n",yaxt="n")
@@ -3044,18 +3054,18 @@ picscale<- function(scale){
   sqrt(sum(diff(digscale$x)^2+diff(digscale$y)^2))*scale
 }
 
-#' Deprecated functions in geomorph
+#' Defunct functions in geomorph
 #'
-#' The following functions have been deprecated in geomorph
+#' The following functions are no longer supported in geomorph
 #'
-#' This function has been deprecated. Below shows the original function and the replacement function.
+#' This function is now defunct. Below shows the original function and the replacement function.
 #'
 #' curves2d:  use define.sliders.2d
 #'
 #' digit.curves: use define.sliders.3d
 #' @export
 curves2d<-function(){
-  .Deprecated(define.sliders.2d)
+  .Defunct(define.sliders.2d)
 }
 
 

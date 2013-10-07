@@ -2,10 +2,10 @@
 \alias{digitize2d}
 \title{Digitize 2D landmarks.}
 \usage{
-digitize2d(file, nlandmarks, scale)
+digitize2d(spec, nlandmarks, scale)
 }
 \arguments{
-  \item{file}{Name of jpeg file to be digitized. File names
+  \item{spec}{Name of jpeg file to be digitized. File names
   can be written in manually, including paths, or obtained
   using directory/file manipulation functions e.g.,
   \code{\link{list.files}}}
