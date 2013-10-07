@@ -3,16 +3,15 @@
 \alias{motionpaths}
 \title{Simulated motion paths}
 \description{
-  Simulated motion paths
+Simulated motion paths
 }
 \author{
-  Dean Adams
+Dean Adams
 }
 \references{
-  Adams, D. C., and M. L. Collyer. 2009. A general
-  framework for the analysis of phenotypic trajectories in
-  evolutionary studies. Evolution 63:1143-1154.
+Adams, D. C., and M. L. Collyer. 2009. A general framework
+for the analysis of phenotypic trajectories in evolutionary
+studies. Evolution 63:1143-1154.
 }
 \keyword{data}
-\keyword{datasets}
 

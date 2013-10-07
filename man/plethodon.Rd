@@ -3,21 +3,19 @@
 \alias{plethodon}
 \title{Landmark data from Plethodon salamander heads}
 \description{
-  Landmark data from Plethodon salamander heads
+Landmark data from Plethodon salamander heads
 }
 \author{
-  Dean Adams
+Dean Adams
 }
 \references{
-  Adams, D. C. 2004. Character displacement via aggressive
-  interference in Appalachian salamanders. Ecology.
-  85:2664-2670.
+Adams, D. C. 2004. Character displacement via aggressive
+interference in Appalachian salamanders. Ecology.
+85:2664-2670.
 
-  Adams, D.C. 2010. Parallel evolution of character
-  displacement driven by competitive selection in
-  terrestrial salamanders. BMC Evolutionary Biology.
-  10(72)1-10.
+Adams, D.C. 2010. Parallel evolution of character
+displacement driven by competitive selection in terrestrial
+salamanders. BMC Evolutionary Biology. 10(72)1-10.
 }
 \keyword{data}
-\keyword{datasets}
 

@@ -2,7 +2,7 @@
 \alias{compare.modular.partitions}
 \title{Compare modular signal to alternative landmark subsets}
 \usage{
-  compare.modular.partitions(A, landgroups, iter = 999)
+compare.modular.partitions(A, landgroups, iter = 999)
 }
 \arguments{
   \item{A}{An array (p x k x n) containing GPA-aligned
@@ -15,43 +15,41 @@
   testing}
 }
 \value{
-  Function returns a list with the following components:
-  \item{RV}{The estimate of morphological integration}
-  \item{pvalue}{The significance level of the observed
-  signal} \item{RV.min}{The minimal RV coefficient found
-  via landmark permutation} \item{RV.min.partitions}{A list
-  of landmarks assigned to partitions that yields the
-  minimal RV coefficient}
+Function returns a list with the following components:
+\item{RV}{The estimate of morphological integration}
+\item{pvalue}{The significance level of the observed
+signal} \item{RV.min}{The minimal RV coefficient found via
+landmark permutation} \item{RV.min.partitions}{A list of
+landmarks assigned to partitions that yields the minimal RV
+coefficient}
 }
 \description{
-  Function quantifies the degree of morphological
-  integration between two or more modules of
-  Procrustes-aligned landmark coordinates and compares this
-  to patterns found by randomly assigning landmarks into
-  subsets
+Function quantifies the degree of morphological integration
+between two or more modules of Procrustes-aligned landmark
+coordinates and compares this to patterns found by randomly
+assigning landmarks into subsets
 }
 \details{
-  The function quantifies the degree of morphological
-  integration between two or more modules of shape data as
-  defined by landmark coordinates, and compares this to
-  modular signals found by randomly assigning landmarks to
-  modules. It is assumed that the landmarks have previously
-  been aligned using Generalized Procrustes Analysis (GPA)
-  [e.g., with \code{\link{gpagen}}]. The degree of
-  morphological integration is quantified using the RV
-  coefficient (Klingenberg 2009). If more than two modules
-  are defined, the average RV coefficient is utilized (see
-  Klingenberg 2009). The RV coefficient for the observed
-  modular hypothesis is then compared to a distribution of
-  values obtained by randomly assigning landmarks into
-  subsets, with the restriction that the number of
-  landmarks in each subset is identical to that observed in
-  each of the original partitions. A significant modular
-  signal is found when the observed RV coefficient is small
-  relative to this distribution (see Klingenberg 2009). A
-  histogram of coefficients obtained via resampling is
-  presented, with the observed value designated by an arrow
-  in the plot.
+The function quantifies the degree of morphological
+integration between two or more modules of shape data as
+defined by landmark coordinates, and compares this to
+modular signals found by randomly assigning landmarks to
+modules. It is assumed that the landmarks have previously
+been aligned using Generalized Procrustes Analysis (GPA)
+[e.g., with \code{\link{gpagen}}]. The degree of
+morphological integration is quantified using the RV
+coefficient (Klingenberg 2009). If more than two modules
+are defined, the average RV coefficient is utilized (see
+Klingenberg 2009). The RV coefficient for the observed
+modular hypothesis is then compared to a distribution of
+values obtained by randomly assigning landmarks into
+subsets, with the restriction that the number of landmarks
+in each subset is identical to that observed in each of the
+original partitions. A significant modular signal is found
+when the observed RV coefficient is small relative to this
+distribution (see Klingenberg 2009). A histogram of
+coefficients obtained via resampling is presented, with the
+observed value designated by an arrow in the plot.
 }
 \examples{
 data(plethodon)
@@ -63,13 +61,12 @@ compare.modular.partitions(Y.gpa$coords,land.gps,iter=99)
 #Result implies that the skull and mandible are not independent modules
 }
 \author{
-  Dean Adams
+Dean Adams
 }
 \references{
-  Klingenberg, C. P. 2009. Morphometric integration and
-  modularity in configurations of landmarks: tools for
-  evaluating a priori hypotheses. Evol. Develop.
-  11:405-421.
+Klingenberg, C. P. 2009. Morphometric integration and
+modularity in configurations of landmarks: tools for
+evaluating a priori hypotheses. Evol. Develop. 11:405-421.
 }
 \keyword{compare.modular.partitions}
 

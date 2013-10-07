@@ -1,3 +1,25 @@
+		CHANGES IN GEOMORPH VERSION 1.1-5
+
+NEW FEATURES
+
+    o NEW FUNCTION!!!
+
+    o define.sliders.2d() and define.sliders.3d() replace curves2d() and digit.curves() 
+
+    o Option allowing specimens to be colored by group added to plotTangentSpace() and PlotAllometry() 
+
+BUG FIXES 
+
+    o Corrected parameter estimates when groups specified for Regression Score option in plotAllometry()
+
+
+OTHER CHANGES
+
+    o Simplified options in morphol.integr()
+
+    o curves2d() and digit.curves() deprecated 
+
+
 		CHANGES IN GEOMORPH VERSION 1.1-4
 
 NEW FEATURES

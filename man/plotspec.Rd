@@ -2,7 +2,7 @@
 \alias{plotspec}
 \title{Plot 3D specimen, fixed landmarks and surface semilandmarks.}
 \usage{
-  plotspec(spec, digitspec, fixed, ptsize = 1)
+plotspec(spec, digitspec, fixed, ptsize = 1)
 }
 \arguments{
   \item{spec}{Name of surface file, as either an object of
@@ -21,13 +21,14 @@
   meshes}
 }
 \description{
-  A function to plot three dimensional specimen along with
-  its fixed landmarks and surface semilandmarks. If
-  specimen is a 3D surface (ply file), mesh is plotted.
+A function to plot three dimensional (3D) specimen along
+with its landmarks.
 }
 \details{
-  Function to plot 3D specimens along with their digitized
-  "fixed" and surface sliding semilandmarks.
+Function to plot 3D specimens along with their digitized
+"fixed" landmarks and semilandmarks "surface sliders" and
+"curve sliders". If specimen is a 3D surface (ply file),
+mesh is plotted.
 }
 \examples{
 data(scallopPLY)
@@ -36,7 +37,7 @@ digitdat <- scallopPLY$coords
 plotspec(spec=ply,digitspec=digitdat,fixed=16)
 }
 \author{
-  Erik Otarola-Castillo & Emma Sherratt
+Erik Otarola-Castillo & Emma Sherratt
 }
 \keyword{plotspec}
 

@@ -2,8 +2,8 @@
 \alias{trajectory.analysis}
 \title{Quantify and compare shape change trajectories}
 \usage{
-  trajectory.analysis(f1, data = NULL,
-    estimate.traj = TRUE, traj.pts = NULL, iter = 99)
+trajectory.analysis(f1, data = NULL, estimate.traj = TRUE,
+  traj.pts = NULL, iter = 99)
 }
 \arguments{
   \item{f1}{A formula for the linear model (e.g., y~x1+x2)}
@@ -22,90 +22,87 @@
   of points in each trajectory (if estimate.traj=FALSE)}
 }
 \value{
-  If "estimate.traj=TRUE", the function returns a list with
-  the following components: \item{procDist.lm}{Procrustes
-  ANOVA table} \item{traj.size}{A matrix of pairwise
-  differences in trajectory size} \item{p.size}{A matrix of
-  pairwise significance levels for trajectory size}
-  \item{traj.orient}{A matrix of pairwise differences in
-  trajectory orientation} \item{p.orient}{A matrix of
-  pairwise significance levels for trajectory orientation}
-  \item{traj.shape}{A matrix of pairwise differences in
-  trajectory shape (if applicable)} \item{p.shape}{A matrix
-  of pairwise significance levels for trajectory shape}
+If "estimate.traj=TRUE", the function returns a list with
+the following components: \item{procDist.lm}{Procrustes
+ANOVA table} \item{traj.size}{A matrix of pairwise
+differences in trajectory size} \item{p.size}{A matrix of
+pairwise significance levels for trajectory size}
+\item{traj.orient}{A matrix of pairwise differences in
+trajectory orientation} \item{p.orient}{A matrix of
+pairwise significance levels for trajectory orientation}
+\item{traj.shape}{A matrix of pairwise differences in
+trajectory shape (if applicable)} \item{p.shape}{A matrix
+of pairwise significance levels for trajectory shape}
 
-  If "estimate.traj=FALSE", the function returns a list
-  with the following components:
-  \item{MANOVA.location.covariation}{Procrustes ANOVA
-  table} \item{ANOVA.Size}{Results of permutational-ANOVA
-  assessing variation in trajectory size}
-  \item{ANOVA.Dir}{Results of permutational-ANOVA assessing
-  variation in trajectory orientation}
-  \item{ANOVA.Shape}{Results of permutational-ANOVA
-  assessing variation in trajectory shape (if applicable)}
+If "estimate.traj=FALSE", the function returns a list with
+the following components:
+\item{MANOVA.location.covariation}{Procrustes ANOVA table}
+\item{ANOVA.Size}{Results of permutational-ANOVA assessing
+variation in trajectory size} \item{ANOVA.Dir}{Results of
+permutational-ANOVA assessing variation in trajectory
+orientation} \item{ANOVA.Shape}{Results of
+permutational-ANOVA assessing variation in trajectory shape
+(if applicable)}
 }
 \description{
-  Function estimates attributes of shape change
-  trajectories or motion trajectories for a set of
-  Procrustes-aligned specimens and compares them
-  statistically
+Function estimates attributes of shape change trajectories
+or motion trajectories for a set of Procrustes-aligned
+specimens and compares them statistically
 }
 \details{
-  The function quantifies phenotypic shape change
-  trajectories from a set of specimens, and assesses
-  variation in these parameters via permutation. A shape
-  change trajectory is defined by a sequence of shapes in
-  tangent space. These trajectories can be quantified
-  various attributes (their size, orientation, and shape),
-  and comparisons of these attribute enables the
-  statistical comparison of shape change trajectories (see
-  Collyer and Adams 2007; Adams and Collyer 2007; Adams and
-  Collyer 2009).
+The function quantifies phenotypic shape change
+trajectories from a set of specimens, and assesses
+variation in these parameters via permutation. A shape
+change trajectory is defined by a sequence of shapes in
+tangent space. These trajectories can be quantified various
+attributes (their size, orientation, and shape), and
+comparisons of these attribute enables the statistical
+comparison of shape change trajectories (see Collyer and
+Adams 2007; Adams and Collyer 2007; Adams and Collyer
+2009).
 
-  Data input is specified by a formula (e.g., Y~X), where
-  'Y' specifies the response variables (trajectory data),
-  and 'X' contains one or more independent variables
-  (discrete or continuous). The response matrix 'Y' must be
-  in the form of a two-dimensional data matrix of dimension
-  (n x [p*k]), rather than a 3D array. The function
-  \code{\link{two.d.array}} can be used to obtain a
-  two-dimensional data matrix from a 3D array of landmark
-  coordinates. It is assumed that the order of the
-  specimens 'Y' matches the order of specimens in 'X'.
+Data input is specified by a formula (e.g., Y~X), where 'Y'
+specifies the response variables (trajectory data), and 'X'
+contains one or more independent variables (discrete or
+continuous). The response matrix 'Y' must be in the form of
+a two-dimensional data matrix of dimension (n x [p x k]),
+rather than a 3D array. The function
+\code{\link{two.d.array}} can be used to obtain a
+two-dimensional data matrix from a 3D array of landmark
+coordinates. It is assumed that the order of the specimens
+'Y' matches the order of specimens in 'X'.
 
-  There are two primary modes of analysis through this
-  function. If "estimate.traj=TRUE" the function estimates
-  shape trajectories using the least-squares means for
-  groups, based on a two-factor model (e.g., Y~A+B+A:B).
-  Under this implementation, the last factor in 'X' must be
-  the interaction term, and the preceding two factors must
-  be the effects of interest. Covariates may be included in
-  'X', and must precede the factors of interest (e.g.,
-  Y~cov+A*B). In this implementation, 'Y' contains a matrix
-  of landmark coordinates. It is assumed that the landmarks
-  have previously been aligned using Generalized Procrustes
-  Analysis (GPA) [e.g., with \code{\link{gpagen}}].
+There are two primary modes of analysis through this
+function. If "estimate.traj=TRUE" the function estimates
+shape trajectories using the least-squares means for
+groups, based on a two-factor model (e.g., Y~A+B+A:B).
+Under this implementation, the last factor in 'X' must be
+the interaction term, and the preceding two factors must be
+the effects of interest. Covariates may be included in 'X',
+and must precede the factors of interest (e.g., Y~cov+A*B).
+In this implementation, 'Y' contains a matrix of landmark
+coordinates. It is assumed that the landmarks have
+previously been aligned using Generalized Procrustes
+Analysis (GPA) [e.g., with \code{\link{gpagen}}].
 
-  If "estimate.traj=FALSE" the trajectories are assembled
-  directly from the set of shapes provided in 'Y'.  With
-  this implementation, the user must specify the number of
-  shapes that comprise each trajectory. This approach is
-  useful when the set of shapes forming each trajectory
-  have been quantified directly (e.g., when motion paths
-  are compared: see Adams and Cerney 2007). With this
-  implementation, variation in trajectory size, shape, and
-  orientation are evaluated for each term in 'X'.(see Adams
-  and Cerney 2007).
+If "estimate.traj=FALSE" the trajectories are assembled
+directly from the set of shapes provided in 'Y'.  With this
+implementation, the user must specify the number of shapes
+that comprise each trajectory. This approach is useful when
+the set of shapes forming each trajectory have been
+quantified directly (e.g., when motion paths are compared:
+see Adams and Cerney 2007). With this implementation,
+variation in trajectory size, shape, and orientation are
+evaluated for each term in 'X'.(see Adams and Cerney 2007).
 
-  Once the function has performed the analysis, it
-  generates a plot of the trajectories as visualized in the
-  space of principal components (PC1 vs. PC2). The first
-  point in each trajectory is displayed as white, the last
-  point is black, and any middle points on the trajectories
-  are in gray.  The colors of trajectories follow the order
-  in which they are found in the dataset, using R's
-  standard color palette: black, red, green3, blue, cyan,
-  magenta, yellow, and gray.
+Once the function has performed the analysis, it generates
+a plot of the trajectories as visualized in the space of
+principal components (PC1 vs. PC2). The first point in each
+trajectory is displayed as white, the last point is black,
+and any middle points on the trajectories are in gray.  The
+colors of trajectories follow the order in which they are
+found in the dataset, using R's standard color palette:
+black, red, green3, blue, cyan, magenta, yellow, and gray.
 }
 \examples{
 #1: Estimate trajectories from LS means in 2-factor model
@@ -123,32 +120,32 @@ trajectory.analysis(motionpaths$trajectories~motionpaths$groups,
 estimate.traj=FALSE, traj.pts=5,iter=15)
 }
 \author{
-  Dean Adams
+Dean Adams
 }
 \references{
-  Collyer, M.L., and D.C. Adams. 2013. Phenotypic
-  trajectory analysis: Comparison of shape change patterns
-  in evolution and ecology. Hystrix. 24:75-83.
+Collyer, M.L., and D.C. Adams. 2013. Phenotypic trajectory
+analysis: Comparison of shape change patterns in evolution
+and ecology. Hystrix. 24:75-83.
 
-  Adams, D. C. 2010. Parallel evolution of character
-  displacement driven by competitive selection in
-  terrestrial salamanders. BMC Evol. Biol. 10:1-10.
+Adams, D. C. 2010. Parallel evolution of character
+displacement driven by competitive selection in terrestrial
+salamanders. BMC Evol. Biol. 10:1-10.
 
-  Adams, D. C., and M. M. Cerney. 2007. Quantifying
-  biomechanical motion using Procrustes motion analysis. J.
-  Biomech. 40:437-444.
+Adams, D. C., and M. M. Cerney. 2007. Quantifying
+biomechanical motion using Procrustes motion analysis. J.
+Biomech. 40:437-444.
 
-  Adams, D. C., and M. L. Collyer. 2007. The analysis of
-  character divergence along environmental gradients and
-  other covariates. Evolution 61:510-515.
+Adams, D. C., and M. L. Collyer. 2007. The analysis of
+character divergence along environmental gradients and
+other covariates. Evolution 61:510-515.
 
-  Adams, D. C., and M. L. Collyer. 2009. A general
-  framework for the analysis of phenotypic trajectories in
-  evolutionary studies. Evolution 63:1143-1154.
+Adams, D. C., and M. L. Collyer. 2009. A general framework
+for the analysis of phenotypic trajectories in evolutionary
+studies. Evolution 63:1143-1154.
 
-  Collyer, M. L., and D. C. Adams. 2007. Analysis of
-  two-state multivariate phenotypic change in ecological
-  studies. Ecology 88:683-692.
+Collyer, M. L., and D. C. Adams. 2007. Analysis of
+two-state multivariate phenotypic change in ecological
+studies. Ecology 88:683-692.
 }
 \keyword{trajectory.analysis}
 

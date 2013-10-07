@@ -9,7 +9,7 @@
 #'  of shape variation and covariation, and provide graphical depictions of shapes and patterns of
 #'  shape variation.
 #' 
-##' @import rgl ape vegan calibrate jpeg
+#' @import rgl ape vegan calibrate jpeg geiger
 NULL
 
 #' Landmark data from Plethodon salamander heads
@@ -157,7 +157,7 @@ arrayspecs<-function(A,p,k,byLand=TRUE){
 #' @keywords two.d.array
 #' @export
 #' @author Dean Adams
-#' @return Function returns a two-dimensional matrix of dimension (n x [p*k]), where rows 
+#' @return Function returns a two-dimensional matrix of dimension (n x [p x k]), where rows 
 #'   represent specimens and columns represent variables. 
 #' @examples
 #' data(plethodon) 
@@ -175,21 +175,28 @@ two.d.array<-function(A){
 
 #' Read mesh data (vertices and faces) from ply files
 #'
-#' Read ply files to obtain landmark coordinates
+#' A function to read ply files to obtain landmark coordinates
 #'
-#' This function reads three-dimensional surface data in the form of a single ply file
-#' (Polygon File Format; ASCII format only, from 3D scanners such as NextEngine and David scanners). 
-#' Vertices of the surface may then be used to digitize three-dimensional points, 
-#' and semilandmarks on curves and surfaces. The function opens the ply file and plots the mesh,
-#' with faces rendered if file contains faces, and colored if the file contains vertex color.
+#' Function reads three-dimensional surface data in the form of a single ply file
+#'  (Polygon File Format; ASCII format only, from 3D scanners such as NextEngine and David scanners). 
+#'  Vertices of the surface may then be used to digitize three-dimensional points, 
+#'  and semilandmarks on curves and surfaces. The function opens the ply file and plots the mesh,
+#'  with faces rendered if file contains faces, and colored if the file contains vertex color.
 #'
 #' @param file An ASCII ply file
-#' @param ShowSpecimen logical: A logical value indicating whether or not the ply file should be displayed
+#' @param ShowSpecimen logical A logical value indicating whether or not the ply file should be displayed
 #' @export
 #' @keywords read.ply
 #' @author Dean Adams & Emma Sherratt
 #' @return Function returns the following components:
 #'   \item{mesh3d}{list of class mesh3d- see rgl for details}
+#' @examples 
+#' # If the file has no mesh color, or color is undesirable, user can assign this as follows:
+#' # Using the example scallop PLY
+#' data(scallopPLY) 
+#' myply <- scallopPLY$ply
+#' myply$material <- "gray" # using color word
+#' myply$material <- "#FCE6C9" # using RGB code
 read.ply <- function (file, ShowSpecimen = TRUE) 
 {
   plyfile <- scan(file = file, what = "char", sep = "\n", strip.white = TRUE, 
@@ -237,7 +244,7 @@ read.ply <- function (file, ShowSpecimen = TRUE)
     clear3d()
     if (length(poly) == 0) { dot3d(mesh) }
     if (length(material) != 0){ shade3d(mesh) }
-    shade3d(mesh, color="grey") }
+    shade3d(mesh, color="gray") }
   return(mesh)
 }
 
@@ -318,7 +325,7 @@ readland.tps<-function (file, specID=c("None","ID","imageID")){
 #'
 #' Write *.tps file from obtain landmark coordinates in a 3-dimensional array 
 #'
-#'  This function writes a *.tps file from a 3-dimensional array (p x k x n) 
+#' This function writes a *.tps file from a 3-dimensional array (p x k x n) 
 #'  of landmark coordinates. 
 #'
 #' @param A An array (p x k x n) containing landmark coordinates for a set of specimens
@@ -331,7 +338,8 @@ writeland.tps<-function(A, file){
   n<-dim(A)[3]
   k<-dim(A)[2]
   p<-dim(A)[1]
-  lmline<-ifelse(k==2,paste("LM=",p,sep=""), paste("LM3=",p,sep=""))    
+  lmline<-ifelse(k==2,paste("LM=",p,sep=""), paste("LM3=",p,sep=""))  
+  file.create(file, overwrite = TRUE)
   for(i in 1:n){
     write(lmline,file,append = TRUE)
     write.table(A[,,i],file,col.names = FALSE, row.names = FALSE,append=TRUE)
@@ -347,7 +355,7 @@ writeland.tps<-function(A, file){
 #'
 #' Read *.nts file to obtain landmark coordinates for a set of specimens
 #'
-#' This function reads a *.nts file containing a matrix of two- or three-dimensional landmark coordinates. 
+#' Function reads a *.nts file containing a matrix of two- or three-dimensional landmark coordinates. 
 #'   NTS files are text files in one of the standard formats for geometric morphometrics (see Rohlf 2012). 
 #'   The parameter line contains 5 or 6 elements, and must begin with a "1" to designate a rectangular 
 #'   matrix. The second and third values designate how many specimens (n) and how many total variables 
@@ -357,19 +365,26 @@ writeland.tps<-function(A, file){
 #'   in the output array. The final value of the parameter line denotes the dimensionality of the landmarks
 #'   (2,3) and begins with "DIM=". If specimen and variable labels are included, these are designated placing 
 #'   an "L" immediately following the specimen or variable values in the parameter file. The labels then 
-#'   precede the data matrix. 
+#'   precede the data matrix.
+#'
+#' Function is for *.nts file containing landmark coordinates for multiple specimens. Function can
+#' read *.dta files in the nts format written by Landmark Editor \url{http://graphics.idav.ucdavis.edu/research/projects/EvoMorph}.
 #'
 #' @param file A *.nts file containing two- or three-dimensional landmark data
 #' @keywords readland.nts
 #' @export
-#' @author Dean Adams
+#' @author Dean Adams & Emma Sherratt
 #' @return Function returns a (p x k x n) array, where p is the number of landmark points, k is the number 
 #'   of landmark dimensions (2 or 3), and n is the number of specimens. The third dimension of this array 
 #'   contains names for each specimen, which are obtained from the image names in the *.nts file. 
 #' @references  Rohlf, F. J. 2012 NTSYSpc: Numerical taxonomy and multivariate analysis system. Version 
 #'   2.2. Exeter Software, New York.
-readland.nts<-function(file){			
+readland.nts<-function(file){  		
   ntsfile<-scan(file=file,what="char",quote="",sep="\n",strip.white=TRUE,comment.char="\"",quiet=TRUE)
+  comment <- grep("\'", ntsfile)
+  if (length(comment) != 0){
+    ntsfile<-scan(file=file,what="char",quote="",sep="\n",strip.white=TRUE,comment.char="\'",quiet=TRUE)
+  }
   header<-unlist(strsplit(ntsfile[1]," "))
   if(header[1]!=1){
     stop("NTS file not a rectangular matrix. First value in parameter line must be '1'.") }
@@ -399,7 +414,6 @@ readland.nts<-function(file){
   return(coords=coords)
 }
 
-
 #' Read landmark data from multiple nts files
 #'
 #' Read a list of names for several *.nts files to obtain landmark coordinates for a set of specimens
@@ -411,7 +425,7 @@ readland.nts<-function(file){
 #'   and concatenated into a single matrix for all specimens. 
 #'
 #' @param filelist A list of names for the *.nts files to be read by the function. The names in the list
-#'   require quotes (").
+#'   require quotes (") and .nts/.NTS suffix.
 #' @keywords readmulti.nts
 #' @export
 #' @author Dean Adams
@@ -425,6 +439,10 @@ readmulti.nts<-function(filelist){
   landdata<-nind<-NULL
   for (i in 1:n){
     ntsfile<-scan(file=filelist[i],what="char",quote="",sep="\n",strip.white=TRUE,comment.char="\"",quiet=TRUE)
+    comment <- grep("\'", ntsfile)
+    if (comment != 0){
+      ntsfile<-scan(file=file,what="char",quote="",sep="\n",strip.white=TRUE,comment.char="\'",quiet=TRUE)
+    }
     header<-unlist(strsplit(ntsfile[1]," "))
     if(header[1]!=1){
       stop("NTS file not a rectangular matrix. First value in parameter line must be '1'.") }
@@ -463,19 +481,28 @@ readmulti.nts<-function(filelist){
 #'
 #' Read Morphologika files to obtain 3D landmark coordinates and specimen information
 #'
-#' This function reads the commonly used Morphologika file format for 2D and 3D landmarks. Landmark coordinates and specimen information may then be used to conduct GPA using \code{\link{gpagen}}, and select three-dimensional semilandmarks on curves (if present) using \code{\link{digit.curves}}. 
-#' If the Morphologika headers "[labels]" and "[labelvalues]" are present, then a data matrix containing all individual specimen information is returned. If "[labels]" and "[labelvalues]" are not present in the file, then only landmark coordinates are returned.
+#' This function reads the commonly used Morphologika file format for 2D and 3D landmarks.
+#'  If semilandmarks are present in the file, after import these should be defined 
+#'  using \code{\link{define.sliders.2d}} or \code{\link{define.sliders.3d}}.
+#'  Landmark coordinates and specimen information may then be used to conduct GPA using \code{\link{gpagen}}, 
 #' 
-#' @param file A morphologika text file. File name can be written in manually, including path, or obtained using directory/file manipulation functions e.g., \code{\link{list.files}}
+#' If the Morphologika headers "[labels]" and "[labelvalues]" are present, then a data matrix containing all 
+#'  individual specimen information is returned. If "[labels]" and "[labelvalues]" are not present in the file, 
+#'  then only landmark coordinates are returned.
+#' 
+#' @param file A Morphologika text file. File name can be written in manually, including path, or obtained using 
+#' directory/file manipulation functions e.g., \code{\link{list.files}}
 #' @seealso \code{\link{list.files}} 
 #' @param plot Logical should (unaligned) specimens be plotted? Defaults to FALSE.
 #' @export
 #' @keywords read.morphologika
 #' @author Erik Otarola-Castillo
 #' @return Function returns a list with the following components:
-#'   \item{coords}{If Morphologika headers "[labels]" and "[labelvalues]" are not present in the file, function only returns a (p x k x n) array, where p is the number of landmark points, k is the number 
+#'   \item{coords}{If Morphologika headers "[labels]" and "[labelvalues]" are not present in the file, function 
+#'   only returns a (p x k x n) array, where p is the number of landmark points, k is the number 
 #'   of landmark dimensions, and n is the number of specimens}
-#'   \item{dataframe}{If Morphologika headers "[labels]" and "[labelvalues]" are present read.morphologika returns the above p x k x n array and a dataframe containing specimen specific information stored in file}
+#'   \item{dataframe}{If Morphologika headers "[labels]" and "[labelvalues]" are present read.morphologika returns 
+#'   the above p x k x n array and a dataframe containing specimen specific information stored in file}
 read.morphologika<-function(file,plot=FALSE){
   mfile<-scan(file,what="character",sep = "\n",strip.white = TRUE,quiet=TRUE)
   tab<-length(grep("\t",mfile))
@@ -555,15 +582,15 @@ read.morphologika<-function(file,plot=FALSE){
 #' A function for estimating the locations of missing landmarks 
 #' 
 #' The function estimates the locations of missing landmarks on a target specimen based on the locations of 
-#' the corresponding landmarks on a complete, reference specimen. Missing landmarks in a target specimen are 
-#' designated by '-999' in place of the x,y,z coordinates.  First, a complete reference specimen is 
-#' aligned to a target specimen (missing one or more landmarks), using the set of landmarks common to both specimens. 
-#' Next, the thin-plate spline interpolating function is used to estimate the locations of the missing landmarks in the target specimen. 
+#'  the corresponding landmarks on a complete, reference specimen. Missing landmarks in a target specimen are 
+#'  designated by '-999' in place of the x,y,z coordinates.  First, a complete reference specimen is 
+#'  aligned to a target specimen (missing one or more landmarks), using the set of landmarks common to both specimens. 
+#'  Next, the thin-plate spline interpolating function is used to estimate the locations of the missing landmarks in the target specimen. 
 #' 
 #' @param ref Landmark coordinates of a reference specimen
 #' @param target Landmark coordinates of a target specimen (contains -999 for missing landmarks)
 #' @author Dean Adams
-#' @return Function returns a n * p matrix of coordinates for the target specimen that includes the original landmarks
+#' @return Function returns a n x p matrix of coordinates for the target specimen that includes the original landmarks
 #' plus the estimated coordinates for the missing landmarks. 
 #' @export
 #' @references  Bookstein, F. L., K. Schafer, H. Prossinger, H. Seidler, M. Fieder, G. Stringer, G. W. Weber, 
@@ -589,9 +616,9 @@ estimate.missing<-function(ref,target){
 #' A function for rotating a subset of landmarks so that the articulation angle between subsets is constant
 #' 
 #' This function standardizes the angle between two subsets of landmarks for a set of specimens. The approach assumes a simple
-#' hinge-point articulation between the two subsets, and rotates all specimens such that the angle between landmark subsets 
-#' is equal across specimens (see Adams 1999).  As a default, the mean angle is used, though the user may specify an additional amount by which 
-#' this may be augmented. 
+#'  hinge-point articulation between the two subsets, and rotates all specimens such that the angle between landmark subsets 
+#'  is equal across specimens (see Adams 1999).  As a default, the mean angle is used, though the user may specify an additional amount by which 
+#'  this may be augmented. 
 #' 
 #' Presently, the function is only implemented for two-dimensional landmark data. 
 #' @param A An array (p x k x n) containing landmark coordinates for a set of specimens
@@ -783,10 +810,10 @@ gpagen<-function(A, Proj=TRUE,ProcD=TRUE,ShowPlot=TRUE,curves = NULL, surfaces =
 #' The function quantifies the degree of morphological integration between two modules of shape data as 
 #'   defined by landmark coordinates. It is assumed that the landmarks have previously been aligned using 
 #'   Generalized Procrustes Analysis (GPA) [e.g., with \code{\link{gpagen}}]. The function may be used to assess
-#'   the degree of morphological integration between two separate structures (WithinConfig=FALSE) or between
-#'   two modules defined within the same landmark configuration (WithinConfig=TRUE). 
+#'   the degree of morphological integration between two separate structures or between two modules defined within 
+#'   the same landmark configuration. 
 #'   
-#'   For both options, two analytical approaches are currently implemented to assess the degree of morphological 
+#'   Two analytical approaches are currently implemented to assess the degree of morphological 
 #'   integration. If "method=PLS" (the default) the function estimates the degree of morphological 
 #'   integration using two-block partial least squares, or PLS. When used with landmark data, this analysis 
 #'   is referred to as singular warps analysis (Bookstein et al. 2003). When "method=PLS", the scores along 
@@ -796,13 +823,11 @@ gpagen<-function(A, Proj=TRUE,ProcD=TRUE,ShowPlot=TRUE,curves = NULL, surfaces =
 #'   to those in the other. A histogram of coefficients obtained via resampling is presented, with the 
 #'   observed value designated by an arrow in the plot.
 #'   
-#'    If  the degree of morphological integration between more than two sets of landmarks is of interest, one may use the 
+#'    If evaluating an a priori hypothesis of modularity within a structure is of interest, one may use the 
 #'    average RV coefficient as implemented in the function \code{\link{compare.modular.partitions}}. 
 #'
-#' @param A An array (p x k x n) containing landmark coordinates for the first module
-#' @param WithinConfig A logical value indicating whether morphological integration is to be assessed within or across structures 
-#' @param A2 An optional array (p x k x n) containing landmark coordinates for the second module (WithinConfig=FALSE)
-#' @param landgroups A list of which landmarks belong in which partition (WithinConfig=TRUE)
+#' @param A An array (p1 x k x n) containing landmark coordinates for the first module
+#' @param A2 An array (p2 x k x n) containing landmark coordinates for the second module 
 #' @param method Method to estimate morphological integration; see below for details
 #' @param iter Number of iterations for significance testing
 #' @export
@@ -821,144 +846,80 @@ gpagen<-function(A, Proj=TRUE,ProcD=TRUE,ShowPlot=TRUE,curves = NULL, surfaces =
 #' @examples
 #' data(plethodon) 
 #' Y.gpa<-gpagen(plethodon$land)    #GPA-alignment    
-#' land.gps<-c("A","A","A","A","A","B","B","B","B","B","B","B")
 #'
-#' #Morphological integration using PLS 
-#' morphol.integr(Y.gpa$coords,landgroups=land.gps,WithinConfig=TRUE,method="PLS",iter=99)
+#' #Morphological integration using PLS between two modules within a structure
+#' morphol.integr(Y.gpa$coords[1:5,,],Y.gpa$coords[6:12,,],method="PLS",iter=99)
 #'
-#' #Morphological integration using RV
-#' morphol.integr(Y.gpa$coords,landgroups=land.gps,WithinConfig=TRUE,method="RV",iter=99)
-morphol.integr<-function(A,WithinConfig=FALSE,A2=NULL,landgroups=NULL,method=c("PLS","RV"),iter=999){
+#' #Morphological integration using RV between two modules within a structure
+#' morphol.integr(Y.gpa$coords[1:5,,],Y.gpa$coords[6:12,,],method="RV",iter=99)
+morphol.integr<-function(A,A2,method=c("PLS","RV"),iter=999){
   method <- match.arg(method)
   if (length(dim(A))!=3){
     stop("Data matrix 1 not a 3D array (see 'arrayspecs').")  }
   if(length(grep("-999",A))!=0){
     stop("Data matrix 1 contains missing values. Estimate these first(see 'estimate.missing').")  }
-  if(WithinConfig==FALSE){
-    if(is.null(A2)){stop("Must specify second data matrix.")}
-    if (length(dim(A2))!=3){
-      stop("Data matrix 2 not a 3D array (see 'arrayspecs').")  }
-    if(length(grep("-999",A2))!=0){
-      stop("Data matrix 2 contains missing values. Estimate these first(see 'estimate.missing').")  }
-    if(is.null(dimnames(A)[[3]])){
-      print("No specimen names in data matrix 1. Assuming specimens in same order.")  }
-    if(is.null(dimnames(A2)[[3]])){
-      print("No specimen names in data matrix 2. Assuming specimens in same order.")  }
-    x<-two.d.array(A)
-    y<-two.d.array(A2)
-    if(nrow(x)!=nrow(y)){
-      stop("Data matrices have different numbers of specimens.")  }
-    if(is.null(rownames(x))==FALSE && is.null(rownames(y))==FALSE){
-      mtch<-x[is.na( match(rownames(x),rownames(y)))]
-      if (length(mtch)>0){stop("Specimen names in data sets are not the same.")  }
-    }
-    if(is.null(rownames(x))==FALSE && is.null(rownames(y))==FALSE){
-      y<-y[rownames(x),]
-    }
-    XY.vcv<-cov(cbind(x,y))
-    S12<-XY.vcv[1:dim(x)[2],(dim(x)[2]+1):(dim(x)[2]+dim(y)[2])]; S21<-t(S12)
-    S11<-XY.vcv[1:dim(x)[2],1:dim(x)[2]]
-    S22<-XY.vcv[(dim(x)[2]+1):(dim(x)[2]+dim(y)[2]),(dim(x)[2]+1):(dim(x)[2]+dim(y)[2])]
-    pls<-svd(S12)
-    U<-pls$u; V<-pls$v
-    XScores<-x%*%U[,1]; YScores<-y%*%V[,1]
-    PLS.obs<-cor(XScores,YScores)
-    RV.obs<- sum(diag(S12%*%S21))/sqrt(sum(diag(S11%*%S11))*sum(diag(S22%*%S22))) 
-    integ.obs<-ifelse(method=="PLS",PLS.obs,RV.obs)
-    P.val<-1
-    integ.val<-rep(0,iter)
-    for(i in 1:iter){
-      y.r<-y[sample(nrow(y)),]  
-      XY.vcv.r<-cov(cbind(x,y.r))
-      S12.r<-XY.vcv.r[1:dim(x)[2],(dim(x)[2]+1):(dim(x)[2]+dim(y.r)[2])]; S21.r<-t(S12.r)
-      S11.r<-XY.vcv.r[1:dim(x)[2],1:dim(x)[2]]
-      S22.r<-XY.vcv.r[(dim(x)[2]+1):(dim(x)[2]+dim(y.r)[2]),(dim(x)[2]+1):(dim(x)[2]+dim(y.r)[2])]
-      pls.r<-svd(S12.r)
-      U.r<-pls.r$u; V.r<-pls.r$v
-      XScores.r<-x%*%U.r[,1]; YScores.r<-y.r%*%V.r[,1]
-      PLS.r<-cor(XScores.r,YScores.r)
-      RV.r<- sum(diag(S12.r%*%S21.r))/sqrt(sum(diag(S11.r%*%S11.r))*sum(diag(S22.r%*%S22.r))) 
-      integ.r<-ifelse(method=="PLS",PLS.r,RV.r)
-      integ.val[i]<-integ.r
-      P.val<-ifelse(integ.r>=integ.obs, P.val+1,P.val) 
-    }  
-    integ.val[iter+1]=integ.obs
-    P.val<-P.val/(iter+1)
-    if(method=="PLS"){
-      par(mfrow=c(1,2))
-      hist(integ.val,30,freq=TRUE,col="gray",xlab="PLS Correlation")
-        arrows(integ.obs,50,integ.obs,5,length=0.1,lwd=2)
-      plot(XScores,YScores,pch=21,bg="black",asp=1,main="PLS Plot")
-      layout(1)
-      return(list(x.scores=XScores,y.scores=YScores,PLS.corr=integ.obs,pvalue=P.val))
-    }
-    if(method=="RV"){
-      hist(integ.val,30,freq=TRUE,col="gray",xlab="RV Coefficient")
-      arrows(integ.obs,50,integ.obs,5,length=0.1,lwd=2)
-      return(list(RV=integ.obs,pvalue=P.val))
-    }
+  if (length(dim(A2))!=3){
+    stop("Data matrix 2 not a 3D array (see 'arrayspecs').")  }
+  if(length(grep("-999",A2))!=0){
+    stop("Data matrix 2 contains missing values. Estimate these first(see 'estimate.missing').")  }
+  if(is.null(dimnames(A)[[3]])){
+    print("No specimen names in data matrix 1. Assuming specimens in same order.")  }
+  if(is.null(dimnames(A2)[[3]])){
+    print("No specimen names in data matrix 2. Assuming specimens in same order.")  }
+  x<-two.d.array(A)
+  y<-two.d.array(A2)
+  if(nrow(x)!=nrow(y)){
+    stop("Data matrices have different numbers of specimens.")  }
+  if(is.null(rownames(x))==FALSE && is.null(rownames(y))==FALSE){
+    mtch<-x[is.na( match(rownames(x),rownames(y)))]
+    if (length(mtch)>0){stop("Specimen names in data sets are not the same.")  }
   }
-  
-  
-  if(WithinConfig==TRUE){
-    if(is.null(landgroups)){stop("No landmark partitions specified.")}
-    p<-dim(A)[1]; k<-dim(A)[2]
-    landgroups<-as.factor(landgroups)
-    if(length(landgroups)!=p){stop("Not all landmarks are assigned to a partition.")}
-    ngps<-nlevels(landgroups)
-    if(ngps>2){stop("Method currently implemented for 2 landmark subsets. For 3+ use 'compare.modular.partitions.'")}
-    gps<-as.factor(rep(landgroups,k,each = k, length=p*k))
-    x.data<-two.d.array(A)
-    S<-cov(x.data)
-    x<-x.data[,which(gps==levels(gps)[1])];y<-x.data[,which(gps==levels(gps)[2])]
-    S11<-S[which(gps==levels(gps)[1]),which(gps==levels(gps)[1])]
-    S22<-S[which(gps==levels(gps)[2]),which(gps==levels(gps)[2])]
-    S12<-S[which(gps==levels(gps)[1]),which(gps==levels(gps)[2])]
-    S21<-t(S12)
-    RV.obs<- sum(diag(S12%*%S21))/sqrt(sum(diag(S11%*%S11))*sum(diag(S22%*%S22)))                         
-    pls<-svd(S12)
-    U<-pls$u; V<-pls$v
-    
-    XScores<-x%*%U[,1]; YScores<-y%*%V[,1]
-    PLS.obs<-cor(XScores,YScores)
-    integ.obs<-ifelse(method=="PLS",PLS.obs,RV.obs)
-    P.val<-1
-    integ.val<-rep(0,iter)
-    for(ii in 1:iter){
-      landgroups.r<-sample(landgroups)
-      gps.r<-as.factor(rep(landgroups.r,k,each = k, length=p*k))  
-      x.r<-x.data[,which(gps==levels(gps)[1])];y.r<-x.data[,which(gps==levels(gps)[2])]
-      S11.r<-S[which(gps.r==levels(gps.r)[1]),which(gps.r==levels(gps.r)[1])]
-      S22.r<-S[which(gps.r==levels(gps.r)[2]),which(gps.r==levels(gps.r)[2])]
-      S12.r<-S[which(gps.r==levels(gps.r)[1]),which(gps.r==levels(gps.r)[2])]
-      S21.r<-t(S12.r)
-      RV.r<- sum(diag(S12.r%*%S21.r))/sqrt(sum(diag(S11.r%*%S11.r))*sum(diag(S22.r%*%S22.r)))      
-      pls.r<-svd(S12.r)
-      U.r<-pls.r$u; V.r<-pls.r$v
-      XScores.r<-x.r%*%U.r[,1]; YScores.r<-y.r%*%V.r[,1]
-      PLS.r<-cor(XScores.r,YScores.r)
-      integ.r<-ifelse(method=="PLS",PLS.r,RV.r)
-      integ.val[ii]<-integ.r
-      P.val<-ifelse(integ.r>=integ.obs, P.val+1,P.val)       
-    }  
-    integ.val[iter+1]=integ.obs
-    P.val<-P.val/(iter+1)
-    if(method=="PLS"){
-      par(mfrow=c(1,2))
-      hist(integ.val,30,freq=TRUE,col="gray",xlab="PLS Correlation")
-        arrows(integ.obs,50,integ.obs,5,length=0.1,lwd=2)
-      plot(XScores,YScores,pch=21,bg="black",asp=1,main="PLS Plot")
-      layout(1)
-      return(list(x.scores=XScores,y.scores=YScores,PLS.corr=integ.obs,pvalue=P.val))
-    }
-    if(method=="RV"){
-      hist(integ.val,30,freq=TRUE,col="gray",xlab="RV Coefficient")
+  if(is.null(rownames(x))==FALSE && is.null(rownames(y))==FALSE){
+    y<-y[rownames(x),]
+  }
+  XY.vcv<-cov(cbind(x,y))
+  S12<-XY.vcv[1:dim(x)[2],(dim(x)[2]+1):(dim(x)[2]+dim(y)[2])]; S21<-t(S12)
+  S11<-XY.vcv[1:dim(x)[2],1:dim(x)[2]]
+  S22<-XY.vcv[(dim(x)[2]+1):(dim(x)[2]+dim(y)[2]),(dim(x)[2]+1):(dim(x)[2]+dim(y)[2])]
+  pls<-svd(S12)
+  U<-pls$u; V<-pls$v
+  XScores<-x%*%U[,1]; YScores<-y%*%V[,1]
+  PLS.obs<-cor(XScores,YScores)
+  RV.obs<- sum(diag(S12%*%S21))/sqrt(sum(diag(S11%*%S11))*sum(diag(S22%*%S22))) 
+  integ.obs<-ifelse(method=="PLS",PLS.obs,RV.obs)
+  P.val<-1
+  integ.val<-rep(0,iter)
+  for(i in 1:iter){
+    y.r<-y[sample(nrow(y)),]  
+    XY.vcv.r<-cov(cbind(x,y.r))
+    S12.r<-XY.vcv.r[1:dim(x)[2],(dim(x)[2]+1):(dim(x)[2]+dim(y.r)[2])]; S21.r<-t(S12.r)
+    S11.r<-XY.vcv.r[1:dim(x)[2],1:dim(x)[2]]
+    S22.r<-XY.vcv.r[(dim(x)[2]+1):(dim(x)[2]+dim(y.r)[2]),(dim(x)[2]+1):(dim(x)[2]+dim(y.r)[2])]
+    pls.r<-svd(S12.r)
+    U.r<-pls.r$u; V.r<-pls.r$v
+    XScores.r<-x%*%U.r[,1]; YScores.r<-y.r%*%V.r[,1]
+    PLS.r<-cor(XScores.r,YScores.r)
+    RV.r<- sum(diag(S12.r%*%S21.r))/sqrt(sum(diag(S11.r%*%S11.r))*sum(diag(S22.r%*%S22.r))) 
+    integ.r<-ifelse(method=="PLS",PLS.r,RV.r)
+    integ.val[i]<-integ.r
+    P.val<-ifelse(integ.r>=integ.obs, P.val+1,P.val) 
+  }  
+  integ.val[iter+1]=integ.obs
+  P.val<-P.val/(iter+1)
+  if(method=="PLS"){
+    par(mfrow=c(1,2))
+    hist(integ.val,30,freq=TRUE,col="gray",xlab="PLS Correlation")
       arrows(integ.obs,50,integ.obs,5,length=0.1,lwd=2)
-      return(list(RV=integ.obs,pvalue=P.val))
-    }
+    plot(XScores,YScores,pch=21,bg="black",asp=1,main="PLS Plot")
+    layout(1)
+    return(list(x.scores=XScores,y.scores=YScores,PLS.corr=integ.obs,pvalue=P.val))
+  }
+  if(method=="RV"){
+    hist(integ.val,30,freq=TRUE,col="gray",xlab="RV Coefficient")
+    arrows(integ.obs,50,integ.obs,5,length=0.1,lwd=2)
+    return(list(RV=integ.obs,pvalue=P.val))
   }
 }
-
 
 #' Compare modular signal to alternative landmark subsets
 #'
@@ -1135,6 +1096,108 @@ physignal<-function(phy,A,iter=249){
   return(list(phy.signal=SSC.o,pvalue=P.val,anc.states=anc.states))
 }
 
+#' Comparing rates of shape evolution on phylogenies
+#'
+#' Function calculates rates of shape evolution for two or more groups of species on a phylogeny from a set of Procrustes-aligned specimens
+#'
+#' The function compares rates of morphological evolution for two or more groups of species on a phylogeny, under a 
+#'  Brownian motion model of evolution. It is assumed that the landmarks have previously been aligned 
+#'  using Generalized Procrustes Analysis (GPA) [e.g., with \code{\link{gpagen}}]. The approach is based on the distances
+#'  between species in morphospace after phylogenetic transformation (Adams 2014). From the data the rate of shape evolution
+#'  for each group is calculated, and a ratio of rates is obtained. If three or more groups of species are used, the ratio of 
+#'  the maximum to minimum rate is used as a test statistic (see Adams 2014). Significance testing 
+#'  is accomplished by phylogenetic simulation in which tips data are obtained under Brownian motion using a single 
+#'  evolutionary rate for all species on the phylogeny. A histogram of evolutionary rate ratios obtained via phylogenetic simulation is presented, 
+#'  with the observed value designated by an arrow in the plot. 
+#'
+#' @param phy A phylogenetic tree of type 'phylo'
+#' @param A An array (p x k x n) containing GPA-aligned coordinates for a set of specimens
+#' @param gp A factor array designating group membership
+#' @param iter Number of iterations for significance testing
+#' @keywords compare.phylo.shape.rate
+#' @author Dean Adams
+#' @export
+#' @return Function returns a list with the following components: 
+#'   \item{sigmad.all}{The phylogenetic evolutionary rate for all species on the phylogeny}
+#'   \item{sigmad.ratio}{The ratio of maximum to minimum evolutionary rates}
+#'   \item{pvalue}{The significance level of the observed ratio}
+#' @references Adams, D.C. 2014. Quantifying and comparing phylogenetic evolutionary rates for 
+#'  shape and other high-dimensional phenotypic data. Syst. Biol. (Accepted).
+#' @examples
+#' data(plethspecies) 
+#' Y.gpa<-gpagen(plethspecies$land)    #GPA-alignment    
+#'
+#'  gp.end<-factor(c(0,0,1,0,0,1,1,0,0))  #endangered species vs. rest
+#'  names(gp.end)<-plethspecies$phy$tip
+#' 
+#' compare.evol.rates(plethspecies$phy,Y.gpa$coords,gp=gp.end,iter=49)
+compare.evol.rates<-function(phy,A,gp,iter=999 ){
+  if (length(dim(A))!=3){
+    stop("Data matrix not a 3D array (see 'arrayspecs').")  }
+  if(length(grep("-999",A))!=0){
+    stop("Data matrix contains missing values. Estimate these first(see 'estimate.missing').")  }
+  if(!is.factor(gp)){
+    stop("gp is not a factor.")}
+  if (class(phy) != "phylo") 
+    stop("tree must be of class 'phylo.'")
+  if(is.null(dimnames(A)[[3]])){
+    stop("Data matrix does not include taxa names as dimnames for 3rd dimension.")  }
+  ntaxa<-length(phy$tip.label)
+  x<-two.d.array(A)
+  N<-nrow(x)  
+  if(N!=dim(x)[1]){
+    stop("Number of taxa in data matrix and tree are not not equal.")  }
+  if(length(match(rownames(x), phy$tip.label))!=N) 
+    stop("Data matrix missing some taxa present on the tree.")
+  if(length(match(phy$tip.label,rownames(x)))!=N) 
+    stop("Tree missing some taxa in the data matrix.")
+  p<-ncol(x)           
+  sigma.d<-function(phy,x,N,gp){
+    x<-prcomp(x)$x
+    gp<-gp[rownames(x)]
+    ngps<-nlevels(gp)
+    gpsz<-table(gp)
+    ones<-array(1,N)
+    C<-vcv.phylo(phy)
+    C<-C[rownames(x),rownames(x)]
+    a.obs<-colSums(solve(C))%*%x/sum(solve(C))  
+    eigC <- eigen(C)
+    D.mat<-solve(eigC$vectors %*% diag(sqrt(eigC$values)) %*% t(eigC$vectors)) 
+    dist.adj<-as.matrix(dist(rbind((D.mat%*%(x-(ones%*%a.obs))),0))) 
+    vec.d2<-dist.adj[N+1,1:N]^2
+    sigma.d<-tapply(vec.d2,gp,sum)/gpsz/p   
+    sigma.d.all<-sum(vec.d2)/N/p            
+    if (ngps==2){sigma.d.rat<-max(sigma.d)/min(sigma.d)}
+    if(ngps>2){
+      sigma.d.rat.gp<- array(0, dim = c(ngps, ngps))
+      for (i in 1:(ngps - 1)) {
+        for (j in 2:ngps) {
+          tmp<-c(sigma.d[i],sigma.d[j])
+          sigma.d.rat.gp[i, j] <-max(tmp)/min(tmp)
+            diag(sigma.d.rat.gp) <- 0
+        }
+      }
+      sigma.d.rat <- sum(sigma.d.rat.gp)/(ngps/2 * (ngps - 1))
+    }
+    return(list(sigma.all = sigma.d.all, ratio = sigma.d.rat,sigma.d.all=sigma.d))
+  }
+  sigmad.obs<-sigma.d(phy,x,ntaxa,gp)  
+  rate.mat<-diag(sigmad.obs$sigma.all,p)
+  x.sim<-sim.char(phy,rate.mat,nsim=iter) 
+  sig.sim<-1
+  rate.val<-rep(0,iter)
+  for(ii in 1:iter){
+      sigmad.sim<-sigma.d(phy,x.sim[,,ii],ntaxa,gp)
+      sig.sim<-ifelse(sigmad.sim$ratio>=sigmad.obs$ratio, sig.sim+1,sig.sim)
+      rate.val[ii]<-sigmad.sim$ratio
+  }
+  sig.sim<-sig.sim/(iter+1)
+  rate.val[iter+1]=sigmad.obs$ratio
+  hist(rate.val,30,freq=TRUE,col="gray",xlab="SigmaD ratio")
+  arrows(sigmad.obs$ratio,50,sigmad.obs$ratio,5,length=0.1,lwd=2)
+  return(list(sigmad.all = sigmad.obs$sigma.d.all, sigmad.ratio = sigmad.obs$ratio, pvalue=sig.sim))
+}
+
 #' Procrustes ANOVA/regression for shape data
 #'
 #' Function performs Procrustes ANOVA with permutation procedures to assess statistical hypotheses describing 
@@ -1144,7 +1207,7 @@ physignal<-function(phy,A,iter=249){
 #'   linear model and assesses this variation via permutation. Data input is specified by a formula (e.g., 
 #'   y~X), where 'y' specifies the response variables (shape data), and 'X' contains one or more independent 
 #'   variables (discrete or continuous). The response matrix 'y' must be in the form of a two-dimensional data 
-#'   matrix of dimension (n x [p*k]), rather than a 3D array.  It is assumed that the landmarks have previously 
+#'   matrix of dimension (n x [p x k]), rather than a 3D array.  It is assumed that the landmarks have previously 
 #'   been aligned using Generalized Procrustes Analysis (GPA) [e.g., with \code{\link{gpagen}}]. The function
 #'   \code{\link{two.d.array}} can be used to obtain a two-dimensional data matrix from a 3D array of landmark
 #'   coordinates. The names specified for the independent (x) variables in the formula represent one or more 
@@ -1235,13 +1298,13 @@ procD.lm<-function(f1,data=NULL,iter=999){
 #' Function performs pairwise comparisons among groups using the Euclidean distances among group means.
 #'
 #' The function performs pairwise comparisons to identify shape among groups. The function is designed as a post-hoc
-#' test to Procrustes ANOVA, where the latter has identified significant shape variation explained by a grouping factor. 
-#' The function takes as input the shape data (y), and a grouping factor (x). It then estimates the Euclidean distances 
-#' among group means, which are used as test values. These are then statistically evaluated through permutation, 
-#' where the rows of the shape matrix are randomized relative to the grouping variable. 
+#'  test to Procrustes ANOVA, where the latter has identified significant shape variation explained by a grouping factor. 
+#'  The function takes as input the shape data (y), and a grouping factor (x). It then estimates the Euclidean distances 
+#'  among group means, which are used as test values. These are then statistically evaluated through permutation, 
+#'  where the rows of the shape matrix are randomized relative to the grouping variable. 
 #'
-#' The input for the shape data (y) must be in the form of a two-dimensional data matrix of dimension (n x [p*k]), 
-#' rather than a 3D array.  It is assumed that the landmarks have previously 
+#' The input for the shape data (y) must be in the form of a two-dimensional data matrix of dimension (n x [p x k]), 
+#'   rather than a 3D array.  It is assumed that the landmarks have previously 
 #'   been aligned using Generalized Procrustes Analysis (GPA) [e.g., with \code{\link{gpagen}}]. The function
 #'   \code{\link{two.d.array}} can be used to obtain a two-dimensional data matrix from a 3D array of landmark
 #'   coordinates. 
@@ -1291,29 +1354,29 @@ pairwiseD.test<-function(y,x,iter=999){
 #' Function performs an analysis of directional and fluctuating asymmetry for bilaterally symmetric objects 
 #'
 #' The function quantifies components of shape variation for a set of specimens as described by their patterns of symmetry
-#' and asymmetry. Here, shape variation is decomposed into variation among individuals, variation among sides (directional 
-#' asymmetry), and variation due to an individual x side interaction (fluctuating symmetry). These components are then 
-#' statistically evaluated using Procrustes ANOVA and Goodall's F tests (i.e. an isotropic model of shape variation). Methods for both 
-#' matching symmetry and object symmetry can be implemented. Matching symmetry is when each object contains mirrored 
-#' pairs of structures (e.g., right and left hands) while object symmetry is when a single object is symmetric 
-#' about a midline (e.g., right and left sides of human faces). Analytical and computational details concerning the 
-#' analysis of symmetry in geometric morphometrics can be found in Mardia et al. 2000; Klingenberg et al. 2002.
+#'  and asymmetry. Here, shape variation is decomposed into variation among individuals, variation among sides (directional 
+#'  asymmetry), and variation due to an individual x side interaction (fluctuating symmetry). These components are then 
+#'  statistically evaluated using Procrustes ANOVA and Goodall's F tests (i.e. an isotropic model of shape variation). Methods for both 
+#'  matching symmetry and object symmetry can be implemented. Matching symmetry is when each object contains mirrored 
+#'  pairs of structures (e.g., right and left hands) while object symmetry is when a single object is symmetric 
+#'  about a midline (e.g., right and left sides of human faces). Analytical and computational details concerning the 
+#'  analysis of symmetry in geometric morphometrics can be found in Mardia et al. 2000; Klingenberg et al. 2002.
 #'
 #' Analyses of symmetry for matched pairs of objects is implemented when "object.sym=FALSE". Here, a 3D array [p x k x 2n] 
 #'  contains the landmark coordinates for all pairs of structures (2 structures for each of n specimens). Because the two sets of 
-#' structures are on opposite sides, they represent mirror images, and one set must be reflected prior to the analysis to 
-#' allow landmark correspondence. IT IS ASSUMED THAT THE USER HAS DONE THIS PRIOR TO PERFORMING THE SYMMETRY ANALYSIS. 
-#' Reflecting a set of specimens may be accomplished by multiplying one coordinate dimension 
-#' by '-1' for these structures (either the x-, the y-, or the z-dimension). A vector containing information on individuals 
-#' and sides must also be supplied. Replicates of each specimen may also be included in the dataset, and when specified will be 
-#' used as measurement error (see Klingenberg and McIntyre 1998). 
+#'  structures are on opposite sides, they represent mirror images, and one set must be reflected prior to the analysis to 
+#'  allow landmark correspondence. IT IS ASSUMED THAT THE USER HAS DONE THIS PRIOR TO PERFORMING THE SYMMETRY ANALYSIS. 
+#'  Reflecting a set of specimens may be accomplished by multiplying one coordinate dimension 
+#'  by '-1' for these structures (either the x-, the y-, or the z-dimension). A vector containing information on individuals 
+#'  and sides must also be supplied. Replicates of each specimen may also be included in the dataset, and when specified will be 
+#'  used as measurement error (see Klingenberg and McIntyre 1998). 
 #' 
 #' Analyses of object symmetry is implemented when "object.sym=TRUE". Here, a 3D array [p x k x n] contains the landmark 
-#' coordinates for all n specimens. To obtain information about asymmetry, the function generates a second set of objects 
-#' by reflecting them about one of their coordinate axes. The landmarks across the line of symmetry are then relabeled to obtain
-#' landmark correspondence. The user must supply a list of landmark pairs. A vector containing information on individuals 
-#' must also be supplied. Replicates of each specimen may also be included in the dataset, and when specified will be 
-#' used as measurement error. 
+#'  coordinates for all n specimens. To obtain information about asymmetry, the function generates a second set of objects 
+#'  by reflecting them about one of their coordinate axes. The landmarks across the line of symmetry are then relabeled to obtain
+#'  landmark correspondence. The user must supply a list of landmark pairs. A vector containing information on individuals 
+#'  must also be supplied. Replicates of each specimen may also be included in the dataset, and when specified will be 
+#'  used as measurement error. 
 #'
 #' @param A An array (p x k x n) containing GPA-aligned coordinates for a set of specimens [for "object.sym=FALSE, A is of dimension (n x k x 2n)]
 #' @param ind A vector containing labels for each individual. For matching symmetry, the matched pairs receive the same 
@@ -1502,7 +1565,7 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
 #'
 #'  Data input is specified by a formula (e.g., Y~X), where 'Y' specifies the response variables (trajectory data), 
 #'  and 'X' contains one or more independent variables (discrete or continuous). The response matrix 'Y' must be 
-#'  in the form of a two-dimensional data matrix of dimension (n x [p*k]), rather than a 3D array. The function
+#'  in the form of a two-dimensional data matrix of dimension (n x [p x k]), rather than a 3D array. The function
 #'  \code{\link{two.d.array}} can be used to obtain a two-dimensional data matrix from a 3D array of landmark
 #'  coordinates. It is assumed that the order of the specimens 'Y' matches the order of specimens in 'X'. 
 #' 
@@ -1548,7 +1611,6 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
 #'   \item{ANOVA.Size}{Results of permutational-ANOVA assessing variation in trajectory size}
 #'   \item{ANOVA.Dir}{Results of permutational-ANOVA assessing variation in trajectory orientation}
 #'   \item{ANOVA.Shape}{Results of permutational-ANOVA assessing variation in trajectory shape (if applicable)}
-
 #' @references Collyer, M.L., and D.C. Adams. 2013. Phenotypic trajectory analysis: Comparison of 
 #'  shape change patterns in evolution and ecology. Hystrix. 24:75-83.
 #' @references Adams, D. C. 2010. Parallel evolution of character displacement driven by competitive 
@@ -1873,16 +1935,19 @@ plotRefToTarget<-function(M1,M2,method=c("TPS","vector","points"),mag=1.0,links=
 #' Function plots a set of Procrustes-aligned specimens in tangent space along their principal axes
 #'
 #' The function performs a principal components analysis of shape variation and plots two 
-#' dimensions of tangent space for a set of Procrustes-aligned specimens (default is PC1 vs. PC2). The percent variation along each PC-axis 
-#' is returned. Additionally (and optionally), deformation grids can be requested, which display the shape of specimens at the ends 
-#' of the range of variability along PC1. The function returns a table summarizing the percent variation explained by each
-#' pc axis, and the set of principal component scores for all specimens. 
+#'  dimensions of tangent space for a set of Procrustes-aligned specimens (default is PC1 vs. PC2). The percent variation along each PC-axis 
+#'  is returned. Additionally (and optionally), deformation grids can be requested, which display the shape of specimens at the ends 
+#'  of the range of variability along PC1. The function returns a table summarizing the percent variation explained by each
+#'  pc axis, and the set of principal component scores for all specimens. If groups are provided, specimens from 
+#'  each group are plotted using distinct colors based on the order in which the groups are found in the dataset, 
+#'  and using R's standard color palette: black, red, green, blue, cyan, magenta, yellow, and gray. 
 #'
 #' @param A An array (p x k x n) containing landmark coordinates for a set of specimens 
 #' @param warpgrids A logical value indicating whether deformation grids for shapes along PC1 should be displayed
 #' @param axis1 A value indicating which PC axis should be displayed as the X-axis (default = PC1)
 #' @param axis2 A value indicating which PC axis should be displayed as the X-axis (default = PC2)
 #' @param label A logical value indicating whether labels for each specimen should be displayed
+#' @param groups An optional factor vector specifying group identity for each specimen
 #' @export
 #' @keywords plotTangentSpace
 #' @author Dean Adams
@@ -1891,12 +1956,13 @@ plotRefToTarget<-function(M1,M2,method=c("TPS","vector","points"),mag=1.0,links=
 #' Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
 #' ref<-mshape(Y.gpa$coords)
 #' 
-#' plotTangentSpace(Y.gpa$coords)
-plotTangentSpace<-function (A, axis1 = 1, axis2 = 2, warpgrids = TRUE, label = FALSE){
+#' plotTangentSpace(Y.gpa$coords, groups = paste(plethodon$species, plethodon$site)) 
+plotTangentSpace<-function (A, axis1 = 1, axis2 = 2, warpgrids = TRUE, label = FALSE,groups=NULL){
   if (length(dim(A)) != 3) {
     stop("Data matrix not a 3D array (see 'arrayspecs').") }
   if (length(grep("-999", A)) != 0) {
     stop("Data matrix contains missing values. Estimate these first(see 'estimate.missing').") }
+  if(!is.null(groups)){groups<-factor(groups)}
   k <- dim(A)[2]
   p <- dim(A)[1]
   n <- dim(A)[3]
@@ -1908,6 +1974,7 @@ plotTangentSpace<-function (A, axis1 = 1, axis2 = 2, warpgrids = TRUE, label = F
   if (warpgrids == F) {
     plot(pcdata[, axis1], pcdata[, axis2], asp = 1, pch = 21,bg = "black", cex = 2, xlab = paste("PC ",axis1),
 	 ylab = paste("PC ",axis2))
+      if(!is.null(groups)){points(pcdata[, axis1], pcdata[, axis2],pch=21,bg=groups,cex=2)}
     segments(min(pcdata[, axis1]), 0, max(pcdata[, axis1]), 0, lty = 2, lwd = 1)
     segments(0, min(pcdata[, axis2]), 0, max(pcdata[, axis2]), lty = 2, lwd = 1)
     if (label == T) {text(pcdata[, axis1], pcdata[, axis2], seq(1, n), adj = c(-0.7, -0.7)) }
@@ -1918,6 +1985,7 @@ plotTangentSpace<-function (A, axis1 = 1, axis2 = 2, warpgrids = TRUE, label = F
     }
     plot(pcdata[, axis1], pcdata[, axis2], asp = 1, pch = 21,bg = "black", cex = 2, xlab = paste("PC ",axis1),
 	 ylab = paste("PC ",axis2))
+      if(!is.null(groups)){points(pcdata[, axis1], pcdata[, axis2],pch=21,bg=groups,cex=2)}
       segments(min(pcdata[, axis1]), 0, max(pcdata[, axis1]), 0, lty = 2, lwd = 1)
       segments(0, min(pcdata[, axis2]), 0, max(pcdata[, axis2]), lty = 2, lwd = 1)
       if (label == T) {text(pcdata[, axis1], pcdata[, axis2], seq(1, n), adj = c(-0.7, -0.7))}
@@ -2026,18 +2094,26 @@ plotGMPhyloMorphoSpace<-function(phy,A,labels=TRUE,ancStates=T){
 #'   derived from landmark data (ie. allometry). It is assumed that the landmarks have previously been 
 #'   aligned using Generalized Procrustes Analysis (GPA) [e.g., with \code{\link{gpagen}}]. The abscissa 
 #'   of the plot is log(centroid size) while the ordinate represents shape. Three complementary approaches 
-#'   can be implemented to visualize allometry. If "method=CAC" (the default) the function calculates the 
+#'   can be implemented to visualize allometry: 
+#'  \enumerate{
+#'   \item {If "method=CAC" (the default) the function calculates the 
 #'   common allometric component of the shape data, which is an estimate of the average allometric trend 
-#'   within groups (Mitteroecker et al. 2004). If "method=RegScore" the function calculates shape scores 
+#'   within groups (Mitteroecker et al. 2004). }
+#'   \item {If "method=RegScore" the function calculates shape scores 
 #'   from the regression of shape on size, and plots these versus size (Drake and Klingenberg 2008). 
-#'   For a single group, these shape scores are mathematically identical to the CAC (Adams et al. 2012). 
-#'   If "method=PredLine" the function calculates predicted values from a regression of shape on size, and 
+#'   For a single group, these shape scores are mathematically identical to the CAC (Adams et al. 2012).}
+#'   \item {If "method=PredLine" the function calculates predicted values from a regression of shape on size, and 
 #'   plots the first principal component of the predicted values versus size as a stylized graphic of the 
-#'   allometric trend (Adams and Nistri 2010). For all methods, both centroid size and allometry scores 
-#'   are returned. Optionally, deformation grids can be 
+#'   allometric trend (Adams and Nistri 2010). }
+#'   }
+#'   For all methods, both centroid size and allometry scores are returned. Optionally, deformation grids can be 
 #'   requested, which display the shape of the smallest and largest specimens relative to the average specimen (using 
-#'   'warpgrid=T' or 'warpgrid=F'). Finally, if groups are provided, the above approaches are implemented while 
-#'   accounting for within-group patterns of covariation (see references for explanation). 
+#'   'warpgrid=T' or 'warpgrid=F'). 
+#'   Finally, if groups are provided, the above approaches are implemented while 
+#'   accounting for within-group patterns of covariation (see references for explanation). In this case,
+#'   specimens from each group are plotted using distinct colors based on the order in which the groups are
+#'   found in the dataset, and using R's standard color palette: black, red, green, blue, cyan, magenta,
+#'   yellow, and gray. 
 #'
 #' @param A An array (p x k x n) containing landmark coordinates for a set of specimens 
 #' @param sz A vector of centroid size measures for all specimens 
@@ -2057,7 +2133,6 @@ plotGMPhyloMorphoSpace<-function(phy,A,labels=TRUE,ancStates=T){
 #'   transformation of skull shape in St Bernard dogs. Proceedings of the Royal Society B, Biological Sciences 275:71'76.
 #' @references Mitteroecker, P., P. Gunz, M. Bernhard, K. Schaefer, and F. L. Bookstein. 2004. 
 #'   Comparison of cranial ontogenetic trajectories among great apes and humans. J. Hum. Evol. 46:679-698.
-
 #' @examples
 #' data(ratland) 
 #' Y.gpa<-gpagen(ratland)    #GPA-alignment
@@ -2111,8 +2186,8 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
   }
   if(!is.null(groups)){
     y.mn<-predict(lm(y~groups))
-    B<-coef(lm(y~groups+csz))
-    yhat<-predict(lm(y~groups*csz))
+    B<-coef(lm(y~csz+groups))
+    yhat<-predict(lm(y~csz*groups))
   }
   y.cent<-y-y.mn
   a<-(t(y.cent)%*%csz)%*%(1/(t(csz)%*%csz)); a<-a%*%(1/sqrt(t(a)%*%a))
@@ -2122,14 +2197,17 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
   if(warpgrids==F){
     if(method=="CAC"){
       plot(csz,CAC,xlab="log(CSize)", ylab="CAC",pch=21,bg="black",cex=1.25)
+      if(!is.null(groups)){points(csz,CAC,pch=21,bg=groups,cex=1.25)}
       if(label ==T){text(csz,CAC,seq(1,n),adj=c(-.7,-.7))}
     }
     if(method=="RegScore"){
       plot(csz,Reg.proj,xlab="log(CSize)", ylab="Shape (Regression Score)",pch=21,bg="black",cex=1.25)
+      if(!is.null(groups)){points(csz,Reg.proj,pch=21,bg=groups,cex=1.25)}
       if(label ==T){text(csz,Reg.proj,seq(1,n),adj=c(-.7,-.7))}
     }
     if(method=="PredLine"){
       plot(csz,pred.val,xlab="log(CSize)", ylab="Shape (Predicted)",pch=21,bg="black",cex=1.25)
+      if(!is.null(groups)){points(csz,pred.val,pch=21,bg=groups,cex=1.25)}
       if(label ==T){text(csz,pred.val,seq(1,n),adj=c(-.7,-.7))}
     }
   }
@@ -2142,6 +2220,7 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
     }
     if(method=="CAC"){
       plot(csz,CAC,xlab="log(CSize)", ylab="CAC",pch=21,bg="black",cex=1.25)
+      if(!is.null(groups)){points(csz,CAC,pch=21,bg=groups,cex=1.25)}
       if(label ==T){text(csz,CAC,seq(1,n),adj=c(-.7,-.7))}
       mypar<-par("usr")
       if(k==2){  
@@ -2151,6 +2230,7 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
     }
     if(method=="RegScore"){
       plot(csz,Reg.proj,xlab="log(CSize)", ylab="Shape (Regression Score)",pch=21,bg="black",cex=1.25)
+      if(!is.null(groups)){points(csz,Reg.proj,pch=21,bg=groups,cex=1.25)}
       if(label ==T){text(csz,Reg.proj,seq(1,n),adj=c(-.7,-.7))}
       mypar<-par("usr")
       if(k==2){  
@@ -2159,6 +2239,7 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
     }
     if(method=="PredLine"){
       plot(csz,pred.val,xlab="log(CSize)", ylab="Shape (Predicted)",pch=21,bg="black",cex=1.25)
+      if(!is.null(groups)){points(csz,pred.val,pch=21,bg=groups,cex=1.25)}
       if(label ==T){text(csz,pred.val,seq(1,n),adj=c(-.7,-.7))}
       mypar<-par("usr")
       if(k==2){  
@@ -2393,46 +2474,76 @@ trajplot<-function(Data,M){
   }
 }
 
+# Write .nts file for output of digitize2d(), buildtemplate() digit.fixed() and digitsurface()
+# A is an nx2 or nx3 matrix of the output coordinates. To be used internally only.
+
+writeland.nts <- function(A, spec.name, comment=NULL){
+  ntsfile=paste(spec.name,".nts",sep="")
+  file.create(file=ntsfile, overwrite = TRUE)
+  if(is.null(comment)){
+    cat(paste('"',spec.name,sep=""),file= ntsfile,sep="\n",append=TRUE)
+  }
+  else if(!is.null(comment)){
+    cat(paste('"',spec.name,sep=""),file= ntsfile,sep="\n")
+    cat(paste('"',comment,sep=""),file= ntsfile,sep="\n",append=TRUE)
+  }
+  dims <- dim(A)
+  if (dims[2] == 2){
+    cat(paste(1,dims[1],2,0,"dim=2"),file= ntsfile,sep="\n",append=TRUE)
+  }
+  else if (dims[2] == 3){
+    cat(paste(1,dims[1],3,0, "dim=3"),file= ntsfile,sep="\n",append=TRUE)
+  }
+  write.table(A ,file= ntsfile,col.names = FALSE, row.names = FALSE,sep="  ",append=TRUE)
+}
+
+
 #' Build 3D surface template 
 #'
-#' A function to build 3D template to extract 3D surface sliding semilandmarks from all specimens
+#' An interactive function to build template of three-dimensional (3D) surface sliding semilandmarks.
+#' Input for the function is either a matrix of vertex coordinates defining a 3D surface object
+#' or a mesh3d object as obtained from \code{\link{read.ply}}.
 #'
-#' Function buildtemplate constructs a template surface with which to down sample point clouds of 
-#' specimens to be used in 3d shape analysis. Input for the function is either a matrix of 3D coordinates 
-#' or a mesh3d object as obtained from read.ply(). 
-#'
-#'builddtemplate allows users to choose a predetermined 
-#' number of points with which to represent the structure of interest as sliding surface semilandmarks.
-#' Template surface is used in analyses of surface semi-landmarks outline in Gunz et al. (2005:90-92) 
-#' and Mitteroecker and Gunz (2009:242). 
-#' Landmark points are first digitized by the user (see Digitizing subsection), then a roughly equidistant set of predetermined number of points 
-#' are automatically chosen. The now down-sampled mesh is used as a "template" to extract a mesh of similarly 
-#' numbered points for analysis. 
-#' \subsection{Digitizing}{Digitizing using buildtemplate is interactive between landmark selection using a mouse (see below for instructions), 
-#' and the R console. Once a point is selected, the user is asked if the system should keep or discard the 
-#' selection #'(y/n). If "y", the user is asked to continue to select the next landmark. If "n" the removes the last chosen
-#' landmark, and the user is asked to select it again. This can be repeated until the user is comfortable with the landmark
-#' chosen. 
+#' Function constructs a template of fixed landmarks and n "surface sliders", semilandmarks that slide over a surface.
+#'  The user digitizes the fixed points (see digitizing below), then the function finds n surface semilandmarks following 
+#'  algorithm outlined in Gunz et al. (2005:90-92) and Mitteroecker and Gunz (2009:242). Surface semilandmarks are 
+#'  roughly equidistant set of predetermined number of points, chosen over the mesh automatically using a nearest-neighbor approach.
+#'  The set of fixed and surface slider landmarks are exported as a "template", which is used to extract a set of similarly numbered 
+#'  landmarks on every specimen using function \code{\link{digitsurface}}. Some of the "fixed" landmarks can be later designated as
+#'  "curve sliders" using function \code{\link{define.sliders.3d}} if required - see details in \code{\link{digit.fixed}}.
+#'  
+#' To ensure a strong match between the scan and the template, it is recommended that a reasonable number of fixed points be used.
+#'  These fixed points can be designated as "curve sliders" later using function \code{\link{define.sliders.3d}}, 
+#'  see the function \code{\link{digit.fixed}} for details.
+#'  NOTE: Function centers the mesh before digitizing (required for further operations).
 #' 
-#' NOTE: To ensure a strong match between the scan and the template, it is recommended that a reasonable number of fixed points be used.
+#' \subsection{Digitizing}{
+#' Digitizing using buildtemplate is interactive between landmark selection using a mouse (see below for instructions), 
+#'  and the R console. Once a point is selected, the user is asked if the system should keep or discard the 
+#'  selection #'(y/n). If "y", the user is asked to continue to select the next landmark. If "n" the removes the last chosen
+#'  landmark, and the user is asked to select it again. This can be repeated until the user is comfortable with the landmark
+#'  chosen. 
 #'
-#' To digitize with a standard 3-button (PC) buildtemplate uses:
+#' To digitize with a standard 3-button (PC):
 #' \enumerate{
-#'  \item the RIGHT mouse button (primary) to select points to be digitized First,
+#'  \item the RIGHT mouse button (primary) to select points to be digitized (click-drag a box around a vertex to select as landmark)
 #'  \item the LEFT mouse button (secondary) is used to rotate mesh, 
 #'  \item the mouse SCROLLER (third/middle) is used to zoom in and out.
 #' }
-#' Note: Digitizing functions on MACINTOSH computers using a standard 3-button mice works as specified. 
+#' NOTE: Digitizing functions on MACINTOSH computers using a standard 3-button mice works as specified. 
 #' Macs using platform specific single button mice: 
 #' \enumerate{
 #'  \item press button to rotate 3D mesh,
-#'  \item press button while pressing CONTROL key to select points to be digitized, 
+#'  \item press button while pressing CONTROL key to select points to be digitized (click-drag a box around a vertex to select as landmark), 
 #'  \item press button while pressing OPTION key to adjust mesh perspective.
 #' }
 #' Mac mouse settings need adjustment to acquire zooming functions of the "middle/third" mouse button/scroller.
 #' Some instructions can be found at \url{http://blog.boastr.net/}. In addition, freeware providing "Middle Click" 
 #' functionality is available at \url{http://magicprefs.com/} for "magicmice" now standard 
 #' on many Macintosh machines.
+#' 
+#' NOTE: there is no pan (translate) functionality in rgl library for all platforms at this time.
+#' The template can be edited using function \code{\link{editTemplate}}. 
 #' }
 #'
 #' @param spec Name of surface file, as either an object of class shape3d/mesh3d, or matrix of three-dimensional vertex coordinates.
@@ -2440,14 +2551,16 @@ trajplot<-function(Data,M){
 #' @param surface.sliders numeric: The number of template surface sliders desired 
 #' @param ptsize numeric: Size to plot the mesh points (vertices), e.g. 0.1 for dense meshes, 3 for sparse meshes
 #' @export
-#' @keywords template buildtemplate
+#' @keywords buildtemplate
 #' @author Erik Otarola-Castillo & Emma Sherratt
-#' @return Function returns a matrix containing the x,y,z coordinates of the down sampled points, which can be 
-#' used as a template for digitizing other surface scans using the function \code{\link{digitsurface}}. Additionally, 
-#' the file 'template.txt' is generated, and an NTS file with the name of the specimen containing the digitized 
-#'  points for the template specimen (for use in subsequent morphometric analyses). 
-#' @references Gunz P, Mitteroecker P, & Bookstein FJ (2005) Semilandmarks in Three Dimensions. Modern Morphometrics in Physical Anthropology, ed Slice DE (Springer-Verlag, New York), pp 73-98.
+#' @return Function writes to the working directory three files: an NTS file with the name of the specimen and .nts suffix containing 
+#' the landmark coordinates, "template.txt" containing the same coordinates for use with the function \code{\link{digitsurface}}, 
+#' and "surfslide.csv", a file containing the address of the landmarks defined as "surface sliders" for use with \code{\link{gpagen}}.
+#' Function also returns to console an n x 3 matrix containing the x,y,z coordinates of the digitized landmarks. 
+#' @references Gunz P, Mitteroecker P, & Bookstein FJ (2005) Semilandmarks in Three Dimensions. Modern Morphometrics in Physical 
+#' Anthropology, ed Slice DE (Springer-Verlag, New York), pp 73-98.
 #' @references Mitteroecker P & Gunz P (2009) Advances in Geometric Morphometrics. Evolutionary Biology 36(2):235-247.
+
 buildtemplate<-function(spec, fixed, surface.sliders, ptsize = 1)    {
   spec.name<-deparse(substitute(spec))
   mesh <- NULL
@@ -2455,135 +2568,191 @@ buildtemplate<-function(spec, fixed, surface.sliders, ptsize = 1)    {
     specimen <- scale(as.matrix(t(spec$vb)[,-4]), scale = FALSE)
     spec$vb <- rbind(t(specimen), 1)
     mesh <- spec 
+    if (is.null(mesh$material)) { mesh$material <- "gray" } 
   } else if (inherits(spec, "matrix") == FALSE) {
     stop ("File is not a shape3d/mesh3d object or xyz matrix")
-    } else if (inherits(spec, "matrix") == TRUE && dim(spec)[2]==3) {
+  } else if (inherits(spec, "matrix") == TRUE && dim(spec)[2]==3) {
     specimen <- scale(spec, scale = FALSE)
-      } else { stop ("File is not matrix in form: vertices by xyz")} 
+  } else { stop ("File is not matrix in form: vertices by xyz")} 
   selected<-digit.fixed(spec,fixed,index=TRUE,ptsize)
   fix<-selected$fix
   selected<-selected$selected
   surfs<-specimen[-fix,]
   template<-rbind(selected,kmeans(x=surfs,centers=surface.sliders,iter.max=100)$centers)
-  cat(paste('"Landmark coordinates for digitized template'),file=paste(spec.name, ".nts", sep=""),sep="\n")
-  cat(paste(1,dim(template)[1],3,0, "dim=3"),file=paste(spec.name, ".nts", sep=""),sep="\n",append=TRUE)
-  write.table(template,file=paste(spec.name, ".nts", sep=""),col.names = FALSE, row.names = FALSE,append=TRUE)
-  write.table(template,file="template.txt",row.names=F,col.names=TRUE)
-  write.csv(seq(from=(fixed+1),to=(surface.sliders+fixed)),file="surfslide.csv",row.names=FALSE)
   points3d(template[-(1:fixed),1],template[-(1:fixed),2],template[-(1:fixed),3],size=10,col="blue")
+  writeland.nts(template, spec.name, comment="Landmark coordinates for digitized template")
+  write.table(template,file="template.txt",row.names=F,col.names=TRUE)
+  write.csv(seq(from=(fixed+1),to=(surface.sliders+fixed)),file="surfslide.csv",row.names=FALSE)  
+  rownames(template)<-seq(from=1,to=nrow(template))
   return(template)
 }
 
-#' Select points to "slide" along three-dimensional curves.
+#' Choose points to "slide" along three-dimensional curves.
 #'
-#' A function to select points which will "slide" along three-dimensional curves.
-#'
-#' This function helps user select points on the created template to "slide" along curves 
-#' lacking known landmarks (see Bookstein 1991:376-382, 1997 for algorithm details). Each 
-#' sliding semi-landmark (sliders) will slide between two designated points, along a line 
-#' tangent to the specified curvature. template.txt file must be in current working directory.
-#' \enumerate{
-#'  \item Select the first point between which semi-landmark will "slide"
-#'  \item Select sliding point,
-#'  \item Select point along which sliding trajectory will end. 
-#' Screen will show lines connecting the three points, and will highlight the sliding semilandmark in red. 
-#' }
-#' \subsection{Digitizing}{ 
-#' Digitizing using buildtemplate is interactive between landmark selection using a mouse (see below for instructions), 
-#' and the R console. Once a point is selected, the user is asked if the system should keep or discard the 
-#' selection #'(y/n). If "y", the user is asked to continue to select the next landmark. If "n" the removes the last chosen
-#' landmark, and the user is asked to select it again. This can be repeated until the user is comfortable with the landmark
-#' chosen. 
+#' An interactive function to define which digitized landmarks of an '*.nts' file
+#' will "slide" along three-dimensional (3D) curves.
 #' 
-#' To digitize with a standard 3-button (PC) buildtemplate uses:
+#' Function takes a matrix of digitized landmark coordinates, such as made by \code{\link{digit.fixed}}, or \code{\link{buildtemplate}}
+#'  and helps user choose which landmarks will be treated as "curve sliders" in Generalized Procrustes analysis
+#'  \code{\link{gpagen}}. This type of semilandmark "slides" along curves lacking known landmarks 
+#'  (see Bookstein 1991:376-382, 1997 for algorithm details). 
+#'  Each sliding semilandmark ("sliders") will slide between two designated points, along a line 
+#'  tangent to the specified curvature.
+#' 
+#' \subsection{Selection}{ 
+#' Choosing which landmarks will be sliders involves landmark selection using a mouse in the rgl plot window. 
+#' With a standard 3-button (PC) buildtemplate uses:
 #' \enumerate{
-#'  \item the RIGHT mouse button (primary) to select points to be digitized First,
+#'  \item the RIGHT mouse button (primary) to choose points to be defined as sliders (click-drag a box around a vertex to select),
 #'  \item the LEFT mouse button (secondary) is used to rotate mesh, 
 #'  \item the mouse SCROLLER (third/middle) is used to zoom in and out.
 #' }
-#' Note: Digitizing functions on MACINTOSH computers using a standard 3-button mice works as specified. 
+#' NOTE: Digitizing functions on MACINTOSH computers using a standard 3-button mice works as specified. 
 #' Macs using platform specific single button mice: 
 #' \enumerate{
 #'  \item press button to rotate 3D mesh,
-#'  \item press button while pressing CONTROL key to select points to be digitized, 
-#'  \item press button while pressing OPTION key to adjust mesh perspective.}
+#'  \item press button while pressing CONTROL key to choose points to be defined as sliders,
+#'  \item press button while pressing OPTION key to zoom in and out.}
 #'
 #' Mac mouse settings need adjustment to acquire zooming functions of the "middle/third" mouse button/scroller.
 #' Some instructions can be found at \url{http://blog.boastr.net/}. In addition, freeware providing "Middle Click" 
 #' functionality is available at \url{http://magicprefs.com/} for "magicmice" now standard 
 #' on many Macintosh machines.
+#' 
+#' To define the sliders, for each sliding landmark along the curve in the format 'before-slider-after':
+#' \enumerate{
+#'  \item Click-drag to choose the first landmark between which semi-landmark will "slide",
+#'  \item Click-drag to choose sliding landmark,
+#'  \item Click-drag to choose the last landmark between which semi-landmark will "slide",
+#' Screen will show lines connecting the three landmarks, and will highlight the sliding semilandmark in red. 
 #' }
-#'
-#' @param n Number of total "fixed" and curve sliding landmarks.
-#' @param curves Number of landmarks to slide along curves. 
+#' This procedure is overlapping, so for example a curve defined by a sequence of semilandmarks,
+#' the user must select the 2nd point of the first three to be the 1st for the next
+#' e.g. 1 2 3 then 2 3 4, etc.
+#' }
+#' @param spec Name of specimen, as an object matrix containing 3D landmark coordinates
+#' @param nsliders Number of landmarks to be semilandmarks that slide along curves
+#' @param surfsliders Logical If spec contains landmarks that are "surface sliders",
+#' made by \code{\link{buildtemplate}}, "surfslide.csv" should be in working directory 
 #' @export
-#' @seealso  \code{\link{digitsurface}}, \code{\link{gpagen}}
-#' @keywords digicurves
-#' @author Erik Otarola-Castillo
-#' @return Function returns a matrix containing the landmark address of the curve sliders, indicating the points between which the selected point will "slide".  
-#' In addition, the function returns a .csv file to be used by \code{\link{gpagen}} during GPA.
+#' @seealso  \code{\link{digit.fixed}}, \code{\link{digitsurface}}, \code{\link{gpagen}}
+#' @keywords define.sliders.3d
+#' @author Erik Otarola-Castillo & Emma Sherratt
+#' @return Function returns a 'curves x 3' matrix containing the landmark address of the curve sliders, indicating the 
+#' points between which the selected point will "slide". Written to the working directory is this matrix as "curveslide.csv".
+#' Matrix (or "curveslide.csv") is designed for use by \code{\link{gpagen}} during GPA.
 #' @references  Bookstein, F. J. 1991  Morphometric Tools for Landmark Data: Geometry and Biology. 
 #' Cambridge University Press, New York.
 #' @references Bookstein, F. J. 1997 Landmark Methods for Forms without Landmarks: Morphometrics of 
 #' Group Differences in Outline Shape. Medical Image Analysis 1(3):225-243.
-digit.curves<-function(n, curves)    {
-  template<-as.matrix(read.table("template.txt",header=TRUE))
-  lm<-cbind(index<-1:n,template[1:n,])
-  clear3d();plot3d(template[-(1:n),],size=3,col="darkgray",xlab="x",ylab="y",zlab="z",aspect=FALSE)
-  points3d(lm[,(2:4)],size=5)
-  text3d(lm[,(2:4)], texts=lm[,1],cex=1,adj=c(2,1))  
-  curslide<-cur<-curslid<-NULL 
-  curslide<-curvfunc(n, curves, template, index, curslid) 
-  write.table(curslide,file="curveslide.csv",row.names=FALSE,col.names=c("before","slide","after"),sep=",")
-  return(curveslide=curslide)
+define.sliders.3d<-function(spec, nsliders,surfsliders=FALSE)    {
+  spec.name <- deparse(substitute(spec))
+  checkmat <- is.matrix(spec)
+  if (checkmat==FALSE) { stop("Input must be a p-x-k matrix of landmark coordinates")}
+  checkdim <- dim(spec)[2]
+  if (checkdim==2) {stop("Input must be a p-x-k matrix of two-dimensional landmark coordinates") }
+  if (surfsliders == TRUE){
+    surf <- as.matrix(read.csv("surfslide.csv", header=T))
+    spec <- spec[-surf,]
+  }
+  n <- dim(spec)[1]
+  index <- 1:n
+  clear3d();plot3d(spec,size=5,col="black",xlab="x",ylab="y",zlab="z",aspect=FALSE)
+  text3d(spec, texts=index,cex=1,adj=c(2,1))  
+  curveslide<-NULL 
+    for (i in 1:nsliders)      {
+      selected<-NULL
+      for (j in 1:3)    		{
+        f<-keep<-NULL
+        f<-select3d(button="right")
+        keep<-f(spec[,1],spec[,2],spec[,3])
+        selected.temp<-cbind(index[which(keep==TRUE)][1],spec[,1][which(keep==TRUE)][1],spec[,2][which(keep==TRUE)][1],spec[,3][which(keep==TRUE)][1])
+        selected<-rbind(selected,selected.temp)
+        if (j==2) {
+          points3d(selected[2,2],selected[2,3],selected[2,4],size=10,color="red",add=TRUE) 
+        } else {
+          points3d(selected[,2],selected[,3],selected[,4],size=7,color="blue",add=TRUE)
+        }  
+        if (j>=2) {
+          lines3d(selected[c(j-1,j),2],selected[c(j-1,j),3],selected[c(j-1,j),4],size=10,color="red",add=TRUE)
+        } 
+      }
+      cat("semi-landmark",selected[2,1],"slides between landmarks",selected[1,1],"and",selected[3,1],"\n")
+      curveslide<-rbind(curveslide,selected[,1])
+    }
+  write.table(curveslide,file="curveslide.csv",row.names=FALSE,col.names=c("before","slide","after"),sep=",")
+  return(curveslide)
 }
 
-#' Digitize fixed 3D landmarks only.
+
+
+#' Deprecated functions in geomorph
 #'
-#' A function to digitize only fixed landmarks. Input for the function is either a matrix of 3D coordinates 
-#' or a mesh3d object as obtained from read.ply(). 
+#' The following functions have been deprecated in geomorph
 #'
-#' Function to digitize landmarks on 3D surfaces or pointclouds. "n" Landmark points 
-#' are selected by user. No template is used to select surface sliding semi landmarks. 
-#' Select points to be digitized, using the RIGHT mouse button. The LEFT mouse button 
-#' is used to ROTATE mesh, and the mouse SCROLLER is used to zoom in and out. When 
-#' selection of n landmarks is completed, an ".nts" file is created in working directory 
-#' using the specimen name, adding "fixedlmcoords.nts" as a suffix.
+#' This function has been deprecated. Below shows the original function and the replacement function.
 #'
-#' NOTE: To ensure a strong match between the scan and the template, it is recommended that a reasonable number of fixed points be used.
+#' curves2d:  use define.sliders.2d
 #'
+#' digit.curves: use define.sliders.3d
+#' @export
+digit.curves<-function()    {
+  .Deprecated(define.sliders.3d)
+}
+
+#' Digitize 3D landmarks
+#'
+#' An interactive function to digitize three-dimensional (3D) landmarks.
+#' Input for the function is either a matrix of vertex coordinates defining a 3D surface object
+#' or a mesh3d object as obtained from \code{\link{read.ply}}. 
+#'
+#' Function for digitizing "n" three-dimensional landmarks. The landmarks are "fixed" (traditional landmarks). They can be later
+#'  designated as "curve sliders" (semilandmarks, that will "slide" along curves lacking known landmarks (see Bookstein 1991:376-382, 1997 for algorithm details) 
+#'  if required. A sliding semi-landmark ("sliders") will slide between two designated points, along a line tangent to the specified curvature,
+#'  and must be defined as "sliders" using function \code{\link{define.sliders.3d}} or with similar format matrix made outside R. 
+#' 
+#' For 3D "surface sliders" (surface semilandmarks that slide over a surface) the function \code{\link{digitsurface}} should be used instead.
+#'  NOTE: Function centers the mesh before digitizing (required for further operations).
+#' 
 #' \subsection{Digitizing}{ 
-#' Digitizing using buildtemplate is interactive between landmark selection using a mouse (see below for instructions), 
+#' Digitizing is interactive between landmark selection using a mouse (see below for instructions), 
 #' and the R console. Once a point is selected, the user is asked if the system should keep or discard the 
 #' selection #'(y/n). If "y", the user is asked to continue to select the next landmark. If "n" the removes the last chosen
 #' landmark, and the user is asked to select it again. This can be repeated until the user is comfortable with the landmark
 #' chosen. 
 #' 
-#' To digitize with a standard 3-button (PC) buildtemplate uses:
+#' To digitize with a standard 3-button (PC):
 #' \enumerate{
-#'  \item the RIGHT mouse button (primary) to select points to be digitized First,
+#'  \item the RIGHT mouse button (primary) to select points to be digitized (click-drag a box around a vertex to select as landmark),
 #'  \item the LEFT mouse button (secondary) is used to rotate mesh, 
 #'  \item the mouse SCROLLER (third/middle) is used to zoom in and out.
 #' }
-#' Note: Digitizing functions on MACINTOSH computers using a standard 3-button mice works as specified. 
+#' NOTE: Digitizing functions on MACINTOSH computers using a standard 3-button mice works as specified. 
 #' Macs using platform specific single button mice: 
 #' \enumerate{
 #'  \item press button to rotate 3D mesh,
-#'  \item press button while pressing CONTROL key to select points to be digitized, 
-#'  \item press button while pressing OPTION key to adjust mesh perspective.}
+#'  \item press button while pressing CONTROL key to select points to be digitized (click-drag a box around a vertex to select as landmark),
+#'  \item press button while pressing OPTION key to to zoom in and out.}
 #'
 #' Mac mouse settings need adjustment to acquire zooming functions of the "middle/third" mouse button/scroller.
 #' Some instructions can be found at \url{http://blog.boastr.net/}. In addition, freeware providing "Middle Click" 
 #' functionality is available at \url{http://magicprefs.com/} for "magicmice" now standard 
 #' on many Macintosh machines.
+#' 
+#' NOTE: there is no pan (translate) functionality in rgl library for all platforms at this time.
 #' }
 #'
 #' @param spec Name of surface file, as either an object of class shape3d/mesh3d, or matrix of three-dimensional vertex coordinates.
-#' @param fixed numeric: The number of fixed template landmarks
+#' @param fixed numeric: The number landmarks (fixed, and curve sliders if desired)
 #' @param index logical: Whether selected landmark addresses should be returned
-#' @param ptsize numeric: Size to plot the mesh points (vertices), e.g. 0.1 for dense meshes, 3 for sparse meshes   
+#' @param ptsize numeric: Size to plot the mesh points (vertices), e.g. 0.1 for dense meshes, 3 for sparse meshes 
+#' @return Function writes to the working directory an NTS file with the name of the specimen and .nts suffix containing the landmark coordinates.
+#' If index=FALSE function returns to the console an n x 3 matrix containing the x,y,z coordinates of the digitized landmarks.  
+#' If index=TRUE, function returns a list:
+#'  \item{selected}{a matrix containing the x,y,z coordinates of the digitized landmarks} 
+#'  \item{fix}{a matrix of addresses for landmarks that are "fixed" (for internal use)} 
 #' @export
-#' @keywords digifix
+#' @keywords digit.fixed
 #' @author Erik Otarola-Castillo & Emma Sherratt
 digit.fixed <- function(spec, fixed, index=FALSE, ptsize = 1)    {
   spec.name<-deparse(substitute(spec))
@@ -2592,11 +2761,12 @@ digit.fixed <- function(spec, fixed, index=FALSE, ptsize = 1)    {
     specimen <- scale(as.matrix(t(spec$vb)[,-4]), scale = FALSE)
     spec$vb <- rbind(t(specimen), 1)
     mesh <- spec 
+    if (is.null(mesh$material)) { mesh$material <- "gray" }
   } else if (inherits(spec, "matrix") == FALSE) {
     stop ("File is not a shape3d/mesh3d object or xyz matrix")
-    } else if (inherits(spec, "matrix") == TRUE && dim(spec)[2]==3) {
-      specimen <- scale(spec, scale = FALSE)
-      } else { stop ("File is not matrix in form: vertices by xyz")} 
+  } else if (inherits(spec, "matrix") == TRUE && dim(spec)[2]==3) {
+    specimen <- scale(spec, scale = FALSE)
+  } else { stop ("File is not matrix in form: vertices by xyz")} 
   clear3d();plot3d(specimen[,1],specimen[,2],specimen[,3],size=ptsize,aspect=FALSE)
   if (!is.null(mesh)) { shade3d(mesh, add=TRUE) }
   selected<-matrix(NA,nrow=fixed,ncol=3);fix<-NULL    
@@ -2642,9 +2812,9 @@ digit.fixed <- function(spec, fixed, index=FALSE, ptsize = 1)    {
     } 
   } 
   if(index==FALSE){
-    cat(paste('"',spec.name,sep=""),file=paste(spec.name,".nts",sep=""),sep="\n")
-    cat(paste(1,dim(selected)[1],3,0, "dim=3"),file=paste(spec.name,".nts",sep=""),sep="\n",append=TRUE)
-    write.table(selected,file=paste(spec.name,".nts",sep=""),col.names = FALSE, row.names = FALSE,sep="  ",append=TRUE)
+    writeland.nts(selected, spec.name, comment=NULL)
+    rownames(selected)<-seq(from=1,to=nrow(selected))
+    colnames(selected)<-c("xpts","ypts","zpts")
     return(selected) 
   }
   if(index==TRUE){
@@ -2652,49 +2822,63 @@ digit.fixed <- function(spec, fixed, index=FALSE, ptsize = 1)    {
   }
 }
 
+
 #' Digitize 3D fixed landmarks and surface semilandmarks.
-#'
-#' A function to digitize three dimensional fixed landmarks and surface semilandmarks. Input for the function 
-#' is either a matrix of 3D coordinates or a mesh3d object as obtained from read.ply(). 
-#'
-#' Function to digitize landmarks on 3D surfaces or pointclouds. "n" Landmark points are selected 
-#' by user akin to landmarks selected to construct template using function \code{\link{buildtemplate}}. 
-#' Following selection of points, function digitsurface finds surface semilandmarks following algorithm outlined in Gunz et al. (2005:90-92) and Mitteroecker and Gunz (2009:242). digitsurface finds the same number of surface semi-landmarks as the template (created by buildtemplate) by downsampling scanned mesh, registering template with current specimen via GPA. A nearest neighbor algorithm is used to match template 
-#' surface landmarks to current specimen's. 
-#' \subsection{Digitizing}{Digitizing using buildtemplate is interactive between landmark selection using a mouse (see below for instructions), 
+#' 
+#' An interactive function to digitize three-dimensional (3D) landmarks on a surface lacking known landmarks.
+#' Input for the function is either a matrix of vertex coordinates defining a 3D surface object
+#' or a mesh3d object as obtained from \code{\link{read.ply}}. 
+#' 
+#' Function for digitizing fixed 3D landmarks and placing "surface sliders", semilandmarks that slide over a surface.
+#'  Following selection of fixed points (see digitizing below), function finds surface semilandmarks following 
+#'  algorithm outlined in Gunz et al. (2005:90-92) and Mitteroecker and Gunz (2009:242). digitsurface finds the same number of surface 
+#'  semilandmarks as the template (created by \code{\link{buildtemplate}}) by downsampling scanned mesh, registering template with 
+#'  current specimen via GPA. A nearest neighbor algorithm is used to match template surface landmarks to current specimen's. 
+#'  To use function digitsurface, the template must be constructed first, and 'template.txt' be in the working directory. 
+#' 
+#' Some of the "fixed" landmarks digitized with digitsurface can be later designated as "curve sliders" using function \code{\link{define.sliders.3d}} 
+#'  if required (see details in \code{\link{digit.fixed}}).
+#'  NOTE: Function centers the mesh before digitizing (required for further operations).
+#' 
+#' \subsection{Digitizing}{
+#' Digitizing is interactive between landmark selection using a mouse (see below for instructions), 
 #' and the R console. Once a point is selected, the user is asked if the system should keep or discard the 
 #' selection #'(y/n). If "y", the user is asked to continue to select the next landmark. If "n" the removes the last chosen
 #' landmark, and the user is asked to select it again. This can be repeated until the user is comfortable with the landmark
 #' chosen. 
 #' 
-#' To digitize with a standard 3-button (PC) buildtemplate uses:
+#' To digitize with a standard 3-button (PC):
 #' \enumerate{
-#'  \item the RIGHT mouse button (primary) to select points to be digitized First,
+#'  \item the RIGHT mouse button (primary) to select points to be digitized (click-drag a box around a vertex to select as landmark),
 #'  \item the LEFT mouse button (secondary) is used to rotate mesh, 
 #'  \item the mouse SCROLLER (third/middle) is used to zoom in and out.
 #' }
-#' Note: Digitizing functions on MACINTOSH computers using a standard 3-button mice works as specified. 
+#' NOTE: Digitizing functions on MACINTOSH computers using a standard 3-button mice works as specified. 
 #' Macs using platform specific single button mice: 
 #' \enumerate{
 #'  \item press button to rotate 3D mesh,
-#'  \item press button while pressing CONTROL key to select points to be digitized, 
+#'  \item press button while pressing CONTROL key to select points to be digitized (click-drag a box around a vertex to select as landmark), 
 #'  \item press button while pressing OPTION key to adjust mesh perspective.
 #' }
 #' Mac mouse settings need adjustment to acquire zooming functions of the "middle/third" mouse button/scroller.
 #' Some instructions can be found at \url{http://blog.boastr.net/}. In addition, freeware providing "Middle Click" 
 #' functionality is available at \url{http://magicprefs.com/} for "magicmice" now standard 
 #' on many Macintosh machines.
+#' 
+#' NOTE: there is no pan (translate) functionality in rgl library for all platforms at this time.
 #' }
-#' When completed, an ".nts" file is created in working directory 
-#' using the specimen name, adding "coords.nts" as a suffix. This file contains the specimen 
-#' coordinates to be used by GPA. 
 #'
 #' @param spec Name of surface file, as either an object of class shape3d/mesh3d, or matrix of three-dimensional vertex coordinates.
 #' @seealso \code{\link{buildtemplate}}
 #' @param fixed numeric: The number of fixed template landmarks 
-#' @param ptsize numeric: Size to plot the mesh points (vertices), e.g. 0.1 for dense meshes, 3 for sparse meshes   
+#' @param ptsize numeric: Size to plot the mesh points (vertices), e.g. 0.1 for dense meshes, 3 for sparse meshes
+#' @return Function writes to the working directory an NTS file with the name of the specimen and .nts suffix containing the landmark coordinates.   
+#' Function also returns a list:
+#'  \item{FIX.LANDMARKS}{an n x 3 matrix containing the x,y,z coordinates of the digitized landmarks} 
+#'  \item{SURFSLIDERSxyz}{a matrix of addresses for landmarks that are "surface sliders"} 
 #' @references Gunz P, Mitteroecker P, & Bookstein FJ (2005) Semilandmarks in Three Dimensions. Modern Morphometrics in Physical Anthropology, ed Slice DE (Springer-Verlag, New York), pp 73-98.
-#' @references Mitteroecker P & Gunz P (2009) Advances in Geometric Morphometrics. Evolutionary Biology 36(2):235-247.            #' @export 
+#' @references Mitteroecker P & Gunz P (2009) Advances in Geometric Morphometrics. Evolutionary Biology 36(2):235-247. 
+#' @export
 #' @keywords digitsurface
 #' @author Erik Otarola-Castillo & Emma Sherratt
 digitsurface<-function(spec, fixed, ptsize = 1)    {
@@ -2704,11 +2888,12 @@ digitsurface<-function(spec, fixed, ptsize = 1)    {
     specimen <- scale(as.matrix(t(spec$vb)[,-4]), scale = FALSE)
     spec$vb <- rbind(t(specimen), 1)
     mesh <- spec 
+    if (is.null(mesh$material)) { mesh$material <- "gray" }
   } else if (inherits(spec, "matrix") == FALSE) {
     stop ("File is not a shape3d/mesh3d object or xyz matrix")
-    } else if (inherits(spec, "matrix") == TRUE && dim(spec)[2]==3) {
-      specimen <- scale(spec, scale = FALSE)
-      } else { stop ("File is not matrix in form: vertices by xyz")} 
+  } else if (inherits(spec, "matrix") == TRUE && dim(spec)[2]==3) {
+    specimen <- scale(spec, scale = FALSE)
+  } else { stop ("File is not matrix in form: vertices by xyz")} 
   selected<-digit.fixed(spec, fixed,index=T,ptsize)
   template<-as.matrix(read.table("template.txt",header=TRUE))
   specimen<-trans(as.matrix(specimen))
@@ -2731,23 +2916,45 @@ digitsurface<-function(spec, fixed, ptsize = 1)    {
   points3d(specimen[selected$fix,],col="red",size=10)
   points3d(template.tps,col="blue",size=10)
   points3d(sliders[,1:3],size=10,col="green")
-  cat(paste('"',spec.name,sep=""),file=paste(spec.name,".nts",sep=""),sep="\n")
-  cat(paste(1,dim(rbind(specimen[selected$fix,],sliders))[1],3,0, "dim=3"),file=paste(spec.name,".nts",sep=""),sep="\n",append=TRUE)
-  write.table(rbind(specimen[selected$fix,],sliders),file=paste(spec.name,".nts",sep=""),col.names = FALSE, row.names = FALSE,sep="  ",append=TRUE)  
+  selected.out <- rbind(specimen[selected$fix,],sliders)
+  writeland.nts(selected.out, spec.name, comment=NULL)
   return(list(FIX.LANDMARKS=selected$selected,SURFSLIDERSxyz=sliders))
 }
 
-
 #' Edit 3D template
 #'
-#' A function to edit the 3D template file by removing undesirable points. 
-#'
+#' An interactive function to remove landmarks from a 3D template file. 
+#' 
+#' Function edits a 'template.txt' file made by \code{\link{buildtemplate}}, which must be in current working directory.
+#'  Function overwrites 'template.txt' in working directory with edited version.
+#' \subsection{Selection}{ 
+#' Choosing which landmarks will be deleted involves landmark selection using a mouse in the rgl plot window. 
+#' With a standard 3-button (PC) buildtemplate uses:
+#' \enumerate{
+#'  \item the RIGHT mouse button (primary) to choose points to be deleted (click-drag a box around landmark),
+#'  \item the LEFT mouse button (secondary) is used to rotate mesh, 
+#'  \item the mouse SCROLLER (third/middle) is used to zoom in and out.
+#' }
+#' NOTE: Digitizing functions on MACINTOSH computers using a standard 3-button mice works as specified. 
+#' Macs using platform specific single button mice: 
+#' \enumerate{
+#'  \item press button to rotate 3D mesh,
+#'  \item press button while pressing CONTROL key to choose points to be deleted (click-drag a box around landmark),
+#'  \item press button while pressing OPTION key to zoom in and out.
+#'  }
+#' Mac mouse settings need adjustment to acquire zooming functions of the "middle/third" mouse button/scroller.
+#' Some instructions can be found at \url{http://blog.boastr.net/}. In addition, freeware providing "Middle Click" 
+#' functionality is available at \url{http://magicprefs.com/} for "magicmice" now standard 
+#' on many Macintosh machines.
+#' }
 #' @param template Matrix of template 3D coordinates.
 #' @param fixed Number of "fixed" landmark points (non surface sliding points)
 #' @param n Number of points to be removed 
+#' @return Function returns a matrix containing the x,y,z coordinates of the new template landmarks.
+#' Function also writes to working directory 'template.txt' containing the x,y,z coordinates of the template 
 #' @export
 #' @keywords editTemplate
-#' @author Erik Otarola-Castillo
+#' @author Erik Otarola-Castillo & Emma Sherratt
 editTemplate<-function(template, fixed, n){
   if (is.null(dim(template))) stop ("File is not 3D matrix")
   if (dim(template)[2]!=3) stop ("File is not 3D matrix")
@@ -2756,7 +2963,7 @@ editTemplate<-function(template, fixed, n){
   points3d(template[(1:fixed),],size=10,color="red",add=TRUE)  
   cat("Remove Template Points","\n")
   selected2<-NULL
-  for (i in 1:n)    		{
+  for (i in 1:n)      	{
     selected2.temp<-NULL
     f<-NULL
     keep<-NULL
@@ -2773,47 +2980,61 @@ editTemplate<-function(template, fixed, n){
   write.table(template,file="template.txt",col.names=TRUE)
   clear3d();plot3d(template[-(1:fixed[1]),],size=7,col="blue",aspect=FALSE)
   points3d(template[(1:fixed),],size=10,color="red",add=TRUE)
+  return(template)
 }
+
 
 #' Digitize 2D landmarks.
 #'
-#' A function to digitize 2D landmarks from .jpg files.
+#' An interactive function to digitize two-dimensional(2D) landmarks from .jpg files.
 #'
-#' digitize2d is a function to digitize 2D landmarks on specimen images (.jpg). "nlandmarks" 
-#' is the number of landmark points to be digitized by the user. Landmarks should include
-#' "true" landmarks and semilandmarks to be "slid". For best results, digitizing sequence should proceed 
-#' by selecting all true landmark points first, followed by selection of sliding semi-landmarks. 
-#' Use function "curves2d" to select sliding semilandmarks. 
-#' After choosing image to digitize, users digitize scale within image (LEFT mouse button). Then 
-#' landmark points can be digitized using the LEFT mouse button. When selection of n landmarks is completed, 
-#' an ".nts" file is created in working directory using the specimen name, adding ".nts" as a suffix.
-#'
+#' Function for digitizing 2D landmarks on specimen images (.jpg). "nlandmarks" 
+#'  are digitized by the user (see below). The landmarks are "fixed" (traditional landmarks). 
+#'  They can be later designated as "curve sliders" (semilandmarks, that will "slide" along curves 
+#'  lacking known landmarks (see Bookstein 1991:376-382, 1997 for algorithm details) 
+#'  if required. These landmarks are defined as "sliders" using function \code{\link{define.sliders.2d}} 
+#'  or with similar format matrix made outside R. Digitizing sequence should proceed 
+#'  by selecting all "fixed" landmark points first, followed by selection of "curve sliders". 
+#' 
+#' \subsection{Digitizing}{ 
+#' Digitizing landmarks involves landmark selection using a mouse in the plot window, 
+#' using the LEFT mouse button (or regular button for Mac users):
+#' \enumerate{
+#'  \item Digitize the scale bar by selecting the two end points (single click for start and end),
+#'  NOTE: no dot is printed on the image on the first click; only when both ends have been digitized.
+#'  \item Digitize each landmark with single click and the landmark is shown in red,
+#'  When selection of n landmarks is completed, an ".nts" file is created in working directory using the specimen name, adding ".nts" as a suffix.
+#' }
+#' }
 #' @param file Name of jpeg file to be digitized. File names can be 
 #' written in manually, including paths, or obtained using directory/file manipulation functions 
 #' e.g., \code{\link{list.files}}
-#' @seealso \code{\link{list.files}}
+#' @seealso \code{\link{list.files}}, 
 #' @param nlandmarks Number of landmarks to be digitized.
-#' @param scale Desired length of scale placed on image.
-#' @return Function returns an n-x-2 .nts file containing the 2d coordinates of digitized landmarks
-#' @return Returns text file with the distance in scale
-#' @export
+#' @param scale Length of scale placed in image.
+#' @return Function writes to the working directory an NTS file with the name of the specimen and .nts suffix containing the landmark coordinates.   
+#' Function also returns to console an n x 2 matrix containing the x,y coordinates of the digitized landmarks.  
 #' @keywords digitize2d
-#' @author Erik Otarola-Castillo
-digitize2d<-function(file, nlandmarks,scale){
+#' @author Erik Otarola-Castillo & Emma Sherratt
+digitize2d<-function(file, nlandmarks, scale){
   spec.name<-unlist(strsplit(basename(file), "\\."))[1]
   specimen<-readJPEG(file, native = T)  
   plot(seq(0,dim(specimen)[2],length.out=10),seq(0,dim(specimen)[1],length.out=10), type='n',xlab="x",ylab="y",asp=1,tck=0,xaxt="n",yaxt="n")
   rasterImage(specimen, 1, 1,dim(specimen)[2],  dim(specimen)[1])
-  cat("set scale =",scale,"\n")
-  dime<-picscale(scale)
-  cat("select landmarks 1:",nlandmarks,"\n",sep="")
-  selected<-matrix(unlist(locator(n = nlandmarks, type ="p",col="black",cex=4,pch=21,bg="red")),dimnames=list(paste("LM",seq(1,nlandmarks)),c("x","y")),ncol=2)
-  output<-selected/dime
-  path<-paste(sub(basename(file),"",file),spec.name,sep="")
-  cat(paste('"',spec.name,sep=""),file=paste(path,".nts",sep=""),sep="\n")
-  cat(paste(1,dim(output)[1],2,0,"dim=2"),file=paste(path,".nts",sep=""),sep="\n",append=TRUE)
-  write.table(output,file=paste(path,".nts",sep=""),col.names= FALSE, row.names = FALSE,sep="  ",append=TRUE) 
-  return(list(SCALE=dime,LANDMARKS=output))
+  cat("Set scale =",scale,"\n")
+  scalebar<-picscale(scale)
+  selected <- matrix(NA, nrow = nlandmarks, ncol = 2)
+  fix <- NULL
+  cat("Select landmarks 1:",nlandmarks,"\n",sep="")
+    for (i in 1:nlandmarks) {
+      fix<- locator(n=1, type ="p",col="black",cex=4,pch=21,bg="red")
+      selected[i,1] <- fix$x
+      selected[i,2] <- fix$y  
+    }
+  output<-selected/scalebar 
+  writeland.nts(output, spec.name, comment=NULL)  
+  output<-matrix(output,dimnames=list(paste("LM",seq(1,nlandmarks)),c("x","y")),ncol=2)
+  return(LANDMARKS=output)
 }
 
 # picscale is called by digitize2d
@@ -2823,83 +3044,102 @@ picscale<- function(scale){
   sqrt(sum(diff(digscale$x)^2+diff(digscale$y)^2))*scale
 }
 
+#' Deprecated functions in geomorph
+#'
+#' The following functions have been deprecated in geomorph
+#'
+#' This function has been deprecated. Below shows the original function and the replacement function.
+#'
+#' curves2d:  use define.sliders.2d
+#'
+#' digit.curves: use define.sliders.3d
+#' @export
+curves2d<-function(){
+  .Deprecated(define.sliders.2d)
+}
+
+
 #' Select points to "slide" along two-dimensional curves.
 #'
-#' An interactive function to select 2d "sliding" semilandmarks along curves.
+#' An interactive function to define which landmarks will "slide" along two-dimensional (2D) curves.
 #'
-#' This function selects points on the created template to "slide" along 2d curves 
-#' lacking known landmarks (see Bookstein 1991:376-382, 1997 for algorithm details). Each 
-#' sliding semi-landmark (sliders) will slide between two designated points, along a line 
-#' tangent to the specified curvature. Using the right mouse button, users:
-#' 1. Select sample ".nts" file digitized using function digitize2d
-#' 2. Select the first point between which semi-landmark will "slide"
-#' 3. Select sliding semi-landmark,
-#' 4.  Select point along which sliding trajectory will end. 
-#' Screen plot shows arrows connecting the three points, and direction of "slider" semilandmark. 
-#' The LEFT mouse button is used to select points.
-#'
-#' @param file Name of sample file in working directory (can include path) containing two-dimensional 
-#' landmark data. File names can be written in manually, including paths, or obtained using directory/file 
-#' manipulation functions e.g., \code{\link{list.files}}
-#' @seealso \code{\link{list.files}}
-#' @param nsliders Number of landmarks to slide along curves.
-#' @return Function returns an n-x-3 .nts file containing the positions along which each of n chosen
-#' semilandmarks will "slide". e.g., "4 3 2", semilandmark 3 will slide between 4 and 2. 
+#' Function takes a matrix of digitized landmark coordinates, such as made by \code{\link{digitize2d}},
+#'  and helps user choose which landmarks will be treated as "curve sliders" in Generalized Procrustes analysis
+#'  \code{\link{gpagen}}. This type of semilandmark "slides" along curves lacking known landmarks 
+#'  (see Bookstein 1991:376-382, 1997 for algorithm details). 
+#'  Each sliding semilandmark ("sliders") will slide between two designated points, along a line 
+#'  tangent to the specified curvature.
+#' 
+#' \subsection{Selection}{ 
+#' Choosing which landmarks will be sliders involves landmark selection using a mouse in the plot window. 
+#' To define the sliders, for each sliding landmark along the curve in the format 'before-slider-after',
+#' using the LEFT mouse button (or regular button for Mac users), click on the hollow circle to choose the landmark
+#' in the following order:
+#' \enumerate{
+#'  \item Click to choose the first landmark between which semi-landmark will "slide",
+#'  \item Click to choose sliding landmark,
+#'  \item Click to choose the last landmark between which semi-landmark will "slide",
+#'  Selected landmarks will be filled in and lines are drawn connecting the three landmarks, 
+#'  and will highlight the sliding semilandmark in red and the flanking landmarks in blue. 
+#' }
+#' This procedure is overlapping, so for example, a curve defined by a sequence of semilandmarks,
+#' the user must select the 2nd point of the first three to be the 1st for the next
+#' e.g. 1 2 3 then 2 3 4, then 3 4 5 etc.
+#' }
+#' @param spec Name of specimen, as an object matrix containing 2D landmark coordinates
+#' @param nsliders Number of landmarks to be semilandmarks that slide along curves
+#' @return Function returns a 'nsliders-x-3' matrix containing the landmark address of the curve sliders, indicating the 
+#' landmarks between which the slider landmarks will "slide". The matrix is also written to working directory
+#' as "curveslide.csv". Matrix (or "curveslide.csv") is designed for use by \code{\link{gpagen}} during GPA.
 #' @export
-#' @keywords digicurves
-#' @author Dean Adams, Erik Otarola-Castillo, and Emma Sherratt
+#' @keywords define.sliders.2d
+#' @seealso  \code{\link{digitize2d}}, \code{\link{gpagen}}
+#' @author Dean Adams,
+#' @author Erik Otarola-Castillo
+#' @author Emma Sherratt
 #' @references  Bookstein, F. J. 1991  Morphometric Tools for Landmark Data: Geometry and Biology. 
 #' Cambridge University Press, New York.
 #' @references Bookstein, F. J. 1997 Landmark Methods for Forms without Landmarks: Morphometrics of 
 #' Group Differences in Outline Shape. Medical Image Analysis 1(3):225-243.
-curves2d<-function(file, nsliders){
-  spec.name<-unlist(strsplit(basename(file), "\\."))[1]
-  nts <- scan(file = file, what = "char", sep = "\n", comment.char = "\"", strip.white = TRUE, 
-                  quiet = TRUE)
-  tmp <- gsub("\\t", " ", nts[-1])
-  tmp <- unlist(strsplit(tmp, split = " +"))
-  lm<- matrix(as.numeric(tmp), ncol=2, byrow=T)
-  plot(lm[,1],lm[,2],cex=1,pch=21,bg="white",xlim=range(lm[,1]),ylim=range(lm[,2]),asp=1)
-  text(lm[,1],lm[,2],label=paste("LM",1:dim(lm)[1]),adj=.5,pos=4)
+define.sliders.2d<-function(spec, nsliders){
+  spec.name <- deparse(substitute(spec))
+  checkmat <- is.matrix(spec)
+  if (checkmat==FALSE) { stop("Input must be a p-x-k matrix of landmark coordinates")}
+  checkdim <- dim(spec)[2]
+  if (checkdim==3) {stop("Input must be a p-x-k matrix of two-dimensional landmark coordinates") }
+  plot(spec[,1],spec[,2],cex=1,pch=21,bg="white",xlim=range(spec[,1]),ylim=range(spec[,2]),asp=1)
+  text(spec[,1],spec[,2],label=paste(1:dim(spec)[1]),adj=.5,pos=4)
   selected<-matrix(NA,ncol=3,nrow=nsliders)
   select<-NULL
   for(i in 1:nsliders){
     for(j in 1:3){
-      select<-identify(lm,n=1,plot=FALSE,cex=5,pch=25)
+      select<-identify(spec,n=1,plot=FALSE,cex=5,pch=25)
       selected[i,j]<-select
       if(j==2){
-        points(lm[select,][1],lm[select,][2],cex=1.5,pch=19,col="red")
-        arrows(lm[selected[i,j],][1],lm[selected[i,j],][2],lm[selected[i,j-1],][1],lm[selected[i,j-1],][2]
+        points(spec[select,][1],spec[select,][2],cex=1.5,pch=19,col="red")
+        arrows(spec[selected[i,j],][1],spec[selected[i,j],][2],spec[selected[i,j-1],][1],spec[selected[i,j-1],][2]
                ,col="red",lwd=2,length=.15)
       } else {
-        points(lm[select,][1],lm[select,][2],cex=1.1,pch=19,col="blue")
+        points(spec[select,][1],spec[select,][2],cex=1.1,pch=19,col="blue")
       }
       if(j==3){
-        arrows(lm[selected[i,j],][1],lm[selected[i,j],][2],lm[selected[i,j-1],][1],lm[selected[i,j-1],][2]
+        arrows(spec[selected[i,j],][1],spec[selected[i,j],][2],spec[selected[i,j-1],][1],spec[selected[i,j-1],][2]
                ,col="red",lwd=2,length=.15,code=1)
       } else { NA
       } 
     }
   }
-  output<-selected
-#  path<-paste(sub(basename(file),"",file),spec.name,sep="")
-#  cat(paste('"sliders',sep=""),file=paste(path,".nts",sep=""),sep="\n")
-#  cat(paste(1,dim(output)[1],3,0, "dim=3"),file=paste(path,".nts",sep=""),sep="\n",append=TRUE)
-#  write.table(output,file=paste(path,".nts",sep=""),col.names = FALSE, row.names = FALSE,sep=" ",append=TRUE)
-  write.table(output,file="curveslide.csv",row.names=FALSE,col.names=c("before","slide","after"),sep=",")
-  return(list(sliders=output))
+  write.table(selected,file="curveslide.csv",row.names=FALSE,col.names=c("before","slide","after"),sep=",")
+  return(curveslide=selected)
 }
-
-
-
-
 
 #' Plot 3D specimen, fixed landmarks and surface semilandmarks.
 #'
-#' A function to plot three dimensional specimen along with its fixed landmarks and surface semilandmarks.
+#' A function to plot three dimensional (3D) specimen along with its landmarks.
+#' 
+#' Function to plot 3D specimens along with their digitized "fixed" landmarks and semilandmarks
+#' "surface sliders" and "curve sliders".
 #' If specimen is a 3D surface (ply file), mesh is plotted.
-#'
-#' Function to plot 3D specimens along with their digitized "fixed" and surface sliding semilandmarks.
 #'
 #' @param spec Name of surface file, as either an object of class shape3d/mesh3d, or matrix of three-dimensional vertex coordinates.
 #' @param digitspec Name of data matrix containing three-dimensional fixed and/or surface sliding coordinates.
@@ -2920,11 +3160,12 @@ plotspec <- function (spec, digitspec, fixed, ptsize = 1)
     specimen <- scale(as.matrix(t(spec$vb)[,-4]), scale = FALSE)
     spec$vb <- rbind(t(specimen), 1)
     mesh <- spec 
+    if (is.null(mesh$material)) { mesh$material <- "gray" }
   } else if (inherits(spec, "matrix") == FALSE) {
     stop ("File is not a shape3d/mesh3d object or xyz matrix")
-    } else if (inherits(spec, "matrix") == TRUE && dim(spec)[2]==3) {
-      specimen <- scale(spec, scale = FALSE)
-      } else { stop ("File is not matrix in form: vertices by xyz")} 
+  } else if (inherits(spec, "matrix") == TRUE && dim(spec)[2]==3) {
+    specimen <- scale(spec, scale = FALSE)
+  } else { stop ("File is not matrix in form: vertices by xyz")} 
   if (is.null(dim(digitspec)) || dim(digitspec)[2] != 3) stop("Digitized file is not xyz matrix in form: p x k")
   clear3d()
   plot3d(specimen[, 1], specimen[, 2], specimen[, 3], size = ptsize, 
@@ -2934,30 +3175,6 @@ plotspec <- function (spec, digitspec, fixed, ptsize = 1)
            col = "red")
   points3d(digitspec[(fixed + 1):nrow(digitspec), ], aspect = F, 
            size = 10, col = "green")
-}
-
-curvfunc<-function(n,curves,template,index,curslid){ # REVISED
-  for (i in 1:curves)      {
-    curslid.temp<-selected<-NULL
-    for (j in 1:3)				{
-      selected.temp<-f<-keep<-NULL
-      f<-select3d(button="right")
-      keep<-f(template[,1],template[,2],template[,3])
-      selected.temp<-cbind(index[which(keep==TRUE)][1],template[,1][which(keep==TRUE)][1],template[,2][which(keep==TRUE)][1],template[,3][which(keep==TRUE)][1])
-      selected<-rbind(selected,selected.temp)
-      if (j==2) {
-        points3d(selected[2,2],selected[2,3],selected[2,4],size=10,color="red",add=TRUE) 
-      } else {
-        points3d(selected[,2],selected[,3],selected[,4],size=7,color="blue",add=TRUE)
-      }  
-      if (j>=2) {
-        lines3d(selected[c(j-1,j),2],selected[c(j-1,j),3],selected[c(j-1,j),4],size=10,color="red",add=TRUE)
-      } 
-    }
-    cat("semi-landmark",selected[2,1],"slides between landmarks",selected[1,1],"and",selected[3,1],"\n")
-    curslid<-rbind(curslid,selected[,1])
-  }
-  return(curslid)
 }
 
 #' Read landmark data from vrml files

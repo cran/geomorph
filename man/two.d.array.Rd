@@ -2,28 +2,27 @@
 \alias{two.d.array}
 \title{Convert (p x k x n) data array into 2D data matrix}
 \usage{
-  two.d.array(A)
+two.d.array(A)
 }
 \arguments{
   \item{A}{An array (p x k x n) containing landmark
   coordinates for a set of specimens}
 }
 \value{
-  Function returns a two-dimensional matrix of dimension (n
-  x [p*k]), where rows represent specimens and columns
-  represent variables.
+Function returns a two-dimensional matrix of dimension (n x
+[p x k]), where rows represent specimens and columns
+represent variables.
 }
 \description{
-  Convert a three-dimensional array of landmark coordinates
-  into a 2-dimensional matrix
+Convert a three-dimensional array of landmark coordinates
+into a 2-dimensional matrix
 }
 \details{
-  This function converts a (p x k x n) array of landmark
-  coordinates into a 2-dimensional matrix. The latter
-  format of the shape data is useful for performing
-  subsequent statistical analyses in R (e.g., PCA, MANOVA,
-  PLS, etc.). Row labels are preserved if included in the
-  original array.
+This function converts a (p x k x n) array of landmark
+coordinates into a 2-dimensional matrix. The latter format
+of the shape data is useful for performing subsequent
+statistical analyses in R (e.g., PCA, MANOVA, PLS, etc.).
+Row labels are preserved if included in the original array.
 }
 \examples{
 data(plethodon)
@@ -32,7 +31,7 @@ plethodon$land    #original data in the form of 3D array
 two.d.array(plethodon$land)   # Convert to a 2D data matrix
 }
 \author{
-  Dean Adams
+Dean Adams
 }
 \keyword{two.d.array}
 

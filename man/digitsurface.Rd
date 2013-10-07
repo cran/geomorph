@@ -2,7 +2,7 @@
 \alias{digitsurface}
 \title{Digitize 3D fixed landmarks and surface semilandmarks.}
 \usage{
-  digitsurface(spec, fixed, ptsize = 1)
+digitsurface(spec, fixed, ptsize = 1)
 }
 \arguments{
   \item{spec}{Name of surface file, as either an object of
@@ -16,73 +16,90 @@
   (vertices), e.g. 0.1 for dense meshes, 3 for sparse
   meshes}
 }
+\value{
+Function writes to the working directory an NTS file with
+the name of the specimen and .nts suffix containing the
+landmark coordinates. Function also returns a list:
+\item{FIX.LANDMARKS}{an n x 3 matrix containing the x,y,z
+coordinates of the digitized landmarks}
+\item{SURFSLIDERSxyz}{a matrix of addresses for landmarks
+that are "surface sliders"}
+}
 \description{
-  A function to digitize three dimensional fixed landmarks
-  and surface semilandmarks. Input for the function is
-  either a matrix of 3D coordinates or a mesh3d object as
-  obtained from read.ply().
+An interactive function to digitize three-dimensional (3D)
+landmarks on a surface lacking known landmarks. Input for
+the function is either a matrix of vertex coordinates
+defining a 3D surface object or a mesh3d object as obtained
+from \code{\link{read.ply}}.
 }
 \details{
-  Function to digitize landmarks on 3D surfaces or
-  pointclouds. "n" Landmark points are selected by user
-  akin to landmarks selected to construct template using
-  function \code{\link{buildtemplate}}. Following selection
-  of points, function digitsurface finds surface
-  semilandmarks following algorithm outlined in Gunz et al.
-  (2005:90-92) and Mitteroecker and Gunz (2009:242).
-  digitsurface finds the same number of surface
-  semi-landmarks as the template (created by buildtemplate)
-  by downsampling scanned mesh, registering template with
-  current specimen via GPA. A nearest neighbor algorithm is
-  used to match template surface landmarks to current
-  specimen's. \subsection{Digitizing}{Digitizing using
-  buildtemplate is interactive between landmark selection
-  using a mouse (see below for instructions), and the R
-  console. Once a point is selected, the user is asked if
-  the system should keep or discard the selection #'(y/n).
-  If "y", the user is asked to continue to select the next
-  landmark. If "n" the removes the last chosen landmark,
-  and the user is asked to select it again. This can be
-  repeated until the user is comfortable with the landmark
-  chosen.
+Function for digitizing fixed 3D landmarks and placing
+"surface sliders", semilandmarks that slide over a surface.
+Following selection of fixed points (see digitizing below),
+function finds surface semilandmarks following algorithm
+outlined in Gunz et al. (2005:90-92) and Mitteroecker and
+Gunz (2009:242). digitsurface finds the same number of
+surface semilandmarks as the template (created by
+\code{\link{buildtemplate}}) by downsampling scanned mesh,
+registering template with current specimen via GPA. A
+nearest neighbor algorithm is used to match template
+surface landmarks to current specimen's.  To use function
+digitsurface, the template must be constructed first, and
+'template.txt' be in the working directory.
 
-  To digitize with a standard 3-button (PC) buildtemplate
-  uses: \enumerate{ \item the RIGHT mouse button (primary)
-  to select points to be digitized First, \item the LEFT
-  mouse button (secondary) is used to rotate mesh, \item
-  the mouse SCROLLER (third/middle) is used to zoom in and
-  out. } Note: Digitizing functions on MACINTOSH computers
-  using a standard 3-button mice works as specified. Macs
-  using platform specific single button mice: \enumerate{
-  \item press button to rotate 3D mesh, \item press button
-  while pressing CONTROL key to select points to be
-  digitized, \item press button while pressing OPTION key
-  to adjust mesh perspective. } Mac mouse settings need
-  adjustment to acquire zooming functions of the
-  "middle/third" mouse button/scroller. Some instructions
-  can be found at \url{http://blog.boastr.net/}. In
-  addition, freeware providing "Middle Click" functionality
-  is available at \url{http://magicprefs.com/} for
-  "magicmice" now standard on many Macintosh machines. }
-  When completed, an ".nts" file is created in working
-  directory using the specimen name, adding "coords.nts" as
-  a suffix. This file contains the specimen coordinates to
-  be used by GPA.
+Some of the "fixed" landmarks digitized with digitsurface
+can be later designated as "curve sliders" using function
+\code{\link{define.sliders.3d}} if required (see details in
+\code{\link{digit.fixed}}).  NOTE: Function centers the
+mesh before digitizing (required for further operations).
+
+\subsection{Digitizing}{ Digitizing is interactive between
+landmark selection using a mouse (see below for
+instructions), and the R console. Once a point is selected,
+the user is asked if the system should keep or discard the
+selection #'(y/n). If "y", the user is asked to continue to
+select the next landmark. If "n" the removes the last
+chosen landmark, and the user is asked to select it again.
+This can be repeated until the user is comfortable with the
+landmark chosen.
+
+To digitize with a standard 3-button (PC): \enumerate{
+\item the RIGHT mouse button (primary) to select points to
+be digitized (click-drag a box around a vertex to select as
+landmark), \item the LEFT mouse button (secondary) is used
+to rotate mesh, \item the mouse SCROLLER (third/middle) is
+used to zoom in and out. } NOTE: Digitizing functions on
+MACINTOSH computers using a standard 3-button mice works as
+specified. Macs using platform specific single button mice:
+\enumerate{ \item press button to rotate 3D mesh, \item
+press button while pressing CONTROL key to select points to
+be digitized (click-drag a box around a vertex to select as
+landmark), \item press button while pressing OPTION key to
+adjust mesh perspective. } Mac mouse settings need
+adjustment to acquire zooming functions of the
+"middle/third" mouse button/scroller. Some instructions can
+be found at \url{http://blog.boastr.net/}. In addition,
+freeware providing "Middle Click" functionality is
+available at \url{http://magicprefs.com/} for "magicmice"
+now standard on many Macintosh machines.
+
+NOTE: there is no pan (translate) functionality in rgl
+library for all platforms at this time. }
 }
 \author{
-  Erik Otarola-Castillo & Emma Sherratt
+Erik Otarola-Castillo & Emma Sherratt
 }
 \references{
-  Gunz P, Mitteroecker P, & Bookstein FJ (2005)
-  Semilandmarks in Three Dimensions. Modern Morphometrics
-  in Physical Anthropology, ed Slice DE (Springer-Verlag,
-  New York), pp 73-98.
+Gunz P, Mitteroecker P, & Bookstein FJ (2005) Semilandmarks
+in Three Dimensions. Modern Morphometrics in Physical
+Anthropology, ed Slice DE (Springer-Verlag, New York), pp
+73-98.
 
-  Mitteroecker P & Gunz P (2009) Advances in Geometric
-  Morphometrics. Evolutionary Biology 36(2):235-247.  #'
+Mitteroecker P & Gunz P (2009) Advances in Geometric
+Morphometrics. Evolutionary Biology 36(2):235-247.
 }
 \seealso{
-  \code{\link{buildtemplate}}
+\code{\link{buildtemplate}}
 }
 \keyword{digitsurface}
 

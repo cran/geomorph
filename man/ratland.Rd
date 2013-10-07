@@ -3,16 +3,15 @@
 \alias{ratland}
 \title{Landmark data from dataset rat}
 \description{
-  Landmark data from dataset rat
+Landmark data from dataset rat
 }
 \author{
-  Dean Adams
+Dean Adams
 }
 \references{
-  Bookstein, F. L. 1991. Morphometric tools for landmark
-  data: Geometry and Biology.  Cambridge Univ. Press, New
-  York.
+Bookstein, F. L. 1991. Morphometric tools for landmark
+data: Geometry and Biology.  Cambridge Univ. Press, New
+York.
 }
 \keyword{data}
-\keyword{datasets}
 
