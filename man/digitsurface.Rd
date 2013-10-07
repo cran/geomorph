@@ -2,41 +2,49 @@
 \alias{digitsurface}
 \title{Digitize 3D fixed landmarks and surface semilandmarks.}
 \usage{
-  digitsurface(specimen, fixed)
+  digitsurface(spec, fixed, ptsize = 1)
 }
 \arguments{
-  \item{specimen}{Name of data matrix in working directory
-  containing three-dimensional landmark coordinates.}
+  \item{spec}{Name of surface file, as either an object of
+  class shape3d/mesh3d, or matrix of three-dimensional
+  vertex coordinates.}
 
-  \item{fixed}{numeric: the number of fixed template
+  \item{fixed}{numeric: The number of fixed template
   landmarks}
+
+  \item{ptsize}{numeric: Size to plot the mesh points
+  (vertices), e.g. 0.1 for dense meshes, 3 for sparse
+  meshes}
 }
 \description{
   A function to digitize three dimensional fixed landmarks
-  and surface semilandmarks.
+  and surface semilandmarks. Input for the function is
+  either a matrix of 3D coordinates or a mesh3d object as
+  obtained from read.ply().
 }
 \details{
-  Function to digitize landmarks on 3D pointclouds. "n"
-  Landmark points are selected by user akin to landmarks
-  selected to construct template using function
-  \code{\link{buildtemplate}}. Following selection of
-  points, function digitsurface finds surface semilandmarks
-  following algorithm outlined in Gunz et al. (2005:90-92)
-  and Mitteroecker and Gunz (2009:242). digitsurface finds
-  the same number of surface semi-landmarks as the template
-  (created by buildtemplate) by downsampling scanned mesh,
-  registering template with current specimen via GPA. A
-  nearest neighbor algorithm is used to match template
-  surface landmarks to current specimen's.
-  \subsection{Digitizing}{Digitizing using buildtemplate is
-  interactive between landmark selection using a mouse (see
-  below for instructions), and the R console. Once a point
-  is selected, the user is asked if the system should keep
-  or discard the selection #'(y/n). If "y", the user is
-  asked to continue to select the next landmark.If "n" the
-  removes the last chosen landmark, and the user is askesd
-  to select it again. This can be repeated until the user
-  is comfortable with the landmark chosen.
+  Function to digitize landmarks on 3D surfaces or
+  pointclouds. "n" Landmark points are selected by user
+  akin to landmarks selected to construct template using
+  function \code{\link{buildtemplate}}. Following selection
+  of points, function digitsurface finds surface
+  semilandmarks following algorithm outlined in Gunz et al.
+  (2005:90-92) and Mitteroecker and Gunz (2009:242).
+  digitsurface finds the same number of surface
+  semi-landmarks as the template (created by buildtemplate)
+  by downsampling scanned mesh, registering template with
+  current specimen via GPA. A nearest neighbor algorithm is
+  used to match template surface landmarks to current
+  specimen's. \subsection{Digitizing}{Digitizing using
+  buildtemplate is interactive between landmark selection
+  using a mouse (see below for instructions), and the R
+  console. Once a point is selected, the user is asked if
+  the system should keep or discard the selection #'(y/n).
+  If "y", the user is asked to continue to select the next
+  landmark. If "n" the removes the last chosen landmark,
+  and the user is asked to select it again. This can be
+  repeated until the user is comfortable with the landmark
+  chosen.
 
   To digitize with a standard 3-button (PC) buildtemplate
   uses: \enumerate{ \item the RIGHT mouse button (primary)
@@ -62,7 +70,7 @@
   be used by GPA.
 }
 \author{
-  Erik Otarola-Castillo
+  Erik Otarola-Castillo & Emma Sherratt
 }
 \references{
   Gunz P, Mitteroecker P, & Bookstein FJ (2005)
@@ -71,7 +79,7 @@
   New York), pp 73-98.
 
   Mitteroecker P & Gunz P (2009) Advances in Geometric
-  Morphometrics. Evolutionary Biology 36(2):235-247.
+  Morphometrics. Evolutionary Biology 36(2):235-247.  #'
 }
 \seealso{
   \code{\link{buildtemplate}}

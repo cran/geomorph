@@ -17,7 +17,7 @@
 \value{
   Function returns an n-x-3 .nts file containing the
   positions along which each of n chosen semilandmarks will
-  "slide". e.g., "4 3 2", semilandmar 3 will slide between
+  "slide". e.g., "4 3 2", semilandmark 3 will slide between
   4 and 2.
 }
 \description{
@@ -31,16 +31,16 @@
   sliding semi-landmark (sliders) will slide between two
   designated points, along a line tangent to the specified
   curvature. Using the right mouse button, users: 1. Select
-  sample "2dcoords.nts" file digitized using function
-  digitize2d 2. Select the first point between which
-  semi-landmark will "slide" 3. Select sliding
-  semi-landmark, 4.  Select point along which sliding
-  trajectory will end. Screen plot shows arrows connecting
-  the three points, and direction of "slider" semilandmark.
-  The LEFT mouse button is used to select points.
+  sample ".nts" file digitized using function digitize2d 2.
+  Select the first point between which semi-landmark will
+  "slide" 3. Select sliding semi-landmark, 4.  Select point
+  along which sliding trajectory will end. Screen plot
+  shows arrows connecting the three points, and direction
+  of "slider" semilandmark. The LEFT mouse button is used
+  to select points.
 }
 \author{
-  Erik Otarola-Castillo
+  Dean Adams, Erik Otarola-Castillo, and Emma Sherratt
 }
 \references{
   Bookstein, F. J. 1991 Morphometric Tools for Landmark

@@ -1,9 +1,9 @@
 \docType{data}
 \name{plethspecies}
 \alias{plethspecies}
-\title{Average head shape and phylogenenetic relationships for several Plethodon salamander species}
+\title{Average head shape and phylogenetic relationships for several Plethodon salamander species}
 \description{
-  Average head shape and phylogenenetic relationships for
+  Average head shape and phylogenetic relationships for
   several Plethodon salamander species
 }
 \author{

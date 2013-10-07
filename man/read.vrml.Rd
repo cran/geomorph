@@ -1,6 +1,6 @@
 \name{read.vrml}
 \alias{read.vrml}
-\title{Read landmark data from .vrml files}
+\title{Read landmark data from vrml files}
 \usage{
   read.vrml(file, plotspec = TRUE, plottri = TRUE,
     write.nts = FALSE)
@@ -32,11 +32,11 @@
   obtain landmark coordinates and triangulations
 }
 \details{
-  This function reads three-dimensional surface data in the
-  form of a single vrml file (Virtual Reality Modeling
-  Language). The landmarks of this surface may then be used
-  to digitize three-dimensional points, and semilandmarks
-  on curves and surfaces. .vrml files are stored either as
+  This function reads three-dimensional surface data from
+  simple vrml files (Virtual Reality Modeling Language).
+  The landmarks of this surface may then be used to
+  digitize three-dimensional points, and semilandmarks on
+  curves and surfaces. .vrml files are stored either as
   centralized data, where 3D scanned object information
   (i.e., coordinates, triangles, color, and surface) are
   stored within single data blocks for the complete object.
@@ -48,6 +48,9 @@
   Argument plottri plots triangle facets if present.
   write.nts provides users with the option of writing a
   .nts coordinate file.
+
+  NOTE: At present, only simple vrml files containing
+  vertices and faces is supported.
 }
 \author{
   Erik Otarola-Castillo

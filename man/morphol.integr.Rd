@@ -71,7 +71,7 @@
 
   If the degree of morphological integration between more
   than two sets of landmarks is of interest, one may use
-  the average RV coefficent as implemented in the function
+  the average RV coefficient as implemented in the function
   \code{\link{compare.modular.partitions}}.
 }
 \examples{

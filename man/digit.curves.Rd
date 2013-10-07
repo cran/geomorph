@@ -11,7 +11,7 @@
   \item{curves}{Number of landmarks to slide along curves.}
 }
 \value{
-  Function returns a matrix containing the landmark adress
+  Function returns a matrix containing the landmark address
   of the curve sliders, indicating the points between which
   the selected point will "slide". In addition, the
   function returns a .csv file to be used by
@@ -39,8 +39,8 @@
   instructions), and the R console. Once a point is
   selected, the user is asked if the system should keep or
   discard the selection #'(y/n). If "y", the user is asked
-  to continue to select the next landmark.If "n" the
-  removes the last chosen landmark, and the user is askesd
+  to continue to select the next landmark. If "n" the
+  removes the last chosen landmark, and the user is asked
   to select it again. This can be repeated until the user
   is comfortable with the landmark chosen.
 

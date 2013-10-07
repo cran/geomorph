@@ -1,12 +1,13 @@
 \docType{data}
-\name{Specimen4Raw}
-\alias{Specimen4Raw}
-\title{Raw 3D scan data from scallop shell}
+\name{scallopPLY}
+\alias{scallopPLY}
+\title{3D scan of a scallop shell from a .ply file in mesh3d format}
 \description{
-  Raw 3D scan data from scallop shell
+  3D scan of a scallop shell from a .ply file in mesh3d
+  format
 }
 \author{
-  Dean Adams and Erik Otarola-Castillo
+  Emma Sherratt
 }
 \references{
   Serb et al. (2011). "Morphological convergence of shell

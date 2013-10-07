@@ -1,31 +1,34 @@
 \name{read.ply}
 \alias{read.ply}
-\title{Read landmark data from ply files}
+\title{Read mesh data (vertices and faces) from ply files}
 \usage{
-  read.ply(file)
+  read.ply(file, ShowSpecimen = TRUE)
 }
 \arguments{
-  \item{file}{A ply file in NextEngine or David scanner
-  format}
+  \item{file}{An ASCII ply file}
+
+  \item{ShowSpecimen}{logical: A logical value indicating
+  whether or not the ply file should be displayed}
 }
 \value{
-  Function returns a list with the following components:
-  \item{coords}{The x,y,z coordinates of the ply surface}
-  \item{polygons}{A set of polygons connecting triplets of
-  coordinates}
+  Function returns the following components:
+  \item{mesh3d}{list of class mesh3d- see rgl for details}
 }
 \description{
   Read ply files to obtain landmark coordinates
 }
 \details{
   This function reads three-dimensional surface data in the
-  form of a single ply file (in either NextEngine or David
-  scanner format). The landmarks of this surface may then
-  be used to digitize three-dimensional points, and
-  semilandmarks on curves and surfaces.
+  form of a single ply file (Polygon File Format; ASCII
+  format only, from 3D scanners such as NextEngine and
+  David scanners). Vertices of the surface may then be used
+  to digitize three-dimensional points, and semilandmarks
+  on curves and surfaces. The function opens the ply file
+  and plots the mesh, with faces rendered if file contains
+  faces, and colored if the file contains vertex color.
 }
 \author{
-  Dean Adams
+  Dean Adams & Emma Sherratt
 }
 \keyword{read.ply}
 

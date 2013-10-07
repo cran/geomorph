@@ -1,6 +1,6 @@
 \name{readland.nts}
 \alias{readland.nts}
-\title{Read landmark data from nts file}
+\title{Read landmark data matrix from nts file}
 \usage{
   readland.nts(file)
 }
@@ -17,7 +17,8 @@
   *.nts file.
 }
 \description{
-  Read *.nts file to obtain landmark coordinates
+  Read *.nts file to obtain landmark coordinates for a set
+  of specimens
 }
 \details{
   This function reads a *.nts file containing a matrix of

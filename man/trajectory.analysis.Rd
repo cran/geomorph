@@ -96,6 +96,16 @@
   implementation, variation in trajectory size, shape, and
   orientation are evaluated for each term in 'X'.(see Adams
   and Cerney 2007).
+
+  Once the function has performed the analysis, it
+  generates a plot of the trajectories as visualized in the
+  space of principal components (PC1 vs. PC2). The first
+  point in each trajectory is displayed as white, the last
+  point is black, and any middle points on the trajectories
+  are in gray.  The colors of trajectories follow the order
+  in which they are found in the dataset, using R's
+  standard color palette: black, red, green3, blue, cyan,
+  magenta, yellow, and gray.
 }
 \examples{
 #1: Estimate trajectories from LS means in 2-factor model
@@ -116,6 +126,10 @@ estimate.traj=FALSE, traj.pts=5,iter=15)
   Dean Adams
 }
 \references{
+  Collyer, M.L., and D.C. Adams. 2013. Phenotypic
+  trajectory analysis: Comparison of shape change patterns
+  in evolution and ecology. Hystrix. 24:75-83.
+
   Adams, D. C. 2010. Parallel evolution of character
   displacement driven by competitive selection in
   terrestrial salamanders. BMC Evol. Biol. 10:1-10.

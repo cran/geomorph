@@ -2,12 +2,12 @@
 \name{geomorph-package}
 \alias{geomorph}
 \alias{geomorph-package}
-\title{Geometric morphometric analsyes for 2D/3D data}
+\title{Geometric morphometric analyses for 2D/3D data}
 \description{
-  Geometric morphometric analsyes for 2D/3D data
+  Geometric morphometric analyses for 2D/3D data
 }
 \author{
-  Dean C. Adams & Erik Otarola-Castillo
+  Dean C. Adams, Erik Otarola-Castillo, & Emma Sherratt
 
   Functions in this package allow one to read, manipulate,
   and digitize landmark data; generate shape variables via
