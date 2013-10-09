@@ -9,7 +9,7 @@
   \item{A}{An array (p x k x n) containing GPA-aligned
   coordinates for a set of specimens}
 
-  \item{mean}{A logical value indicating whetehr the mean
+  \item{mean}{A logical value indicating whether the mean
   shape should be included in the plot}
 
   \item{links}{An optional matrix defining for links

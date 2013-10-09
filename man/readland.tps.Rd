@@ -2,11 +2,15 @@
 \alias{readland.tps}
 \title{Read landmark data from tps file}
 \usage{
-  readland.tps(file)
+  readland.tps(file, specID = c("None", "ID", "imageID"))
 }
 \arguments{
   \item{file}{A *.tps file containing two- or
   three-dimensional landmark data}
+
+  \item{specID}{a character specifying whether to extract
+  the specimen ID names from the ID or IMAGE lines (default
+  is "None").}
 }
 \value{
   Function returns a (p x k x n) array, where p is the
@@ -29,9 +33,16 @@
   "LM3=". Landmark coordinates are multiplied by their
   scale factor if this is provided for all specimens. If
   one or more specimens are missing the scale factor,
-  landmarks are treated in their original units.  NOTE: all
-  other information present in tps files (curves, comments,
-  variables, radii, etc.)  is ignored.
+  landmarks are treated in their original units.
+
+  The user may specify whether specimen names are to be
+  included in the resulting 3D array. If so, names may be
+  read from either the 'ID' field or the 'IMAGE' field of
+  the TPS file.
+
+  NOTE: At present, all other information that can be
+  contained in tps files (curves, comments, variables,
+  radii, etc.)  is ignored.
 }
 \author{
   Dean Adams

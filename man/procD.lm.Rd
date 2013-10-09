@@ -37,7 +37,7 @@
   Procrustes Analysis (GPA) [e.g., with
   \code{\link{gpagen}}]. The function
   \code{\link{two.d.array}} can be used to obtain a
-  two-dimensional data matrix from a 3D array oflandmark
+  two-dimensional data matrix from a 3D array of landmark
   coordinates. The names specified for the independent (x)
   variables in the formula represent one or more vectors
   containing continuous data or factors. It is assumed that
@@ -75,7 +75,7 @@ y<-two.d.array(Y.gpa$coords)
 procD.lm(y~plethodon$species*plethodon$site,iter=99)
 
 ### Regression example
-data(rats)
+data(ratland)
 rat.gpa<-gpagen(ratland)         #GPA-alignment
 
 procD.lm(two.d.array(rat.gpa$coords)~rat.gpa$Csize,iter=99)

@@ -1,6 +1,6 @@
 \name{pairwiseD.test}
 \alias{pairwiseD.test}
-\title{Pairwise Group Comarisons}
+\title{Pairwise Group Comparisons}
 \usage{
   pairwiseD.test(y, x, iter = 999)
 }
@@ -39,7 +39,7 @@
   have previously been aligned using Generalized Procrustes
   Analysis (GPA) [e.g., with \code{\link{gpagen}}]. The
   function \code{\link{two.d.array}} can be used to obtain
-  a two-dimensional data matrix from a 3D array oflandmark
+  a two-dimensional data matrix from a 3D array of landmark
   coordinates.
 }
 \examples{

@@ -61,7 +61,7 @@
   covariation (see references for explanation).
 }
 \examples{
-data(rats)
+data(ratland)
 Y.gpa<-gpagen(ratland)    #GPA-alignment
 
 #Using CAC for plot
@@ -77,9 +77,9 @@ plotAllometry(Y.gpa$coords,Y.gpa$Csize,method="PredLine")
   Dean Adams
 }
 \references{
-  Adams, D.C., F.J. Rohlf, and D.E. Slice. 2012. A field
+  Adams, D.C., F.J. Rohlf, and D.E. Slice. 2013. A field
   comes of age: geometric morphometrics in the 21st
-  century. Hystrix. (Submitted).
+  century. Hystrix. 24:7-14.
 
   Adams, D. C., and A. Nistri. 2010. Ontogenetic
   convergence and evolution of foot morphology in European

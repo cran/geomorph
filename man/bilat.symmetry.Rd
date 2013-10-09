@@ -56,9 +56,9 @@
   specimens} \item{asymm.shape}{The asymmetric component of
   shape variation of the aligned specimens}
   \item{ANOVA.shape}{Procrustes ANOVA table assessing
-  passterns of shape asymmetry}
-  \item{ANOVA.size}{Procrustes ANOVA table assessing
-  passterns of shape asymmetry (when object.sym=FALSE)}
+  patterns of shape asymmetry} \item{ANOVA.size}{Procrustes
+  ANOVA table assessing patterns of shape asymmetry (when
+  object.sym=FALSE)}
 }
 \description{
   Function performs an analysis of directional and
@@ -94,7 +94,7 @@
   PRIOR TO PERFORMING THE SYMMETRY ANALYSIS. Reflecting a
   set of specimens may be accomplished by multiplying one
   coordinate dimension by '-1' for these structures (either
-  the x-, the y-, or the z-dimension). A vector contaning
+  the x-, the y-, or the z-dimension). A vector containing
   information on individuals and sides must also be
   supplied. Replicates of each specimen may also be
   included in the dataset, and when specified will be used
@@ -108,10 +108,10 @@
   their coordinate axes. The landmarks across the line of
   symmetry are then relabeled to obtain landmark
   correspondence. The user must supply a list of landmark
-  pairs. A vector contaning information on individuals must
-  also be supplied. Replicates of each specimen may also be
-  included in the dataset, and when specified will be used
-  as measurement error.
+  pairs. A vector containing information on individuals
+  must also be supplied. Replicates of each specimen may
+  also be included in the dataset, and when specified will
+  be used as measurement error.
 }
 \examples{
 #Example of matching symmetry

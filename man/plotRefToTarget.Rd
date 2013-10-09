@@ -56,7 +56,7 @@ data(plethodon)
 Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
 ref<-mshape(Y.gpa$coords)
 
-# Differnt plotting options
+# Different plotting options
 plotRefToTarget(ref,Y.gpa$coords[,,39])
 
 plotRefToTarget(ref,Y.gpa$coords[,,39],mag=3)   #magnify difference by 3X

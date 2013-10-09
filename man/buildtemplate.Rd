@@ -2,17 +2,22 @@
 \alias{buildtemplate}
 \title{Build 3D surface template}
 \usage{
-  buildtemplate(specimen, fixed, surface.sliders)
+  buildtemplate(spec, fixed, surface.sliders, ptsize = 1)
 }
 \arguments{
-  \item{specimen}{Name of matrix containing
-  three-dimensional coordinates of a surface scan}
+  \item{spec}{Name of surface file, as either an object of
+  class shape3d/mesh3d, or matrix of three-dimensional
+  vertex coordinates.}
 
-  \item{fixed}{numeric: the number of fixed template
+  \item{fixed}{numeric: The number of fixed template
   landmarks}
 
-  \item{surface.sliders}{numeric: the number of template
+  \item{surface.sliders}{numeric: The number of template
   surface sliders desired}
+
+  \item{ptsize}{numeric: Size to plot the mesh points
+  (vertices), e.g. 0.1 for dense meshes, 3 for sparse
+  meshes}
 }
 \value{
   Function returns a matrix containing the x,y,z
@@ -22,7 +27,7 @@
   the file 'template.txt' is generated, and an NTS file
   with the name of the specimen containing the digitized
   points for the template specimen (for use in subsequent
-  morphometric analsyes).
+  morphometric analyses).
 }
 \description{
   A function to build 3D template to extract 3D surface
@@ -31,26 +36,30 @@
 \details{
   Function buildtemplate constructs a template surface with
   which to down sample point clouds of specimens to be used
-  in 3d shape analysis. builddtemplate allows users to
-  choose a predetermined number of points with which to
-  represent the structure of interest as sliding surface
-  semilandmarks. Template surface is used in analyses of
-  surface semi-landmarks outline in Gunz et al.
-  (2005:90-92) and Mitteroecker and Gunz (2009:242).
-  Landmark points are first digitized by the user (see
-  Digitizing subsection), then a roughly equidistant set of
-  predetermined number of points are automatically chosen.
-  The now down-sampled mesh is used as a "template" to
-  extract a mesh of similarly numbered points for analysis.
-  \subsection{Digitizing}{Digitizing using buildtemplate is
-  interactive between landmark selection using a mouse (see
-  below for instructions), and the R console. Once a point
-  is selected, the user is asked if the system should keep
-  or discard the selection #'(y/n). If "y", the user is
-  asked to continue to select the next landmark.If "n" the
-  removes the last chosen landmark, and the user is askesd
-  to select it again. This can be repeated until the user
-  is comfortable with the landmark chosen.
+  in 3d shape analysis. Input for the function is either a
+  matrix of 3D coordinates or a mesh3d object as obtained
+  from read.ply().
+
+  builddtemplate allows users to choose a predetermined
+  number of points with which to represent the structure of
+  interest as sliding surface semilandmarks. Template
+  surface is used in analyses of surface semi-landmarks
+  outline in Gunz et al. (2005:90-92) and Mitteroecker and
+  Gunz (2009:242). Landmark points are first digitized by
+  the user (see Digitizing subsection), then a roughly
+  equidistant set of predetermined number of points are
+  automatically chosen. The now down-sampled mesh is used
+  as a "template" to extract a mesh of similarly numbered
+  points for analysis. \subsection{Digitizing}{Digitizing
+  using buildtemplate is interactive between landmark
+  selection using a mouse (see below for instructions), and
+  the R console. Once a point is selected, the user is
+  asked if the system should keep or discard the selection
+  #'(y/n). If "y", the user is asked to continue to select
+  the next landmark. If "n" the removes the last chosen
+  landmark, and the user is asked to select it again. This
+  can be repeated until the user is comfortable with the
+  landmark chosen.
 
   NOTE: To ensure a strong match between the scan and the
   template, it is recommended that a reasonable number of
@@ -76,7 +85,7 @@
   "magicmice" now standard on many Macintosh machines. }
 }
 \author{
-  Erik Otarola-Castillo
+  Erik Otarola-Castillo & Emma Sherratt
 }
 \references{
   Gunz P, Mitteroecker P, & Bookstein FJ (2005)

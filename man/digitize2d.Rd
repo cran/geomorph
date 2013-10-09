@@ -1,6 +1,6 @@
 \name{digitize2d}
 \alias{digitize2d}
-\title{Digitize 2d landmarks.}
+\title{Digitize 2D landmarks.}
 \usage{
   digitize2d(file, nlandmarks, scale)
 }
@@ -21,10 +21,10 @@
   Returns text file with the distance in scale
 }
 \description{
-  A function to digitize 2d landmarks from .jpg files.
+  A function to digitize 2D landmarks from .jpg files.
 }
 \details{
-  digitize2d is a function to digitize 2d landmarks on
+  digitize2d is a function to digitize 2D landmarks on
   specimen images (.jpg). "nlandmarks" is the number of
   landmark points to be digitized by the user. Landmarks
   should include "true" landmarks and semilandmarks to be
@@ -37,7 +37,7 @@
   can be digitized using the LEFT mouse button. When
   selection of n landmarks is completed, an ".nts" file is
   created in working directory using the specimen name,
-  adding "2dcoords.nts" as a suffix.
+  adding ".nts" as a suffix.
 }
 \author{
   Erik Otarola-Castillo

@@ -27,7 +27,7 @@
   tangent space along their principal axes
 }
 \details{
-  The function performs a principal compoments analysis of
+  The function performs a principal components analysis of
   shape variation and plots two dimensions of tangent space
   for a set of Procrustes-aligned specimens (default is PC1
   vs. PC2). The percent variation along each PC-axis is

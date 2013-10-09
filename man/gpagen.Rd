@@ -1,6 +1,6 @@
 \name{gpagen}
 \alias{gpagen}
-\title{Generalized Procrustes analyis of points, curves, and surfaces}
+\title{Generalized Procrustes analysis of points, curves, and surfaces}
 \usage{
   gpagen(A, Proj = TRUE, ProcD = TRUE, ShowPlot = TRUE,
     curves = NULL, surfaces = NULL, pointscale = 1)
