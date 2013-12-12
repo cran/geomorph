@@ -2,8 +2,8 @@
 \alias{fixed.angle}
 \title{Rotate a subset of 2D landmarks to common articulation angle}
 \usage{
-  fixed.angle(A, art.pt = NULL, angle.pts = NULL,
-    rot.pts = NULL, angle = 0, degrees = FALSE)
+fixed.angle(A, art.pt = NULL, angle.pts = NULL, rot.pts = NULL,
+  angle = 0, degrees = FALSE)
 }
 \arguments{
   \item{A}{An array (p x k x n) containing landmark
@@ -28,25 +28,25 @@
   radians (radians is default)}
 }
 \value{
-  Function returns a (p x k x n) array of landmark
-  coordinates.
+Function returns a (p x k x n) array of landmark
+coordinates.
 }
 \description{
-  A function for rotating a subset of landmarks so that the
-  articulation angle between subsets is constant
+A function for rotating a subset of landmarks so that the
+articulation angle between subsets is constant
 }
 \details{
-  This function standardizes the angle between two subsets
-  of landmarks for a set of specimens. The approach assumes
-  a simple hinge-point articulation between the two
-  subsets, and rotates all specimens such that the angle
-  between landmark subsets is equal across specimens (see
-  Adams 1999).  As a default, the mean angle is used,
-  though the user may specify an additional amount by which
-  this may be augmented.
+This function standardizes the angle between two subsets of
+landmarks for a set of specimens. The approach assumes a
+simple hinge-point articulation between the two subsets,
+and rotates all specimens such that the angle between
+landmark subsets is equal across specimens (see Adams
+1999).  As a default, the mean angle is used, though the
+user may specify an additional amount by which this may be
+augmented.
 
-  Presently, the function is only implemented for
-  two-dimensional landmark data.
+Presently, the function is only implemented for
+two-dimensional landmark data.
 }
 \examples{
 #Example using Plethodon
@@ -56,11 +56,11 @@ data(plethspecies)
 fixed.angle(plethspecies$land,art.pt=1,angle.pts=c(5,6),rot.pts=c(2,3,4,5))
 }
 \author{
-  Dean Adams
+Dean Adams
 }
 \references{
-  Adams, D. C. 1999. Methods for shape analysis of landmark
-  data from articulated structures. Evolutionary Ecology
-  Research. 1:959-970.
+Adams, D. C. 1999. Methods for shape analysis of landmark
+data from articulated structures. Evolutionary Ecology
+Research. 1:959-970.
 }
 

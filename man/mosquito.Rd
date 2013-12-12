@@ -3,11 +3,10 @@
 \alias{mosquito}
 \title{landmarks on mosquito wings}
 \description{
-  landmarks on mosquito wings
+landmarks on mosquito wings
 }
 \author{
-  Dean Adams
+Dean Adams
 }
 \keyword{data}
-\keyword{datasets}
 

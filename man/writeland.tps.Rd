@@ -2,7 +2,7 @@
 \alias{writeland.tps}
 \title{Write landmark data to tps file}
 \usage{
-  writeland.tps(A, file)
+writeland.tps(A, file)
 }
 \arguments{
   \item{A}{An array (p x k x n) containing landmark
@@ -11,15 +11,15 @@
   \item{file}{Name of the *.tps file to be created}
 }
 \description{
-  Write *.tps file from obtain landmark coordinates in a
-  3-dimensional array
+Write *.tps file from obtain landmark coordinates in a
+3-dimensional array
 }
 \details{
-  This function writes a *.tps file from a 3-dimensional
-  array (p x k x n) of landmark coordinates.
+This function writes a *.tps file from a 3-dimensional
+array (p x k x n) of landmark coordinates.
 }
 \author{
-  Dean Adams
+Dean Adams
 }
 \keyword{writeland.tps}
 
