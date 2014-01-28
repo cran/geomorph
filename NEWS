@@ -1,8 +1,21 @@
+		CHANGES IN GEOMORPH VERSION 1.1-6
+
+OTHER CHANGES
+
+    o Minor I/O enhancements in readmulti.nts()
+
+    o Minor I/O enhancements in define.sliders.3d() to allow sliders to be in any order
+
+    o Simplified pPsup (original code from J. Claude) to not include size re-scaling by beta (underlying function used in trajectory.analysis() only)
+
+    o Added name.check for groups in compare.evol.rates()
+ 
+
 		CHANGES IN GEOMORPH VERSION 1.1-5
 
 NEW FEATURES
 
-    o NEW FUNCTION!!!
+    o New function compare.evol.rates() for comparing multivariate evolutionary rates on phylogenies
 
     o define.sliders.2d() and define.sliders.3d() replace curves2d() and digit.curves() 
 

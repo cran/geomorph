@@ -1,14 +1,14 @@
 \name{digit.curves}
 \alias{digit.curves}
-\title{Deprecated functions in geomorph}
+\title{Defunct functions in geomorph}
 \usage{
 digit.curves()
 }
 \description{
-The following functions have been deprecated in geomorph
+The following functions are no longer supported in geomorph
 }
 \details{
-This function has been deprecated. Below shows the original
+This function is now defunct. Below shows the original
 function and the replacement function.
 
 curves2d: use define.sliders.2d

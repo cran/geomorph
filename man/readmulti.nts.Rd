@@ -32,7 +32,7 @@ read and concatenated into a single matrix for all
 specimens.
 }
 \author{
-Dean Adams
+Dean Adams & Emma Sherratt
 }
 \keyword{readmulti.nts}
 

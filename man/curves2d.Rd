@@ -1,14 +1,14 @@
 \name{curves2d}
 \alias{curves2d}
-\title{Deprecated functions in geomorph}
+\title{Defunct functions in geomorph}
 \usage{
 curves2d()
 }
 \description{
-The following functions have been deprecated in geomorph
+The following functions are no longer supported in geomorph
 }
 \details{
-This function has been deprecated. Below shows the original
+This function is now defunct. Below shows the original
 function and the replacement function.
 
 curves2d: use define.sliders.2d
