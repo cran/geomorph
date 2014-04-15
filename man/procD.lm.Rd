@@ -15,7 +15,8 @@ procD.lm(f1, data = NULL, iter = 999)
 }
 \value{
 Function returns an ANOVA table of statistical results for
-all factors: df (for each factor), SS, MS, Prand.
+all factors: df (for each factor), SS, MS, F ratio, Prand,
+and Rsquare.
 }
 \description{
 Function performs Procrustes ANOVA with permutation
@@ -84,11 +85,11 @@ Dean Adams
 \references{
 Anderson MJ. 2001. A new method for non-parametric
 multivariate analysis of variance.  Austral Ecology 26:
-32'46.
+32-46.
 
 Goodall, C. R. 1991. Procrustes methods in the statistical
 analysis of shape. Journal of the Royal Statistical Society
 B 53:285-339.
 }
-\keyword{procD.lm}
+\keyword{analysis}
 

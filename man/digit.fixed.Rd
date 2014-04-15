@@ -2,22 +2,24 @@
 \alias{digit.fixed}
 \title{Digitize 3D landmarks}
 \usage{
-digit.fixed(spec, fixed, index = FALSE, ptsize = 1)
+digit.fixed(spec, fixed, index = FALSE, ptsize = 1, center = TRUE)
 }
 \arguments{
-  \item{spec}{Name of surface file, as either an object of
-  class shape3d/mesh3d, or matrix of three-dimensional
-  vertex coordinates.}
+  \item{spec}{An object of class shape3d/mesh3d, or matrix
+  of 3D vertex coordinates}
 
-  \item{fixed}{numeric: The number landmarks (fixed, and
+  \item{fixed}{Numeric The number landmarks (fixed, and
   curve sliders if desired)}
 
-  \item{index}{logical: Whether selected landmark addresses
-  should be returned}
+  \item{index}{Logical Whether selected landmark addresses
+  should be returned (internal use only)}
 
-  \item{ptsize}{numeric: Size to plot the mesh points
+  \item{ptsize}{Numeric Size to plot the mesh points
   (vertices), e.g. 0.1 for dense meshes, 3 for sparse
   meshes}
+
+  \item{center}{Logical Whether the object 'spec' should be
+  centered prior to digitizing (default {center=TRUE})}
 }
 \value{
 Function writes to the working directory an NTS file with
@@ -40,8 +42,7 @@ object as obtained from \code{\link{read.ply}}.
 Function for digitizing "n" three-dimensional landmarks.
 The landmarks are "fixed" (traditional landmarks). They can
 be later designated as "curve sliders" (semilandmarks, that
-will "slide" along curves lacking known landmarks (see
-Bookstein 1991:376-382, 1997 for algorithm details) if
+will "slide" along curves lacking known landmarks if
 required. A sliding semi-landmark ("sliders") will slide
 between two designated points, along a line tangent to the
 specified curvature, and must be defined as "sliders" using
@@ -51,7 +52,9 @@ format matrix made outside R.
 For 3D "surface sliders" (surface semilandmarks that slide
 over a surface) the function \code{\link{digitsurface}}
 should be used instead.  NOTE: Function centers the mesh
-before digitizing (required for further operations).
+before digitizing by default (center=TRUE). If one chooses
+not to center, specimen may be difficult to manipulate in
+rgl window.
 
 \subsection{Digitizing}{ Digitizing is interactive between
 landmark selection using a mouse (see below for
@@ -70,19 +73,15 @@ landmark), \item the LEFT mouse button (secondary) is used
 to rotate mesh, \item the mouse SCROLLER (third/middle) is
 used to zoom in and out. } NOTE: Digitizing functions on
 MACINTOSH computers using a standard 3-button mice works as
-specified. Macs using platform specific single button mice:
-\enumerate{ \item press button to rotate 3D mesh, \item
-press button while pressing CONTROL key to select points to
-be digitized (click-drag a box around a vertex to select as
-landmark), \item press button while pressing OPTION key to
-to zoom in and out.}
-
-Mac mouse settings need adjustment to acquire zooming
-functions of the "middle/third" mouse button/scroller. Some
-instructions can be found at \url{http://blog.boastr.net/}.
-In addition, freeware providing "Middle Click"
-functionality is available at \url{http://magicprefs.com/}
-for "magicmice" now standard on many Macintosh machines.
+specified. Macs using platform specific single button mice,
+XQuartz must be configured: go to Preferences > Input >
+tick "Emulate three button mouse": \enumerate{ \item press
+button to rotate 3D mesh, \item press button while pressing
+COMMAND key to select points to be digitized (click-drag a
+box around a vertex to select as landmark), \item press
+button while pressing OPTION key to adjust mesh
+perspective.  \item the mouse SCROLLER or trackpad two
+finger scroll is used to zoom in an out.  }
 
 NOTE: there is no pan (translate) functionality in rgl
 library for all platforms at this time. }
@@ -90,5 +89,8 @@ library for all platforms at this time. }
 \author{
 Erik Otarola-Castillo & Emma Sherratt
 }
-\keyword{digit.fixed}
+\seealso{
+\code{\link{read.ply}}
+}
+\keyword{digitizing}
 

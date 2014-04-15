@@ -50,6 +50,9 @@ when the observed RV coefficient is small relative to this
 distribution (see Klingenberg 2009). A histogram of
 coefficients obtained via resampling is presented, with the
 observed value designated by an arrow in the plot.
+
+Landmark groups can be defined using
+\code{\link{define.modules}}.
 }
 \examples{
 data(plethodon)
@@ -68,5 +71,5 @@ Klingenberg, C. P. 2009. Morphometric integration and
 modularity in configurations of landmarks: tools for
 evaluating a priori hypotheses. Evol. Develop. 11:405-421.
 }
-\keyword{compare.modular.partitions}
+\keyword{analysis}
 

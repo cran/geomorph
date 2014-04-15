@@ -2,19 +2,25 @@
 \alias{plotGMPhyloMorphoSpace}
 \title{Plot phylogenetic tree and specimens in tangent space}
 \usage{
-plotGMPhyloMorphoSpace(phy, A, labels = TRUE, ancStates = T)
+plotGMPhyloMorphoSpace(phy, A, labels = TRUE, ancStates = TRUE)
 }
 \arguments{
-  \item{phy}{A phylogenetic tree of type 'phylo'}
+  \item{phy}{A phylogenetic tree of {class phylo} - see
+  \code{\link[ape]{read.tree}} in library ape}
 
-  \item{A}{An array (p x k x n) containing landmark
-  coordinates for a set of specimens}
+  \item{A}{A matrix (n x [p x k]) or 3D array (p x k x n)
+  containing GPA-aligned coordinates for a set of
+  specimens}
 
   \item{labels}{A logical value indicating whether taxa
   labels should be included}
 
   \item{ancStates}{A logical value indicating whether
   ancestral state values should be returned}
+}
+\value{
+Function returns estimated ancestral states if
+{ancStates=TRUE}
 }
 \description{
 Function plots a phylogenetic tree and a set of
@@ -26,8 +32,9 @@ tangent space for a set of Procrustes-aligned specimens.
 The phylogenetic tree for these specimens is superimposed
 in this plot revealing how shape evolves (e.g., Rohlf 2002;
 Klingenberg and Gidaszewski 2010). The plot also displays
-the ancestral states for each node of the phylogenetic
-tree, whose values can optionally be returned.
+the ancestral states for each node of the phylogenetic tree
+(obtained from \code{\link[ape]{ace}}), whose values can
+optionally be returned.
 }
 \examples{
 data(plethspecies)
@@ -47,5 +54,5 @@ Rohlf, F. J. 2002. Geometric morphometrics and phylogeny.
 Pp. 175'193 in N. Macleod, and P. Forey, eds. Morphology,
 shape, and phylogeny. Taylor & Francis, London.
 }
-\keyword{plotGMPhyloMorphoSpace}
+\keyword{visualization}
 

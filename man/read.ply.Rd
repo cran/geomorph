@@ -15,7 +15,8 @@ Function returns the following components:
 \item{mesh3d}{list of class mesh3d- see rgl for details}
 }
 \description{
-A function to read ply files to obtain landmark coordinates
+A function to read ply files, which can be used for
+digitizing landmark coordinates or for shape warps.
 }
 \details{
 Function reads three-dimensional surface data in the form
@@ -23,9 +24,12 @@ of a single ply file (Polygon File Format; ASCII format
 only, from 3D scanners such as NextEngine and David
 scanners).  Vertices of the surface may then be used to
 digitize three-dimensional points, and semilandmarks on
-curves and surfaces. The function opens the ply file and
-plots the mesh, with faces rendered if file contains faces,
-and colored if the file contains vertex color.
+curves and surfaces. The surface may also be used as a mesh
+for visualizing 3D deformations
+(\code{\link{warpRefMesh}}).  The function opens the ply
+file and plots the mesh, with faces rendered if file
+contains faces, and colored if the file contains vertex
+color.
 }
 \examples{
 # If the file has no mesh color, or color is undesirable, user can assign this as follows:
@@ -38,5 +42,5 @@ myply$material <- "#FCE6C9" # using RGB code
 \author{
 Dean Adams & Emma Sherratt
 }
-\keyword{read.ply}
+\keyword{IO}
 

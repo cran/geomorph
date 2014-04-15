@@ -1,54 +1,49 @@
 \name{read.morphologika}
 \alias{read.morphologika}
-\title{Read 3D landmark data from Morphologika files}
+\title{Read landmark data from Morphologika file}
 \usage{
-read.morphologika(file, plot = FALSE)
+read.morphologika(file)
 }
 \arguments{
-  \item{file}{A Morphologika text file. File name can be
-  written in manually, including path, or obtained using
-  directory/file manipulation functions e.g.,
-  \code{\link{list.files}}}
-
-  \item{plot}{Logical should (unaligned) specimens be
-  plotted? Defaults to FALSE.}
+  \item{file}{A Morphologika *.txt file containing two- or
+  three-dimensional landmark data.}
 }
 \value{
-Function returns a list with the following components:
-\item{coords}{If Morphologika headers "[labels]" and
-"[labelvalues]" are not present in the file, function only
-returns a (p x k x n) array, where p is the number of
-landmark points, k is the number of landmark dimensions,
-and n is the number of specimens} \item{dataframe}{If
-Morphologika headers "[labels]" and "[labelvalues]" are
-present read.morphologika returns the above p x k x n array
-and a dataframe containing specimen specific information
-stored in file}
+Function returns a (p x k x n) array of the coordinate
+data. If other optional headers are present in the file
+(e.g. "[labels]" or "[wireframe]") function returns a list
+containing the "coords" array, and data matrix of "labels"
+and or "wireframe".
 }
 \description{
-Read Morphologika files to obtain 3D landmark coordinates
-and specimen information
+Read Morphologika file (*.txt) to obtain landmark
+coordinates and specimen information
 }
 \details{
-This function reads the commonly used Morphologika file
-format for 2D and 3D landmarks.  If semilandmarks are
-present in the file, after import these should be defined
-using \code{\link{define.sliders.2d}} or
-\code{\link{define.sliders.3d}}.  Landmark coordinates and
-specimen information may then be used to conduct GPA using
-\code{\link{gpagen}},
+This function reads a *.txt file in the Morphologika format
+containing two- or three-dimensional landmark coordinates.
+Morphologika files are text files in one of the standard
+formats for geometric morphometrics (see O'Higgins and
+Jones 1998,2006).
 
-If the Morphologika headers "[labels]" and "[labelvalues]"
-are present, then a data matrix containing all individual
-specimen information is returned. If "[labels]" and
-"[labelvalues]" are not present in the file, then only
-landmark coordinates are returned.
+If the headers "[labels]" and "[labelvalues]" are present,
+then a data matrix containing all individual specimen
+information is returned.  If the header "[wireframe]" is
+present, then a matrix of the landmark addresses for the
+wireframe is returned (see \code{\link{plotRefToTarget}}
+option 'links')
 }
 \author{
-Erik Otarola-Castillo
+Emma Sherratt & Erik Otarola-Castillo
 }
-\seealso{
-\code{\link{list.files}}
+\references{
+O'Higgins P and Jones N (1998) Facial growth in Cercocebus
+torquatus: An application of three dimensional geometric
+morphometric techniques to the study of morphological
+variation. Journal of Anatomy. 193: 251-272
+
+O'Higgins P and Jones N (2006) Tools for statistical shape
+analysis. Hull York Medical School.
 }
-\keyword{read.morphologika}
+\keyword{IO}
 

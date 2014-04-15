@@ -29,10 +29,20 @@ number of dimensions of the landmark data (k=2 or 3). When
 the function is called a dialog box is opened, from which
 the user may select multiple *.nts files. These are then
 read and concatenated into a single matrix for all
-specimens.
+specimens. The parameter line contains 5 or 6 elements, and
+must begin with a "1" to designate a rectangular matrix.
+The second and third values designate how many specimens
+(n) and how many total variables (p x k) are in the data
+matrix.  The fourth value is a "0" if the data matrix is
+complete and a "1" if there are missing values. If missing
+values are present, the '1' is followed by the arbitrary
+numeric code used to represent missing values (e.g., -999).
+These values will be replaced with "NA" in the output
+array. Subsequent analyses requires a full complement of
+data, see \code{\link{estimate.missing}}.
 }
 \author{
 Dean Adams & Emma Sherratt
 }
-\keyword{readmulti.nts}
+\keyword{IO}
 

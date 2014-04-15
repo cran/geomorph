@@ -2,13 +2,14 @@
 \alias{estimate.missing}
 \title{Estimate locations of missing landmarks using the thin-plate spline}
 \usage{
-estimate.missing(ref, target)
+estimate.missing(A, method = c("TPS", "Reg"))
 }
 \arguments{
-  \item{ref}{Landmark coordinates of a reference specimen}
+  \item{A}{An array (p x k x n) containing landmark
+  coordinates for a set of specimens}
 
-  \item{target}{Landmark coordinates of a target specimen
-  (contains -999 for missing landmarks)}
+  \item{method}{Method for estimating missing landmark
+  locations}
 }
 \value{
 Function returns a n x p matrix of coordinates for the
@@ -21,27 +22,68 @@ landmarks
 }
 \details{
 The function estimates the locations of missing landmarks
-on a target specimen based on the locations of the
-corresponding landmarks on a complete, reference specimen.
-Missing landmarks in a target specimen are designated by
-'-999' in place of the x,y,z coordinates.  First, a
-complete reference specimen is aligned to a target specimen
-(missing one or more landmarks), using the set of landmarks
-common to both specimens.  Next, the thin-plate spline
-interpolating function is used to estimate the locations of
-the missing landmarks in the target specimen.
+for incomplete specimens in a set of landmark
+configurations, where missing landmarks in the incomplete
+specimens are designated by NA in place of the x,y,z
+coordinates.  Two distinct approaches are implemented.
+
+The first approach (method="TPS") uses the thin-plate
+spline to interpolate landmarks on a reference specimen to
+estimate the locations of missing landmarks on a target
+specimen. Here, a reference specimen is obtained from the
+set of specimens for which all landmarks are present, Next,
+each incomplete specimen is aligned to the reference using
+the set of landmarks common to both. Finally, the
+thin-plate spline is used to estimate the locations of the
+missing landmarks in the target specimen (Gunz et al.
+2009).
+
+The second approach (method="Reg") is multivariate
+regression. Here each landmark with missing values is
+regressed on all other landmarks for the set of complete
+specimens, and the missing landmark values are then
+predicted by this linear regression model. Because the
+number of variables can exceed the number of specimens, the
+regression is implemented on scores along the first set of
+PLS axes for the complete and incomplete blocks of
+landmarks (see Gunz et al. 2009).
+
+One can also exploit bilateral symmetry to estimate the
+locations of missing landmarks. Several possibilities exist
+for implementing this approach (see Gunz et al. 2009).
+Example R code for one implementation is found in Claude
+(2008).
+
+NOTE: Because all geometric morphometric analyses and
+plotting functions implemented in geomorph require a full
+complement of landmark coordinates, the alternative to
+estimating the missing landmark coordinates is to proceed
+with subsequent analyses EXCLUDING specimens with missing
+values. To do this, see functions
+\code{\link[stats]{complete.cases}} (use:
+mydata[complete.cases(mydata),]) or
+\code{\link[stats]{na.omit}} (use: newdata <-
+na.omit(mydata)) to make a dataset of only the complete
+specimens. These functions require the dataset to be a
+matrix in the form of a 2d array (see
+\code{\link{two.d.array}}).
 }
 \examples{
 data(plethodon)
-ref<-plethodon$land[,,1]
-target<-plethodon$land[,,11]
-target[2,]<-target[6,]<- -999    #create some missing landmarks
-estimate.missing(ref,target)
+plethland<-plethodon$land
+  plethland[3,,2]<-plethland[8,,2]<-NA  #create missing landmarks
+  plethland[3,,5]<-plethland[8,,5]<-plethland[9,,5]<-NA
+  plethland[3,,10]<-NA
+
+estimate.missing(plethland,method="TPS")
+estimate.missing(plethland,method="Reg")
 }
 \author{
 Dean Adams
 }
 \references{
+Claude, J. 2008. Morphometrics with R. Springer, New York.
+
 Bookstein, F. L., K. Schafer, H. Prossinger, H. Seidler, M.
 Fieder, G. Stringer, G. W. Weber, J.-L. Arsuaga, D. E.
 Slice, F. J. Rohlf, W. Recheis, A. J. Mariam, and L. F.
@@ -53,4 +95,5 @@ Gunz, P., P. Mitteroecker, S. Neubauer, G. W. Weber, and F.
 L. Bookstein. 2009. Principles for the virtual
 reconstruction of hominin crania. J. Hum. Evol. 57:48-62.
 }
+\keyword{utilities}
 

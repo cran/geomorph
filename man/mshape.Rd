@@ -31,5 +31,5 @@ Julien Claude
 \references{
 Claude, J. 2008. Morphometrics with R. Springer, New York.
 }
-\keyword{mshape}
+\keyword{utilities}
 

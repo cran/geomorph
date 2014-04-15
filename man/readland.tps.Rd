@@ -35,9 +35,10 @@ missing the scale factor, landmarks are treated in their
 original units.
 
 The user may specify whether specimen names are to be
-included in the resulting 3D array. If so, names may be
-read from either the 'ID' field or the 'IMAGE' field of the
-TPS file.
+extracted from the 'ID=' field or 'IMAGE=' field and
+included in the resulting 3D array. e.g., for 'ID=' use
+(file, specID = "ID") and for 'IMAGE=' use (file, specID =
+"imageID"). The default is specID="None".
 
 NOTE: At present, all other information that can be
 contained in tps files (curves, comments, variables, radii,
@@ -51,5 +52,5 @@ Rohlf, F. J. 2010. tpsRelw: Relative warps analysis.
 Version 1.49. Department of Ecology and Evolution, State
 University of New York at Stony Brook, Stony Brook, NY.
 }
-\keyword{readland.tps}
+\keyword{IO}
 

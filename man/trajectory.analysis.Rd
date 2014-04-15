@@ -58,8 +58,8 @@ tangent space. These trajectories can be quantified various
 attributes (their size, orientation, and shape), and
 comparisons of these attribute enables the statistical
 comparison of shape change trajectories (see Collyer and
-Adams 2007; Adams and Collyer 2007; Adams and Collyer
-2009).
+Adams 2013; Collyer and Adams 2007; Adams and Collyer 2007;
+Adams and Collyer 2009).
 
 Data input is specified by a formula (e.g., Y~X), where 'Y'
 specifies the response variables (trajectory data), and 'X'
@@ -147,5 +147,5 @@ Collyer, M. L., and D. C. Adams. 2007. Analysis of
 two-state multivariate phenotypic change in ecological
 studies. Ecology 88:683-692.
 }
-\keyword{trajectory.analysis}
+\keyword{analysis}
 

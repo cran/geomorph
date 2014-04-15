@@ -21,5 +21,5 @@ array (p x k x n) of landmark coordinates.
 \author{
 Dean Adams
 }
-\keyword{writeland.tps}
+\keyword{IO}
 

@@ -36,10 +36,9 @@ such as made by \code{\link{digit.fixed}}, or
 landmarks will be treated as "curve sliders" in Generalized
 Procrustes analysis \code{\link{gpagen}}. This type of
 semilandmark "slides" along curves lacking known landmarks
-(see Bookstein 1991:376-382, 1997 for algorithm details).
-Each sliding semilandmark ("sliders") will slide between
-two designated points, along a line tangent to the
-specified curvature.
+(see Bookstein 1997 for algorithm details).  Each sliding
+semilandmark ("sliders") will slide between two designated
+points, along a line tangent to the specified curvature.
 
 \subsection{Selection}{ Choosing which landmarks will be
 sliders involves landmark selection using a mouse in the
@@ -51,18 +50,15 @@ LEFT mouse button (secondary) is used to rotate mesh, \item
 the mouse SCROLLER (third/middle) is used to zoom in and
 out. } NOTE: Digitizing functions on MACINTOSH computers
 using a standard 3-button mice works as specified. Macs
-using platform specific single button mice: \enumerate{
-\item press button to rotate 3D mesh, \item press button
-while pressing CONTROL key to choose points to be defined
-as sliders, \item press button while pressing OPTION key to
-zoom in and out.}
-
-Mac mouse settings need adjustment to acquire zooming
-functions of the "middle/third" mouse button/scroller. Some
-instructions can be found at \url{http://blog.boastr.net/}.
-In addition, freeware providing "Middle Click"
-functionality is available at \url{http://magicprefs.com/}
-for "magicmice" now standard on many Macintosh machines.
+using platform specific single button mice, XQuartz must be
+configured: go to Preferences > Input > tick "Emulate three
+button mouse": \enumerate{ \item press button to rotate 3D
+mesh, \item press button while pressing COMMAND key to
+select points to be digitized (click-drag a box around a
+vertex to select as landmark), \item press button while
+pressing OPTION key to adjust mesh perspective.  \item the
+mouse SCROLLER or trackpad two finger scroll is used to
+zoom in an out.  }
 
 To define the sliders, for each sliding landmark along the
 curve in the format 'before-slider-after': \enumerate{
@@ -81,9 +77,6 @@ point of the first three to be the 1st for the next e.g. 1
 Erik Otarola-Castillo & Emma Sherratt
 }
 \references{
-Bookstein, F. J. 1991 Morphometric Tools for Landmark Data:
-Geometry and Biology. Cambridge University Press, New York.
-
 Bookstein, F. J. 1997 Landmark Methods for Forms without
 Landmarks: Morphometrics of Group Differences in Outline
 Shape. Medical Image Analysis 1(3):225-243.
@@ -92,5 +85,5 @@ Shape. Medical Image Analysis 1(3):225-243.
 \code{\link{digit.fixed}}, \code{\link{digitsurface}},
 \code{\link{gpagen}}
 }
-\keyword{define.sliders.3d}
+\keyword{utilities}
 

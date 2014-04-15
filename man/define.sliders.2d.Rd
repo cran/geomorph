@@ -29,10 +29,10 @@ such as made by \code{\link{digitize2d}}, and helps user
 choose which landmarks will be treated as "curve sliders"
 in Generalized Procrustes analysis \code{\link{gpagen}}.
 This type of semilandmark "slides" along curves lacking
-known landmarks (see Bookstein 1991:376-382, 1997 for
-algorithm details).  Each sliding semilandmark ("sliders")
-will slide between two designated points, along a line
-tangent to the specified curvature.
+known landmarks (see Bookstein 1997 for algorithm details).
+Each sliding semilandmark ("sliders") will slide between
+two designated points, along a line tangent to the
+specified curvature.
 
 \subsection{Selection}{ Choosing which landmarks will be
 sliders involves landmark selection using a mouse in the
@@ -54,16 +54,9 @@ first three to be the 1st for the next e.g. 1 2 3 then 2 3
 4, then 3 4 5 etc. }
 }
 \author{
-Dean Adams,
-
-Erik Otarola-Castillo
-
-Emma Sherratt
+Dean Adams, Erik Otarola-Castillo, Emma Sherratt
 }
 \references{
-Bookstein, F. J. 1991 Morphometric Tools for Landmark Data:
-Geometry and Biology. Cambridge University Press, New York.
-
 Bookstein, F. J. 1997 Landmark Methods for Forms without
 Landmarks: Morphometrics of Group Differences in Outline
 Shape. Medical Image Analysis 1(3):225-243.
@@ -71,5 +64,5 @@ Shape. Medical Image Analysis 1(3):225-243.
 \seealso{
 \code{\link{digitize2d}}, \code{\link{gpagen}}
 }
-\keyword{define.sliders.2d}
+\keyword{utilities}
 

@@ -2,7 +2,7 @@
 \alias{buildtemplate}
 \title{Build 3D surface template}
 \usage{
-buildtemplate(spec, fixed, surface.sliders, ptsize = 1)
+buildtemplate(spec, fixed, surface.sliders, ptsize = 1, center = TRUE)
 }
 \arguments{
   \item{spec}{Name of surface file, as either an object of
@@ -18,6 +18,9 @@ buildtemplate(spec, fixed, surface.sliders, ptsize = 1)
   \item{ptsize}{numeric: Size to plot the mesh points
   (vertices), e.g. 0.1 for dense meshes, 3 for sparse
   meshes}
+
+  \item{center}{Logical Whether the object 'spec' should be
+  centered prior to digitizing (default {center=TRUE})}
 }
 \value{
 Function writes to the working directory three files: an
@@ -42,17 +45,20 @@ Function constructs a template of fixed landmarks and n
 "surface sliders", semilandmarks that slide over a surface.
 The user digitizes the fixed points (see digitizing below),
 then the function finds n surface semilandmarks following
-algorithm outlined in Gunz et al. (2005:90-92) and
-Mitteroecker and Gunz (2009:242). Surface semilandmarks are
-roughly equidistant set of predetermined number of points,
-chosen over the mesh automatically using a nearest-neighbor
+algorithm outlined in Gunz et al. (2005) and Mitteroecker
+and Gunz (2009). Surface semilandmarks are roughly
+equidistant set of predetermined number of points, chosen
+over the mesh automatically using a nearest-neighbor
 approach.  The set of fixed and surface slider landmarks
 are exported as a "template", which is used to extract a
 set of similarly numbered landmarks on every specimen using
 function \code{\link{digitsurface}}. Some of the "fixed"
 landmarks can be later designated as "curve sliders" using
 function \code{\link{define.sliders.3d}} if required - see
-details in \code{\link{digit.fixed}}.
+details in \code{\link{digit.fixed}}.  Because template
+matching is based on the correspondence of fixed landmark
+points in the template and the specimen, a minimum of four
+fixed landmarks must be used.
 
 To ensure a strong match between the scan and the template,
 it is recommended that a reasonable number of fixed points
@@ -60,8 +66,9 @@ be used.  These fixed points can be designated as "curve
 sliders" later using function
 \code{\link{define.sliders.3d}}, see the function
 \code{\link{digit.fixed}} for details.  NOTE: Function
-centers the mesh before digitizing (required for further
-operations).
+centers the mesh before digitizing by default
+(center=TRUE). If one chooses not to center, specimen may
+be difficult to manipulate in rgl window.
 
 \subsection{Digitizing}{ Digitizing using buildtemplate is
 interactive between landmark selection using a mouse (see
@@ -80,18 +87,15 @@ landmark) \item the LEFT mouse button (secondary) is used
 to rotate mesh, \item the mouse SCROLLER (third/middle) is
 used to zoom in and out. } NOTE: Digitizing functions on
 MACINTOSH computers using a standard 3-button mice works as
-specified. Macs using platform specific single button mice:
-\enumerate{ \item press button to rotate 3D mesh, \item
-press button while pressing CONTROL key to select points to
-be digitized (click-drag a box around a vertex to select as
-landmark), \item press button while pressing OPTION key to
-adjust mesh perspective. } Mac mouse settings need
-adjustment to acquire zooming functions of the
-"middle/third" mouse button/scroller. Some instructions can
-be found at \url{http://blog.boastr.net/}. In addition,
-freeware providing "Middle Click" functionality is
-available at \url{http://magicprefs.com/} for "magicmice"
-now standard on many Macintosh machines.
+specified. Macs using platform specific single button mice,
+XQuartz must be configured: go to Preferences > Input >
+tick "Emulate three button mouse": \enumerate{ \item press
+button to rotate 3D mesh, \item press button while pressing
+COMMAND key to select points to be digitized (click-drag a
+box around a vertex to select as landmark), \item press
+button while pressing OPTION key to adjust mesh
+perspective.  \item the mouse SCROLLER or trackpad two
+finger scroll is used to zoom in an out.  }
 
 NOTE: there is no pan (translate) functionality in rgl
 library for all platforms at this time. The template can be
@@ -109,5 +113,12 @@ Anthropology, ed Slice DE (Springer-Verlag, New York), pp
 Mitteroecker P & Gunz P (2009) Advances in Geometric
 Morphometrics. Evolutionary Biology 36(2):235-247.
 }
-\keyword{buildtemplate}
+\seealso{
+\code{\link{read.ply}}
+
+\code{\link{digit.fixed}}
+
+\code{\link{digitsurface}}
+}
+\keyword{digitizing}
 

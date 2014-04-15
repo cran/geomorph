@@ -8,5 +8,5 @@ landmarks on mosquito wings
 \author{
 Dean Adams
 }
-\keyword{data}
+\keyword{datasets}
 

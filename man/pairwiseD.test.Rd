@@ -55,5 +55,5 @@ pairwiseD.test(y,plethodon$species,iter=99)
 \author{
 Dean Adams
 }
-\keyword{PairwiseD.test}
+\keyword{analysis}
 

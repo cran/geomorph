@@ -38,20 +38,18 @@ a box around landmark), \item the LEFT mouse button
 SCROLLER (third/middle) is used to zoom in and out. } NOTE:
 Digitizing functions on MACINTOSH computers using a
 standard 3-button mice works as specified. Macs using
-platform specific single button mice: \enumerate{ \item
-press button to rotate 3D mesh, \item press button while
-pressing CONTROL key to choose points to be deleted
-(click-drag a box around landmark), \item press button
-while pressing OPTION key to zoom in and out.  } Mac mouse
-settings need adjustment to acquire zooming functions of
-the "middle/third" mouse button/scroller. Some instructions
-can be found at \url{http://blog.boastr.net/}. In addition,
-freeware providing "Middle Click" functionality is
-available at \url{http://magicprefs.com/} for "magicmice"
-now standard on many Macintosh machines. }
+platform specific single button mice, XQuartz must be
+configured: go to Preferences > Input > tick "Emulate three
+button mouse": \enumerate{ \item press button to rotate 3D
+mesh, \item press button while pressing COMMAND key to
+select points to be digitized (click-drag a box around a
+vertex to select as landmark), \item press button while
+pressing OPTION key to adjust mesh perspective.  \item the
+mouse SCROLLER or trackpad two finger scroll is used to
+zoom in an out.  } }
 }
 \author{
 Erik Otarola-Castillo & Emma Sherratt
 }
-\keyword{editTemplate}
+\keyword{digitizing}
 

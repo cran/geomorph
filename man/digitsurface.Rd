@@ -2,7 +2,7 @@
 \alias{digitsurface}
 \title{Digitize 3D fixed landmarks and surface semilandmarks.}
 \usage{
-digitsurface(spec, fixed, ptsize = 1)
+digitsurface(spec, fixed, ptsize = 1, center = TRUE)
 }
 \arguments{
   \item{spec}{Name of surface file, as either an object of
@@ -15,15 +15,14 @@ digitsurface(spec, fixed, ptsize = 1)
   \item{ptsize}{numeric: Size to plot the mesh points
   (vertices), e.g. 0.1 for dense meshes, 3 for sparse
   meshes}
+
+  \item{center}{Logical Whether the object 'spec' should be
+  centered prior to digitizing (default {center=TRUE})}
 }
 \value{
 Function writes to the working directory an NTS file with
 the name of the specimen and .nts suffix containing the
-landmark coordinates. Function also returns a list:
-\item{FIX.LANDMARKS}{an n x 3 matrix containing the x,y,z
-coordinates of the digitized landmarks}
-\item{SURFSLIDERSxyz}{a matrix of addresses for landmarks
-that are "surface sliders"}
+landmark coordinates.
 }
 \description{
 An interactive function to digitize three-dimensional (3D)
@@ -37,21 +36,26 @@ Function for digitizing fixed 3D landmarks and placing
 "surface sliders", semilandmarks that slide over a surface.
 Following selection of fixed points (see digitizing below),
 function finds surface semilandmarks following algorithm
-outlined in Gunz et al. (2005:90-92) and Mitteroecker and
-Gunz (2009:242). digitsurface finds the same number of
-surface semilandmarks as the template (created by
+outlined in Gunz et al. (2005) and Mitteroecker and Gunz
+(2009). digitsurface finds the same number of surface
+semilandmarks as the template (created by
 \code{\link{buildtemplate}}) by downsampling scanned mesh,
 registering template with current specimen via GPA. A
 nearest neighbor algorithm is used to match template
 surface landmarks to current specimen's.  To use function
 digitsurface, the template must be constructed first, and
-'template.txt' be in the working directory.
+'template.txt' be in the working directory. Because
+template matching is based on the correspondence of fixed
+landmark points in the template and the specimen, a minimum
+of four fixed landmarks must be used.
 
 Some of the "fixed" landmarks digitized with digitsurface
 can be later designated as "curve sliders" using function
 \code{\link{define.sliders.3d}} if required (see details in
 \code{\link{digit.fixed}}).  NOTE: Function centers the
-mesh before digitizing (required for further operations).
+mesh before digitizing by default (center=TRUE). If one
+chooses not to center, specimen may be difficult to
+manipulate in rgl window.
 
 \subsection{Digitizing}{ Digitizing is interactive between
 landmark selection using a mouse (see below for
@@ -70,18 +74,15 @@ landmark), \item the LEFT mouse button (secondary) is used
 to rotate mesh, \item the mouse SCROLLER (third/middle) is
 used to zoom in and out. } NOTE: Digitizing functions on
 MACINTOSH computers using a standard 3-button mice works as
-specified. Macs using platform specific single button mice:
-\enumerate{ \item press button to rotate 3D mesh, \item
-press button while pressing CONTROL key to select points to
-be digitized (click-drag a box around a vertex to select as
-landmark), \item press button while pressing OPTION key to
-adjust mesh perspective. } Mac mouse settings need
-adjustment to acquire zooming functions of the
-"middle/third" mouse button/scroller. Some instructions can
-be found at \url{http://blog.boastr.net/}. In addition,
-freeware providing "Middle Click" functionality is
-available at \url{http://magicprefs.com/} for "magicmice"
-now standard on many Macintosh machines.
+specified. Macs using platform specific single button mice,
+XQuartz must be configured: go to Preferences > Input >
+tick "Emulate three button mouse": \enumerate{ \item press
+button to rotate 3D mesh, \item press button while pressing
+COMMAND key to select points to be digitized (click-drag a
+box around a vertex to select as landmark), \item press
+button while pressing OPTION key to adjust mesh
+perspective.  \item the mouse SCROLLER or trackpad two
+finger scroll is used to zoom in an out.  }
 
 NOTE: there is no pan (translate) functionality in rgl
 library for all platforms at this time. }
@@ -100,6 +101,10 @@ Morphometrics. Evolutionary Biology 36(2):235-247.
 }
 \seealso{
 \code{\link{buildtemplate}}
+
+\code{\link{read.ply}}
+
+\code{\link{digit.fixed}}
 }
-\keyword{digitsurface}
+\keyword{digitizing}
 

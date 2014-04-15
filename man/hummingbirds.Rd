@@ -16,5 +16,5 @@ hummingbirds: Archilochus alexandri (black-chinned
 hummingbirds) and Archilochus colubris (ruby-throated
 hummingbirds). The Auk. 127:626-635.
 }
-\keyword{data}
+\keyword{datasets}
 

@@ -70,8 +70,8 @@ Generalized Procrustes Analysis (GPA: Gower 1975, Rohlf and
 Slice 1990) is the primary means by which shape variables
 are obtained from landmark data (for a general overview of
 geometric morphometrics see Bookstein 1991, Rohlf and
-Marcus 1993, Adams et al. 2004, Zelditch et al. 2004,
-Mitteroecker and Gunz 2009, Adams et al. 2012). GPA
+Marcus 1993, Adams et al. 2004, Zelditch et al. 2012,
+Mitteroecker and Gunz 2009, Adams et al. 2013). GPA
 translates all specimens to the origin, scales them to
 unit-centroid size, and optimally rotates them (using a
 least-squares criterion) until the coordinates of
@@ -101,16 +101,11 @@ points(mshape(gpagen(plethodon$land)$coords),pch=22,col="red",bg="red",cex=1.2)
 #Example 2: points and semilandmarks on curves
 data(hummingbirds)
 
-#Matrix defining which points are semilandmarks (middle column)
-#and in which directions they slide (columns 1 vs. 3)
-
-hummingbirds$curvepts
-
 #Using Procrustes Distance for sliding
-gpagen(hummingbirds$land,curves=hummingbirds$curvepts,)
+gpagen(hummingbirds$land,curves=hummingbirds$curvepts)
 
 #Using bending energy for sliding
-gpagen(hummingbirds$land,curves=hummingbirds$curvepts,ProcD=FALSE,)
+gpagen(hummingbirds$land,curves=hummingbirds$curvepts,ProcD=FALSE)
 
 #Example 3: points, curves and surfaces
 data(scallops)
@@ -125,9 +120,9 @@ Adams, D. C., F. J. Rohlf, and D. E. Slice. 2004. Geometric
 morphometrics: ten years of progress following the
 'revolution'. It. J. Zool. 71:5-16.
 
-Adams, D. C., F. J. Rohlf, and D. E. Slice. 2012. In Press.
-A field comes of age: Geometric morphometrics in the 21st
-century. Hystrix.
+Adams, D. C., F. J. Rohlf, and D. E. Slice. 2013. A field
+comes of age: Geometric morphometrics in the 21st century.
+Hystrix.24:7-14.
 
 Bookstein, F. L. 1991. Morphometric tools for landmark
 data: Geometry and Biology.  Cambridge Univ. Press, New
@@ -171,8 +166,8 @@ Version 1.49. Department of Ecology and Evolution, State
 University of New York at Stony Brook, Stony Brook, NY.
 
 Zelditch, M. L., D. L. Swiderski, H. D. Sheets, and W. L.
-Fink. 2004. Geometric morphometrics for biologists: a
-primer. Elsevier/Academic Press, Amsterdam.
+Fink. 2012. Geometric morphometrics for biologists: a
+primer. 2nd edition. Elsevier/Academic Press, Amsterdam.
 }
-\keyword{gpagen}
+\keyword{analysis}
 

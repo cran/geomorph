@@ -1,4 +1,58 @@
-		CHANGES IN GEOMORPH VERSION 1.1-6
+  	CHANGES IN GEOMORPH VERSION 2.0
+
+NEW FEATURES
+
+    o New function phylo.pls() for assessing the multivariate association between two blocks of variables in a phylogenetic context
+
+    o New function two.b.pls() for assessing the multivariate association between two blocks of variables
+
+    o New function morphol.disparity() to compare Procrustes variance disparity among groups
+
+    o F-ratios and R-squared values added to output of ProcD.lm()
+
+    o 3D Visualizations now include "surface" option to view shape deformation as warped mesh3d surfaces in the following: plotRefToTarget(), plotTangentSpace(), plotAllometry(), and bilat.symmetry()
+
+    o New I/O functions: warpRefMesh() to create a mesh3d surface that represents the mean shape, findMeanSpec() to assist in choosing a template ply file for use with warpRefMesh that identifies specimen closest to the mean shape, and defline.modules() to interactively assign landmarks to modular partitions [currently 2D only]
+
+    o Generalized data input to allow 3D array or 2D matrix of data added to the following analysis functions: compare.evol.rates(), phylo.pls(), morphol.integr(), two.b.pls(), physignal(), and plotGMPhyloMorphoSpace()
+
+    o Ability to input univariate data added to compare.evol.rates() and physignal()
+
+    o Verbose output = T/F added to the following functions: bilat.symmetry(), phylo.pls(), two.b.pls(), morphol.integr(), plotAllometry(), plotTangentSpace(), physignal()
+
+OTHER CHANGES
+
+    o Added calculation of pairwise Pvalues, and the option to assess a single group in  function compare.evol.rates() 
+
+    o Additional graphical output added to morphol.integr()
+
+    o Missing data handling altered (now NA is used)
+
+    o byLand option in arrayspecs() has been removed
+
+    o Residual shape component (RSC) plot added and scores returned for plotAllometry (method = "CAC")
+
+    o Procrustes ANOVA added to plotAllometry output
+
+    o Centering = T/F option added to following 3D digitizing functions: build.Template(), digit.fixed(), digitsurface(), and plotSpec()
+
+    o read.vrml now defunct
+
+INTERNAL CODING CHANGES
+
+    o Major re-organization of underlying R code structure and format
+
+    o Optimized code to improve speed and performance in following functions: arrayspecs(), readland.tps(), readland.nts(), readmulti.nts(), two.d.array(), plotTangentSpace(), trajectory.analysis(), bilat.symmetry(), gpagen() 
+
+    o Simplified plotting options in bilat.symmetry()
+
+BUG FIXES 
+
+    o Corrected small coding error in digitize2D and updated flexibility of the function
+
+######
+
+    CHANGES IN GEOMORPH VERSION 1.1-6
 
 OTHER CHANGES
 

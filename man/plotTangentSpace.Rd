@@ -2,16 +2,20 @@
 \alias{plotTangentSpace}
 \title{Plot specimens in tangent space}
 \usage{
-plotTangentSpace(A, axis1 = 1, axis2 = 2, warpgrids = TRUE,
-  label = FALSE, groups = NULL)
+plotTangentSpace(A, axis1 = 1, axis2 = 2, warpgrids = TRUE, mesh = NULL,
+  label = FALSE, groups = NULL, verbose = FALSE)
 }
 \arguments{
   \item{A}{An array (p x k x n) containing landmark
-  coordinates for a set of specimens}
+  coordinates for a set of aligned specimens}
 
   \item{warpgrids}{A logical value indicating whether
-  deformation grids for shapes along PC1 should be
+  deformation grids for shapes along X-axis should be
   displayed}
+
+  \item{mesh}{A mesh3d object to be warped to represent
+  shape deformation along X-axis (when {warpgrids=TRUE}) as
+  described in \code{\link{plotRefToTarget}}.}
 
   \item{axis1}{A value indicating which PC axis should be
   displayed as the X-axis (default = PC1)}
@@ -24,6 +28,21 @@ plotTangentSpace(A, axis1 = 1, axis2 = 2, warpgrids = TRUE,
 
   \item{groups}{An optional factor vector specifying group
   identity for each specimen}
+
+  \item{verbose}{A logical value indicating whether the
+  output is basic or verbose (see Value below)}
+}
+\value{
+Function returns a table summarizing the percent variation
+explained by each pc axis (equivalent to summary() of
+\code{\link{prcomp}}) (default, verbose = FALSE).  If
+verbose=TRUE, function returns a list containing the
+following components: \item{pc.summary}{A PC summary table
+as above} \item{pc.scores}{The set of principal component
+scores for all specimens.} \item{pc.shapes}{A list with
+four components of the shape coordinates of the extreme
+ends of axis1 and axis2 is returned, which can be used by
+\code{\link{warpRefMesh}}.}
 }
 \description{
 Function plots a set of Procrustes-aligned specimens in
@@ -33,17 +52,15 @@ tangent space along their principal axes
 The function performs a principal components analysis of
 shape variation and plots two dimensions of tangent space
 for a set of Procrustes-aligned specimens (default is PC1
-vs. PC2). The percent variation along each PC-axis is
-returned. Additionally (and optionally), deformation grids
-can be requested, which display the shape of specimens at
-the ends of the range of variability along PC1. The
-function returns a table summarizing the percent variation
-explained by each pc axis, and the set of principal
-component scores for all specimens. If groups are provided,
-specimens from each group are plotted using distinct colors
-based on the order in which the groups are found in the
-dataset, and using R's standard color palette: black, red,
-green, blue, cyan, magenta, yellow, and gray.
+vs. PC2).  The percent variation along each PC-axis is
+returned. Additionally (and optionally, {warpgrids=T}),
+deformation grids can be requested, which display the shape
+of specimens at the ends of the range of variability along
+PC1. If groups are provided, specimens from each group are
+plotted using distinct colors based on the order in which
+the groups are found in the dataset, and using R's standard
+color palette: black, red, green, blue, cyan, magenta,
+yellow, and gray.
 }
 \examples{
 data(plethodon)
@@ -53,7 +70,7 @@ ref<-mshape(Y.gpa$coords)
 plotTangentSpace(Y.gpa$coords, groups = paste(plethodon$species, plethodon$site))
 }
 \author{
-Dean Adams
+Dean Adams & Emma Sherratt
 }
-\keyword{plotTangentSpace}
+\keyword{visualization}
 

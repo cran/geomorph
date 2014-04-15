@@ -3,8 +3,8 @@
 \title{Analysis of bilateral symmetry}
 \usage{
 bilat.symmetry(A, ind = NULL, side = NULL, replicate = NULL,
-  object.sym = FALSE, land.pairs = NULL, GPAoutput = FALSE,
-  plot.method = "TPS", mag = 1, ...)
+  object.sym = FALSE, land.pairs = NULL, warpgrids = TRUE, mesh = NULL,
+  verbose = FALSE)
 }
 \arguments{
   \item{A}{An array (p x k x n) containing GPA-aligned
@@ -23,41 +23,35 @@ bilat.symmetry(A, ind = NULL, side = NULL, replicate = NULL,
   objects belong to which group of replicates}
 
   \item{object.sym}{A logical value specifying whether the
-  analysis should proceed based on object symmetry (TRUE)
-  or matching symmetry (FALSE)}
+  analysis should proceed based on object symmetry {=TRUE}
+  or matching symmetry {=FALSE}}
 
   \item{land.pairs}{An optional matrix (for object
   symmetry) containing numbers for matched pairs of
   landmarks across the line of symmetry}
 
-  \item{GPAoutput}{A logical value indicating whether
-  results from GPA should be returned}
+  \item{warpgrids}{A logical value indicating whether
+  deformation grids for directional and fluctuating
+  components of asymmetry}
 
-  \item{plot.method}{A logical value indicating which type
-  of plot should be used for the directional and
-  fluctuating components of asymmetry (see
-  \code{\link{plotRefToTarget}})}
+  \item{mesh}{A mesh3d object to be warped to represent
+  shape deformation of the directional and fluctuating
+  components of asymmetry if {warpgrids= TRUE} (see
+  \code{\link{warpRefMesh}}).}
 
-  \item{mag}{The desired magnification to be used when
-  visualizing the shape differences for the directional and
-  fluctuating components of shape variation (see
-  \code{\link{plotRefToTarget}})}
-
-  \item{...}{Additional parameters to be passed to
-  'gpagen'}
+  \item{verbose}{A logical value indicating whether the
+  output is basic or verbose (see Value below)}
 }
 \value{
 Function returns a list with the following components:
-\item{aligned}{Procrustes aligned coordinates (when
-GPAoutput=TRUE)} \item{csize}{Centroid size of aligned
-specimens (when GPAoutput=TRUE)} \item{symm.shape}{The
-symmetric component of shape variation of the aligned
-specimens} \item{asymm.shape}{The asymmetric component of
-shape variation of the aligned specimens}
 \item{ANOVA.shape}{Procrustes ANOVA table assessing
 patterns of shape asymmetry} \item{ANOVA.size}{Procrustes
 ANOVA table assessing patterns of shape asymmetry (when
-object.sym=FALSE)}
+{object.sym=FALSE})} \item{symm.shape}{The symmetric
+component of shape variation of the aligned specimens
+({when verbose=TRUE})} \item{asymm.shape}{The asymmetric
+component of shape variation of the aligned specimens
+({when verbose=TRUE})}
 }
 \description{
 Function performs an analysis of directional and
@@ -83,7 +77,7 @@ morphometrics can be found in Mardia et al. 2000;
 Klingenberg et al. 2002.
 
 Analyses of symmetry for matched pairs of objects is
-implemented when "object.sym=FALSE". Here, a 3D array [p x
+implemented when {object.sym=FALSE}. Here, a 3D array [p x
 k x 2n] contains the landmark coordinates for all pairs of
 structures (2 structures for each of n specimens). Because
 the two sets of structures are on opposite sides, they
@@ -100,7 +94,7 @@ specified will be used as measurement error (see
 Klingenberg and McIntyre 1998).
 
 Analyses of object symmetry is implemented when
-"object.sym=TRUE". Here, a 3D array [p x k x n] contains
+{object.sym=TRUE}. Here, a 3D array [p x k x n] contains
 the landmark coordinates for all n specimens. To obtain
 information about asymmetry, the function generates a
 second set of objects by reflecting them about one of their
@@ -125,7 +119,7 @@ data(scallops)
 bilat.symmetry(scallops$coorddata,ind=scallops$ind,object.sym=TRUE,land.pairs=scallops$land.pairs)
 }
 \author{
-Dean Adams
+Dean Adams & Emma Sherratt
 }
 \references{
 Klingenberg, C.P. and G.S. McIntyre. 1998. Quantitative
@@ -140,5 +134,5 @@ Klingenberg, C.P., M. Barluenga, and A. Meyer. 2002. Shape
 analysis of symmetric structures: quantifying variation
 among individuals and asymmetry. Evolution. 56:1909-1920.
 }
-\keyword{bilat.symmetry}
+\keyword{analysis}
 

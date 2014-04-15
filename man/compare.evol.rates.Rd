@@ -5,10 +5,12 @@
 compare.evol.rates(phy, A, gp, iter = 999)
 }
 \arguments{
-  \item{phy}{A phylogenetic tree of type 'phylo'}
+  \item{phy}{A phylogenetic tree of {class phylo} - see
+  \code{\link[ape]{read.tree}} in library ape}
 
-  \item{A}{An array (p x k x n) containing GPA-aligned
-  coordinates for a set of specimens}
+  \item{A}{A matrix (n x [p x k]) or 3D array (p x k x n)
+  containing GPA-aligned coordinates for a set of
+  specimens}
 
   \item{gp}{A factor array designating group membership}
 
@@ -17,10 +19,14 @@ compare.evol.rates(phy, A, gp, iter = 999)
 }
 \value{
 Function returns a list with the following components:
-\item{sigmad.all}{The phylogenetic evolutionary rate for
-all species on the phylogeny} \item{sigmad.ratio}{The ratio
-of maximum to minimum evolutionary rates} \item{pvalue}{The
-significance level of the observed ratio}
+\item{sigma.d}{The phylogenetic evolutionary rate for all
+species on the phylogeny} \item{sigmad.all}{The
+phylogenetic evolutionary rate for each group of species on
+the phylogeny} \item{sigmad.ratio}{The ratio of maximum to
+minimum evolutionary rates} \item{pvalue}{The significance
+level of the observed ratio} \item{pairwise.pvalue}{Matrix
+of pairwise significance levels comaring each pair of
+rates}
 }
 \description{
 Function calculates rates of shape evolution for two or
@@ -42,10 +48,18 @@ are used, the ratio of the maximum to minimum rate is used
 as a test statistic (see Adams 2014). Significance testing
 is accomplished by phylogenetic simulation in which tips
 data are obtained under Brownian motion using a single
-evolutionary rate for all species on the phylogeny. A
-histogram of evolutionary rate ratios obtained via
-phylogenetic simulation is presented, with the observed
-value designated by an arrow in the plot.
+evolutionary rate for all species on the phylogeny. If
+three or more groups of species are used, pairwise p-values
+are also returned. A histogram of evolutionary rate ratios
+obtained via phylogenetic simulation is presented, with the
+observed value designated by an arrow in the plot. The
+function can be used to obtain a rate for the whole dataset
+of species by using a dummy group factor assigning all
+species to one group.
+
+This function can be used with univariate data (i.e.
+centroid size) if imported as matrix with rownames giving
+the taxa names.
 }
 \examples{
 data(plethspecies)
@@ -54,15 +68,20 @@ Y.gpa<-gpagen(plethspecies$land)    #GPA-alignment
  gp.end<-factor(c(0,0,1,0,0,1,1,0,0))  #endangered species vs. rest
  names(gp.end)<-plethspecies$phy$tip
 
+#Calculate rates of shape
 compare.evol.rates(plethspecies$phy,Y.gpa$coords,gp=gp.end,iter=49)
+
+#Calculate rates of size
+Csize <- matrix(Y.gpa$Csize, dimnames=list(names(Y.gpa$Csize))) # make matrix Csize with names
+compare.evol.rates(plethspecies$phy,Csize,gp=gp.end,iter=49)
 }
 \author{
-Dean Adams
+Dean Adams & Emma Sherratt
 }
 \references{
 Adams, D.C. 2014. Quantifying and comparing phylogenetic
 evolutionary rates for shape and other high-dimensional
-phenotypic data. Syst. Biol. (Accepted).
+phenotypic data. Syst. Biol. 63:166-177.
 }
-\keyword{compare.phylo.shape.rate}
+\keyword{analysis}
 

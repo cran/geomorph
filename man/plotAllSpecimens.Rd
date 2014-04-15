@@ -45,5 +45,5 @@ plotAllSpecimens(Y.gpa$coords,links=plethodon$links)
 \author{
 Dean Adams
 }
-\keyword{plotAllSpecimens}
+\keyword{visualization}
 
