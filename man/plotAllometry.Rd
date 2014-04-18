@@ -59,28 +59,30 @@ data (i.e., allometry). It is assumed that the landmarks
 have previously been aligned using Generalized Procrustes
 Analysis (GPA) [e.g., with \code{\link{gpagen}}]. The
 abscissa of the plot is log(centroid size) while the
-ordinate represents shape. Three complementary approaches
-can be implemented to visualize allometry: \enumerate{
-\item {If "method=CAC" (the default) the function
-calculates the common allometric component of the shape
-data, which is an estimate of the average allometric trend
-within groups (Mitteroecker et al. 2004). The function also
-calculates the residual shape component (RSC) for the
-data.} \item {If "method=RegScore" the function calculates
-shape scores from the regression of shape on size, and
-plots these versus size (Drake and Klingenberg 2008).  For
-a single group, these shape scores are mathematically
-identical to the CAC (Adams et al. 2013).} \item {If
-"method=PredLine" the function calculates predicted values
-from a regression of shape on size, and plots the first
-principal component of the predicted values versus size as
-a stylized graphic of the allometric trend (Adams and
-Nistri 2010). } } For all methods, both centroid size and
-allometry scores are returned. Optionally, deformation
-grids can be requested, which display the shape of the
-smallest and largest specimens relative to the average
-specimen (using 'warpgrids=T' or 'warpgrids=F').  Finally,
-if groups are provided, the above approaches are
+ordinate represents shape [NOTE: the function takes the
+input size and performed log-transformation automatically,
+as log(Csize) should be used]. Three complementary
+approaches can be implemented to visualize allometry:
+\enumerate{ \item {If "method=CAC" (the default) the
+function calculates the common allometric component of the
+shape data, which is an estimate of the average allometric
+trend within groups (Mitteroecker et al. 2004). The
+function also calculates the residual shape component (RSC)
+for the data.} \item {If "method=RegScore" the function
+calculates shape scores from the regression of shape on
+size, and plots these versus size (Drake and Klingenberg
+2008).  For a single group, these shape scores are
+mathematically identical to the CAC (Adams et al. 2013).}
+\item {If "method=PredLine" the function calculates
+predicted values from a regression of shape on size, and
+plots the first principal component of the predicted values
+versus size as a stylized graphic of the allometric trend
+(Adams and Nistri 2010). } } For all methods, both centroid
+size and allometry scores are returned. Optionally,
+deformation grids can be requested, which display the shape
+of the smallest and largest specimens relative to the
+average specimen (using 'warpgrids=T' or 'warpgrids=F').
+Finally, if groups are provided, the above approaches are
 implemented while accounting for within-group patterns of
 covariation (see references for explanation). In this case,
 the regression is of the form: shape~size+groups (Note: to

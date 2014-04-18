@@ -62,9 +62,13 @@ and \code{\link{plotRefToTarget}}).
 Emma Sherratt
 }
 \references{
-Bookstein, F. J. 1989 Principal Warps: Thin-Plate Splines
+Bookstein, F. L. 1989 Principal Warps: Thin-Plate Splines
 and the Decomposition of Deformations. IEEE Transactions on
 Pattern Analysis and Machine Intelligence 11(6):567-585.
+
+Rohlf, F. J. 1998. On Applications of Geometric
+Morphometrics to Studies of Ontogeny and Phylogeny.
+Systematic Biology. 47:147-158.
 }
 \seealso{
 \code{\link{findMeanSpec}}

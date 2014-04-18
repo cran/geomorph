@@ -1,6 +1,6 @@
-348953adff9a6493d09d36749f962606 *DESCRIPTION
+fa7678a7c1a61a03f97027dff7794a1e *DESCRIPTION
 513ea934a5eb51c9ec2911e855f3b413 *NAMESPACE
-003caf6a34e4c850a919ce9b3d1f18c5 *NEWS
+29b1324b073aec977613ccfc2016241a *NEWS
 dcd457a4bf99f0698792a67d25793d42 *R/arrayspecs.r
 d205a251502ceeac43d362caac84db6f *R/bilat.symmetry.r
 17f49e45272bbaa6ce0d1cbd1b29b9e4 *R/build.template.r
@@ -24,8 +24,8 @@ b5abc21b73b063eb3357df7711720dd5 *R/morphol.disparity.R
 ff7f745b348c8bc6d3165aa4f55dafb7 *R/phylo.pls.R
 314f016a87c27a33a734fb2cfa2c2560 *R/physignal.r
 e10daae88b64ae81d82c29f63ff79428 *R/plotAllSpecimens.r
-5b3b7d2be9aaf48026af6bf3212ab08f *R/plotAllometry.r
-a84283ecab52093f17ccdf3311ed1b29 *R/plotGMPhyloMorphoSpace.r
+aa7ecbaea345bfd49d14a3c919d8e07c *R/plotAllometry.r
+2c3965b2fc37dc5f3ddf2b6f1e65c3d1 *R/plotGMPhyloMorphoSpace.r
 cc811ace07c60abfbae1c862fd303066 *R/plotRefToTarget.r
 acea820c6bcb2cf53a4fc560a8284a67 *R/plotTangentSpace.r
 de77c10bd46c9476074cfb15e559999e *R/plotspec.r
@@ -38,7 +38,7 @@ eb8d15e8b08152db79be724af419cb10 *R/readland.tps.r
 e551d1f3f4d68e76627f6527321115c4 *R/trajectory.analysis.r
 1ca92d47cabe077ea2c6b4421afdda85 *R/two.b.pls.r
 cac4c94b232cb0da0e2faf26f9f07597 *R/two.d.array.r
-00b478c5a237e36e83e77543ad51272f *R/warpRefMesh.R
+cdbcec5258ddfeeffeaecf7d9146e2b6 *R/warpRefMesh.R
 abec95a913437c6429f724f3af734039 *R/writeland.tps.r
 c97a907e79afc4518737830f1417f3da *data/hummingbirds.rda
 59140cead527641a81ee9d7d5c0cba3d *data/mosquito.rda
@@ -80,7 +80,7 @@ f3bc9d32cf075506f9f6399d436b6b03 *man/plethShapeFood.Rd
 e08866696f279e2caa6f54ef2fad91fc *man/plethodon.Rd
 72a390e0e9158303643639aeb64dff4c *man/plethspecies.Rd
 669b8811a760df65252468632ad12747 *man/plotAllSpecimens.Rd
-9d11bab5abdcdf901c01897cf6fdafef *man/plotAllometry.Rd
+b5dc10bf5f82dfcc662bcdd00be3e35f *man/plotAllometry.Rd
 349adfa49632f15e9946e8076a62c3c7 *man/plotGMPhyloMorphoSpace.Rd
 b983a7c94ff0dac83062dd28924bde39 *man/plotRefToTarget.Rd
 cb83da131945d6fce7156ebc3ca2596f *man/plotTangentSpace.Rd
@@ -98,9 +98,9 @@ b558c49ddbe8e019250f758d08415bb3 *man/readland.nts.Rd
 8373b80e8b4ee3a596155c256b7a7163 *man/trajectory.analysis.Rd
 59fca152286e32f58d4647dcd8ebe008 *man/two.b.pls.Rd
 8e3475761ecf1d8c31b2ef17950cb4be *man/two.d.array.Rd
-93fe198a4de8d5c9eff510bf07228a45 *man/warpRefMesh.Rd
+701957926a545d538d1449b4f6a2dc87 *man/warpRefMesh.Rd
 cf0ff0a8e4a401d0d08200ce3b4d2e15 *man/writeland.tps.Rd
 7f5f4521e5eb0c3f8761a8b9f97f2036 *src/Makevars
 d7d11ff24546e14df04f3e2a5ff09662 *src/Makevars.win
 39c13aa7bf8317b7020141a4edf07f7a *src/array.h
-090aabd60e3027d752ba5939a7e091f2 *src/geomorph.c
+cc6b56b41691d7bbc25ccf31e075d8b6 *src/geomorph.c

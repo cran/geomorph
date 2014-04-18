@@ -25,8 +25,6 @@
 #'
 #' plotGMPhyloMorphoSpace(plethspecies$phy,Y.gpa$coords)
 plotGMPhyloMorphoSpace<-function(phy,A,labels=TRUE,ancStates=TRUE){
-  if (length(dim(A))!=3){
-    stop("Data matrix not a 3D array (see 'arrayspecs').")  }
   if(any(is.na(A))==T){
     stop("Data matrix contains missing values. Estimate these first(see 'estimate.missing').")  }
   if (length(dim(A))==3){ 

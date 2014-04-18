@@ -34,8 +34,9 @@
 #' @keywords visualization
 #' @author Emma Sherratt
 #' @return Function returns a mesh3d object, which is a list of class mesh3d (see rgl for details)
-#' @references  Bookstein, F. J. 1989 Principal Warps: Thin-Plate Splines and the Decomposition
+#' @references  Bookstein, F. L. 1989 Principal Warps: Thin-Plate Splines and the Decomposition
 #' of Deformations. IEEE Transactions on Pattern Analysis and Machine Intelligence 11(6):567-585.
+#' @references  Rohlf, F. J. 1998. On Applications of Geometric Morphometrics to Studies of Ontogeny and Phylogeny. Systematic Biology. 47:147-158.
 warpRefMesh <- function(file, mesh.coord, ref, color=NULL, centered=FALSE){
   ply <- read.ply(file, ShowSpecimen = T)
   title3d(main="Imported Mesh")

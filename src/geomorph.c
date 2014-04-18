@@ -464,9 +464,10 @@ void DoSlide(int *ProcDin, int *pin, int *kin, int *nin, double *matin, double *
   }
   int ncurve;
   ncurve = *ncurvein;
-  int curves[ncurve][3];
+  int **curves=0;
   if (ncurve >0){
-    for (i=0;i<3;i++){
+  MAKE_2ARRAY(curves,ncurve,3);
+  for (i=0;i<3;i++){
       for (j=0;j<ncurve;j++){
         curves[j][i]=curvein[(i*ncurve)+j];
       }
@@ -474,9 +475,10 @@ void DoSlide(int *ProcDin, int *pin, int *kin, int *nin, double *matin, double *
   } 
   int nsurf;
   nsurf= *nsurfin;
-  int surf[nsurf];
+  int *surf=0;
   if (nsurf >0){
-    for (i=0;i<nsurf;i++){
+  MAKE_1ARRAY(surf,nsurf);
+  for (i=0;i<nsurf;i++){
       surf[i]=surfin[i];
     }
   }
@@ -871,9 +873,6 @@ void DoSlide(int *ProcDin, int *pin, int *kin, int *nin, double *matin, double *
          }
        }
        for (j=0;j<(ncolU);j++){
-
-	   }
-       for (j=0;j<(ncolU);j++){
 	     if (Dmat3[j] > tol){D3[j][j]=1/Dmat3[j];}
            else{D3[j][j]=0;}
        }
@@ -919,13 +918,6 @@ void DoSlide(int *ProcDin, int *pin, int *kin, int *nin, double *matin, double *
            }
          }
        }       
-       for (j=0;j<ncolU;j++){    
-         for (kk=0;kk<(p*k);kk++){
-           for (m=0;m<(p*k);m++){
-             ginvULinv[j][kk]=ginvULinv[j][kk]+ginvU[j][m]*BigLinv[m][kk];
-           }
-         }
-       }              
        for (j=0;j<(p*k);j++){    
          for (kk=0;kk<(p*k);kk++){
            for (m=0;m<ncolU;m++){
@@ -994,4 +986,6 @@ void DoSlide(int *ProcDin, int *pin, int *kin, int *nin, double *matin, double *
   }
   FREE_2ARRAY(U);
   FREE_3ARRAY(coords);
+  FREE_2ARRAY(curves);
+  FREE_1ARRAY(surf);
 } // end DoSlide    

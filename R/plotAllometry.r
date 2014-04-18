@@ -6,7 +6,8 @@
 #' multivariate relationship between size and shape 
 #'   derived from landmark data (i.e., allometry). It is assumed that the landmarks have previously been 
 #'   aligned using Generalized Procrustes Analysis (GPA) [e.g., with \code{\link{gpagen}}]. The abscissa 
-#'   of the plot is log(centroid size) while the ordinate represents shape. Three complementary approaches 
+#'   of the plot is log(centroid size) while the ordinate represents shape [NOTE: the function takes the 
+#'   input size and performed log-transformation automatically, as log(Csize) should be used]. Three complementary approaches 
 #'   can be implemented to visualize allometry: 
 #'  \enumerate{
 #'   \item {If "method=CAC" (the default) the function calculates the 

@@ -1,8 +1,8 @@
 Package: geomorph
-Date: 2014-04-04
+Date: 2014-04-18
 Type: Package
 Title: Geometric morphometric analyses of 2d/3d landmark data
-Version: 2.0
+Version: 2.0.1
 Author: Dean Adams, Erik Otarola-Castillo, Emma Sherratt
 Maintainer: Dean Adams <dcadams@iastate.edu>
 Depends: R (>= 2.10), rgl
@@ -12,7 +12,7 @@ Description: Read, manipulate, and digitize landmark data, generate shape
     shape analyses, and provide graphical depictions of shapes and patterns of
     shape variation
 License: GPL (>= 2)
-Packaged: 2014-04-15 16:28:13 UTC; dcadams
+Packaged: 2014-04-18 15:44:50 UTC; dcadams
 NeedsCompilation: yes
 Repository: CRAN
-Date/Publication: 2014-04-15 23:13:44
+Date/Publication: 2014-04-18 19:46:57
