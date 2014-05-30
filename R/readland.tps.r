@@ -8,6 +8,9 @@
 #'   data are designated by "LM3=". Landmark coordinates are multiplied by their scale factor if this is 
 #'   provided for all specimens. If one or more specimens are missing the scale factor, landmarks are treated 
 #'   in their original units.  
+#'   
+#'   Missing data may be present in the file. In this case, they must be designated by 'NA'. The 
+#'   positions of missing landmarks may then be estimated using estimate.missing.
 #' 
 #' The user may specify whether specimen names are to be extracted from the 'ID=' field or 'IMAGE=' field 
 #' and included in the resulting 3D array. 
@@ -19,6 +22,7 @@
 #'
 #' @param file A *.tps file containing two- or three-dimensional landmark data
 #' @param specID a character specifying whether to extract the specimen ID names from the ID or IMAGE lines (default is "None").
+#' @param warnmsg A logical value stating whether warnings should be printed
 #' @export
 #' @keywords IO
 #' @author Dean Adams & Emma Sherratt
@@ -27,7 +31,7 @@
 #'   contains names for each specimen, which are obtained from the image names in the *.tps file. 
 #' @references  Rohlf, F. J. 2010. tpsRelw: Relative warps analysis. Version 1.49. Department of Ecology 
 #'   and Evolution, State University of New York at Stony Brook, Stony Brook, NY.
-readland.tps<-function (file, specID=c("None","ID","imageID")){
+readland.tps<-function (file, specID=c("None","ID","imageID"),warnmsg=T){
   specID <- match.arg(specID)
   tpsfile <- scan(file = file, what = "char", sep = "\n", quiet = TRUE)
   lmdata <- grep("LM=", tpsfile)
@@ -42,30 +46,46 @@ readland.tps<-function (file, specID=c("None","ID","imageID")){
   p <- nland[1]
   imscale <- as.numeric(sub("SCALE=", "", tpsfile[grep("SCALE", tpsfile)]))
   if (is.null(imscale)) {imscale = array(1, nspecs)}
-  if (length(imscale) != nspecs) {print("Not all specimens have scale. Using scale = 1.0")}
+  if (warnmsg==T){
+    if (length(imscale) != nspecs) {print("Not all specimens have scale. Assuming landmarks have been previously scaled.")}
+  }
   if (length(imscale) != nspecs) {imscale = array(1, nspecs)}
   tmp <- tpsfile[-(grep("=", tpsfile) )]
+  options(warn=-1)
   tmp <- matrix(as.numeric(unlist(strsplit(tmp, split = " +")), ncol=k, byrow=T))
+  if (warnmsg==T){
+    if(sum(which(is.na(tmp)==TRUE))>0){print("NOTE.  Missing data identified.")}
+  }
   coords <- aperm(array(t(tmp), c(k,p,n)), c(2,1,3))
   imscale <- aperm(array(rep(imscale,p*k),c(n,k,p)),c(3,2,1))
   coords <- coords*imscale
-  if(specID=="None"){   print("No Specimen names extracted") }
+  if (warnmsg==T){
+    if(specID=="None"){   print("No Specimen names extracted") }
+  }
   if(specID=="imageID"){
     imageID <- (sub("IMAGE=", "", tpsfile[grep("IMAGE", tpsfile)]))
-    if (length(imageID) ==0) {print("No name given under IMAGE=. Specimen names not extracted") }
+    if (warnmsg==T){
+      if (length(imageID) ==0) {print("No name given under IMAGE=. Specimen names not extracted") }
+    }
     else if (length(imageID) !=0){
       imageID <- sub(".jpg", "", imageID); imageID <- sub(".tif", "", imageID)
       imageID <- sub(".bmp", "", imageID); imageID <- sub(".tiff", "", imageID)
       imageID <- sub(".jpeg", "", imageID); imageID <- sub(".jpe", "", imageID)
       dimnames(coords)[[3]] <- as.list(imageID) 
-      print("Specimen names extracted from line IMAGE=") }
+      if (warnmsg==T){
+        print("Specimen names extracted from line IMAGE=") }
+    }
   }
   if(specID=="ID"){
     ID <-sub("ID=", "", tpsfile[grep("ID", tpsfile)])  
-    if (length(ID) ==0) {print("No name given under ID=. Specimen names not extracted") }
+    if (warnmsg==T){
+      if (length(ID) ==0) {print("No name given under ID=. Specimen names not extracted") }
+    }
     else if (length(ID) !=0){
       dimnames(coords)[[3]] <- as.list(ID)  
-      print("Specimen names extracted from line ID=") }
+      if (warnmsg==T){
+        print("Specimen names extracted from line ID=") }
+    }
   } 
   return(coords = coords)
 }

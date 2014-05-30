@@ -15,10 +15,13 @@
 #'   is small relative to this distribution (see Klingenberg 2009). A histogram of coefficients obtained via 
 #'   resampling is presented, with the observed value designated by an arrow in the plot. 
 #'   
-#'   Landmark groups can be defined using \code{\link{define.modules}}. 
+#'   Landmark groups can be defined using \code{\link{define.modules}}, or made by hand (see example below).
+#'   To use this method with other data (i.e., a set of length measurements), the input A should be a matrix 
+#'   of n rows of specimens and variables arranged in columns. 
+#'   In this case, the partition.gp input should have each variable assigned to a partition. 
 #'
-#' @param A An array (p x k x n) containing GPA-aligned coordinates for all specimens
-#' @param landgroups A list of which landmarks belong in which partition (e.g. A,A,A,B,B,B,C,C,C)
+#' @param A A 3D array (p x k x n) containing GPA-aligned coordinates for all specimens, or a matrix (n x variables)
+#' @param partition.gp A list of which landmarks (or variables) belong in which partition (e.g. A,A,A,B,B,B,C,C,C)
 #' @param iter Number of iterations for significance testing
 #' @export
 #' @keywords analysis
@@ -38,17 +41,18 @@
 #'
 #' compare.modular.partitions(Y.gpa$coords,land.gps,iter=99)
 #' #Result implies that the skull and mandible are not independent modules
-compare.modular.partitions<-function(A,landgroups,iter=999){
-  if (length(dim(A))!=3){
-    stop("Data matrix not a 3D array (see 'arrayspecs').")  }
+compare.modular.partitions<-function(A,partition.gp,iter=999){
   if(any(is.na(A))==T){
     stop("Data matrix contains missing values. Estimate these first (see 'estimate.missing').")}
-  p<-dim(A)[1]; k<-dim(A)[2]
-  landgroups<-as.factor(landgroups)
-  if(length(landgroups)!=p){stop("Not all landmarks are assigned to a partition.")}
-  ngps<-nlevels(landgroups)
-  gps<-as.factor(rep(landgroups,k,each = k, length=p*k))
-  x<-two.d.array(A)
+  partition.gp<-as.factor(partition.gp)
+  if (length(dim(A))==3){ x<-two.d.array(A)
+                          p<-dim(A)[1]; k<-dim(A)[2]
+                          if(length(partition.gp)!=p){stop("Not all landmarks are assigned to a partition.")}
+                          gps<-as.factor(rep(partition.gp,k,each = k, length=p*k))  }
+  if (length(dim(A))==2){ x<-A
+                          if(length(partition.gp)!=ncol(x)){stop("Not all variables are assigned to a partition.")}
+                          gps<-partition.gp  }
+  ngps<-nlevels(partition.gp)
   S<-cov(x)
   RV.gp<-array(0,dim=c(ngps,ngps))
   for (i in 1:(ngps-1)){
@@ -62,12 +66,13 @@ compare.modular.partitions<-function(A,landgroups,iter=999){
     }
   }
   RV.obs<-sum(RV.gp)/(ngps/2*(ngps-1))
-  RV.min<-RV.obs; partition.min<-landgroups
+  RV.min<-RV.obs; partition.min<-partition.gp
   P.val<-1
   RV.val<-rep(0,iter)
   for(ii in 1:iter){
-    landgroups.r<-sample(landgroups)
-    gps.r<-as.factor(rep(landgroups.r,k,each = k, length=p*k))    
+    partition.gp.r<-sample(partition.gp)
+    if (length(dim(A))==3){ gps.r<-as.factor(rep(partition.gp.r,k,each = k, length=p*k)) }  
+    if (length(dim(A))==2){ gps.r<-as.factor(partition.gp.r) }
     RV.gp.r<-array(0,dim=c(ngps,ngps))
     for (i in 1:(ngps-1)){
       for (j in 2:ngps){
@@ -81,7 +86,7 @@ compare.modular.partitions<-function(A,landgroups,iter=999){
     }
     RV.r<-sum(RV.gp.r)/(ngps/2*(ngps-1))
     RV.val[ii]<-RV.r
-    if (RV.r< RV.min) {RV.min<-RV.r; partition.min<-landgroups.r}
+    if (RV.r< RV.min) {RV.min<-RV.r; partition.min<-partition.gp.r}
     P.val<-ifelse(RV.r<=RV.obs, P.val+1,P.val) 
   }
   RV.val[iter+1]=RV.obs

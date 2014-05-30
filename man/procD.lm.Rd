@@ -2,16 +2,19 @@
 \alias{procD.lm}
 \title{Procrustes ANOVA/regression for shape data}
 \usage{
-procD.lm(f1, data = NULL, iter = 999)
+procD.lm(f1, iter = 999, RRPP = FALSE, verbose = FALSE)
 }
 \arguments{
   \item{f1}{A formula for the linear model (e.g., y~x1+x2)}
 
-  \item{data}{An optional value specifying a data frame
-  containing all data (not required)}
-
   \item{iter}{Number of iterations for significance
   testing}
+
+  \item{RRPP}{a logical value indicating whether residual
+  randomization should be used for significance testing}
+
+  \item{verbose}{A logical value specifying whether
+  additional output should be displayed}
 }
 \value{
 Function returns an ANOVA table of statistical results for
@@ -49,21 +52,25 @@ in the model using Procrustes distances among specimens,
 rather than explained covariance matrices among variables.
 With this approach, the sum-of-squared Procrustes distances
 are used as a measure of SS (see Goodall 1991). The
-observed SS are evaluated through permutation, where the
-rows of the shape matrix are randomized relative to the
-design matrix. Procedurally, Procrustes ANOVA is identical
-to permutational-MANOVA as used in other fields (Anderson
-2001). For several reasons, Procrustes ANOVA is
-particularly useful for shape data. First, covariance
-matrices from GPA-aligned Procrustes coordinates are
-singular, and thus standard approaches such as MANOVA
-cannot be accomplished unless generalized inverses are
-utilized. This problem is accentuated when using sliding
-semilandmarks.  Additionally, GM datasets often have more
-variables than specimens (the 'small N large P' problem).
-In these cases, distance-based procedures can still be
-utilized to assess statistical hypotheses, whereas standard
-linear models cannot.
+observed SS are evaluated through permutation. In
+morphometrics this approach is known as a Procrustes ANOVA
+(Goodall 1991), which is equivalent to distance-based anova
+designs (Anderson 2001). Two possible resampling procedures
+are provided. First, if RRPP=FALSE, the rows of the matrix
+of shape variables are randomized relative to the design
+matrix. This is analogous to a 'full' randomization.
+Second, if RRPP=TRUE, a residual randomization permutation
+procedure is utilized (Collyer et al. 2014). Here, residual
+shape values from a reduced model are obtained, and are
+randomized with respect to the linear model under
+consideration. These are then added to predicted values
+from the remaining effects to obtain pseudo-values from
+which SS are calculated. NOTE: for single-factor designs,
+the two approaches are identical.  However, when evaluating
+factorial models it has been shown that RRPP attains higher
+statistical power and thus has greater ability to identify
+patterns in data should they be present (see Anderson and
+terBraak 2003).
 }
 \examples{
 ### MANOVA example for Goodall's F test (multivariate shape vs. factors)
@@ -78,14 +85,25 @@ data(ratland)
 rat.gpa<-gpagen(ratland)         #GPA-alignment
 
 procD.lm(two.d.array(rat.gpa$coords)~rat.gpa$Csize,iter=99)
+
+## using RRPP
+ procD.lm(two.d.array(rat.gpa$coords)~rat.gpa$Csize,iter=99,RRPP=TRUE)
 }
 \author{
-Dean Adams
+Dean Adams and Mike Collyer
 }
 \references{
 Anderson MJ. 2001. A new method for non-parametric
 multivariate analysis of variance.  Austral Ecology 26:
 32-46.
+
+Anderson MJ. and C.J.F. terBraak. 2003. Permutation tests
+for multi-factorial analysis of variance.  Journal of
+Statistical Copmutation and Simulation 73: 85-113.
+
+Collyer, M.L., D.J. Sekora, and D.C. Adams. 2014. A method
+for analysis of phenotypic change for phenotypes described
+by high-dimensional data. Heredity. (In Press).
 
 Goodall, C. R. 1991. Procrustes methods in the statistical
 analysis of shape. Journal of the Royal Statistical Society

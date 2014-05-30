@@ -9,7 +9,7 @@
 #'
 #' @param phy A phylogenetic tree of {class phylo} - see \code{\link[ape]{read.tree}} in library ape
 #' @param A A matrix (n x [p x k]) or 3D array (p x k x n) containing GPA-aligned coordinates for a set of specimens
-#' @param labels A logical value indicating whether taxa labels should be included
+#' @param labels A logical value indicating whether taxa labels (tips and ancestors) should be included
 #' @param ancStates A logical value indicating whether ancestral state values should be returned
 #' @export
 #' @keywords visualization
@@ -54,6 +54,8 @@ plotGMPhyloMorphoSpace<-function(phy,A,labels=TRUE,ancStates=TRUE){
     tmp<-as.vector(ace(x[,i], compute.brlen(phy,1), type="continuous", method="ML")$ace)
     anc.states<-cbind(anc.states,tmp)   }
   colnames(anc.states)<-NULL
+  ## add labels to anc.states
+  row.names(anc.states)<-1:length(tmp)
   all.data<-rbind(x,anc.states)  
   pcdata<-prcomp(all.data)$x  
   limits = function(x,s){ 
@@ -70,6 +72,6 @@ plotGMPhyloMorphoSpace<-function(phy,A,labels=TRUE,ancStates=TRUE){
   points(pcdata[1:N,],pch=21,bg="black",cex=2)
   points(pcdata[(N+1):nrow(pcdata),],pch=21,bg="white",cex=1.25)
   if(labels==TRUE){
-    textxy(pcdata[1:N,1],pcdata[1:N,2],rownames(pcdata),cx=.75)  }
+    text(pcdata[,1],pcdata[,2],rownames(pcdata),cex=0.75,adj=c(-.1,-.1))}
   if(ancStates==TRUE){ return(anc.states)  }
 }

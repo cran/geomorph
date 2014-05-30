@@ -14,6 +14,11 @@
 #'   numeric code used to represent missing values (e.g., -999). These values will be replaced with "NA" 
 #'   in the output array. Subsequent analyses requires a full complement of data, see \code{\link{estimate.missing}}. 
 #'
+#'   Missing data may be present in the file by designating them using 'NA'. In
+#'   this case, the standard NTSYS header is used with no numeric designation for missing data (i.e. the fourth value is '0').
+#'   The positions of missing landmarks may then be estimated using estimate.missing.
+
+#'
 #' @param filelist A list of names for the *.nts files to be read by the function. The names in the list
 #'   require quotes (") and .nts/.NTS suffix.
 #' @keywords IO
@@ -58,10 +63,12 @@ readmulti.nts<-function(filelist){
       tmp<-tmp[-(1:length(rowlab))]   }
     if(c.lab==TRUE){ tmp<-tmp[-(1:k)] }
     if(missdata==TRUE){tmp<-sub(missval,NA,tmp)}
+    options(warn=-1)
     data<-matrix(as.numeric(tmp),ncol=k,byrow=TRUE)
     landdata<-rbind(landdata,data)
   }
   coords<-arrayspecs(landdata,p,k)
+  if(sum(which(is.na(landdata)==TRUE))>0){print("NOTE.  Missing data identified.")}
   dimnames(coords)[[3]]<-names
   return(coords=coords)
 }

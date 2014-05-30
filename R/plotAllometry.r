@@ -29,18 +29,19 @@
 #'   the regression is of the form: shape~size+groups (Note: to examine the interaction term use \code{\link{procD.lm}}).
 #'   Specimens from each group are plotted using distinct colors based on the order in which the groups are
 #'   found in the dataset, and using R's standard color palette: black, red, green, blue, cyan, magenta,
-#'   yellow, and gray. 
+#'   yellow, and gray. NOTE: to change the colors of the groups, simply substitute a vector of the desired colors for 
+#'   each specimen.
 #'
 #' @param A An array (p x k x n) containing landmark coordinates for a set of specimens 
 #' @param sz A vector of centroid size measures for all specimens 
 #' @param groups An optional vector containing group labels for each specimen if available 
 #' @param method Method for estimating allometric shape components; see below for details
 #' @param warpgrids A logical value indicating whether deformation grids for small and large shapes 
-#'  should be displayed
+#'  should be displayed (note: if groups are provided no TPS grids are shown)
 #'  @param mesh A mesh3d object to be warped to represent shape deformation of the directional and fluctuating components
 #' of asymmetry if {warpgrids= TRUE} (see \code{\link{warpRefMesh}}).
 #' @param iter Number of iterations for significance testing
-#' @param label A logical value indicating whether labels for each specimen should be displayed
+#' @param label An optional vector indicating labels for each specimen that are to be displayed
 #' @param verbose A logical value indicating whether the output is basic or verbose (see Value below)
 #' @keywords analysis
 #' @keywords visualization
@@ -74,7 +75,7 @@
 #' #Using predicted allometry curve for plot
 #' plotAllometry(Y.gpa$coords,Y.gpa$Csize,method="PredLine", iter=5)
 plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),warpgrids=TRUE,
-                        iter=99,label=FALSE, mesh=NULL, verbose=FALSE){
+                        iter=249,label=NULL, mesh=NULL, verbose=FALSE){
   method <- match.arg(method)
   if (length(dim(A))!=3){
     stop("Data matrix 1 not a 3D array (see 'arrayspecs').")  }
@@ -109,7 +110,8 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
     groups<-groups[rownames(y)]
   }
   if(is.null(groups)){lm.res<-procD.lm(y~csz,iter=iter)}  
-  if(!is.null(groups)){lm.res<-procD.lm(y~csz+groups,iter=iter)}
+  if(!is.null(groups)){lm.res<-procD.lm(y~csz+groups,iter=iter)
+                       lm.res2<-procD.lm(y~csz*groups,iter=iter)}
   if(is.null(groups)){
     y.mn<-predict(lm(y~1))
     B<-coef(lm(y~csz))
@@ -119,6 +121,9 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
     y.mn<-predict(lm(y~groups))
     B<-coef(lm(y~csz+groups))
     yhat<-predict(lm(y~csz*groups))
+    if(lm.res2[3,5]>0.05){
+      yhat<-predict(lm(y~csz+groups))      
+    }
   }
   y.cent<-y-y.mn
   a<-(t(y.cent)%*%csz)%*%(1/(t(csz)%*%csz)); a<-a%*%(1/sqrt(t(a)%*%a))
@@ -132,44 +137,48 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
   if(method!="CAC"){
     layout(matrix(c(2,1,1,1,1,1,1,1,3),3,3))   
     if(method=="RegScore"){
-      plot(csz,Reg.proj,xlab="log(CSize)", ylab="Shape (Regression Score)",pch=21,bg="black",cex=1.25)
+      plot(csz,Reg.proj,xlab="log(CSize)", ylab="Shape (Regression Score)",pch=21,bg="black",cex=1.25,asp=1)
       if(!is.null(groups)){points(csz,Reg.proj,pch=21,bg=groups,cex=1.25)}
-      if(label ==T){text(csz,Reg.proj,seq(1,n),adj=c(-.7,-.7))}
+      if(length(label!=0)){text(csz,Reg.proj,label,adj=c(-.7,-.7))}
       if(warpgrids==T && dim(A)[2]==2){
         arrows(min(csz), (0.7*max(Reg.proj)), min(csz), 0, length = 0.1,lwd = 2)
         arrows(max(csz), (0.7 * min(Reg.proj)), max(csz), 0, length = 0.1,lwd = 2)
       }
     } 
     if(method=="PredLine"){
-      plot(csz,pred.val,xlab="log(CSize)", ylab="Shape (Predicted)",pch=21,bg="black",cex=1.25)
+      plot(csz,pred.val,xlab="log(CSize)", ylab="Shape (Predicted)",pch=21,bg="black",cex=1.25,asp=1)
       if(!is.null(groups)){points(csz,pred.val,pch=21,bg=groups,cex=1.25)}
-      if(label ==T){text(csz,pred.val,seq(1,n),adj=c(-.7,-.7))}
+      if(length(label!=0)){text(csz,pred.val,label,adj=c(-.7,-.7))}
       if(warpgrids==T && dim(A)[2]==2){
         arrows(min(csz), (0.7*max(pred.val)), min(csz), 0, length = 0.1,lwd = 2)
         arrows(max(csz), (0.7 * min(pred.val)), max(csz), 0, length = 0.1,lwd = 2)
       }
     }
-    if(warpgrids==T && dim(A)[2]==2){
-      tps(ref,Ahat[,,which.min(csz)],20)
-      tps(ref,Ahat[,,which.max(csz)],20)
+    if(is.null(groups)){
+      if(warpgrids==T && dim(A)[2]==2){
+        tps(ref,Ahat[,,which.min(csz)],20)
+        tps(ref,Ahat[,,which.max(csz)],20)
+      }
     }
     layout(1)    
   }
   if(method=="CAC"){
     layout(matrix(c(3,1,1,1,1,1,1,1,4,2,2,2,2,2,2,2,2,2),3,6))   
-    plot(csz,CAC,xlab="log(CSize)", ylab="CAC",pch=21,bg="black",cex=1.25)
+    plot(csz,CAC,xlab="log(CSize)", ylab="CAC",pch=21,bg="black",cex=1.25,asp=1)
     if(warpgrids==T && dim(A)[2]==2){
       arrows(min(csz), (0.7*max(CAC)), min(csz), 0, length = 0.1,lwd = 2)
       arrows(max(csz), (0.7 * min(CAC)), max(csz), 0, length = 0.1,lwd = 2)
     }
     if(!is.null(groups)){points(csz,CAC,pch=21,bg=groups,cex=1.25)}
-    if(label ==T){text(csz,CAC,seq(1,n),adj=c(-.7,-.7))}
-    plot(CAC,RSC[,1], xlab="CAC",ylab="RSC 1", pch=21,bg="black",cex=1.25)
-    if(!is.null(groups)){points(CAC,RSC,pch=21,bg=groups,cex=1.25)}
-    if(label ==T){text(CAC,RSC,seq(1,n),adj=c(-.7,-.7))}
-    if(warpgrids==T && dim(A)[2]==2){
-      tps(ref,Ahat[,,which.min(csz)],20)
-      tps(ref,Ahat[,,which.max(csz)],20)
+    if(length(label!=0)){text(csz,CAC,label,adj=c(-.7,-.7))}
+    plot(CAC,RSC[,1], xlab="CAC",ylab="RSC 1", pch=21,bg="black",cex=1.25,asp=1)
+    if(!is.null(groups)){points(CAC,RSC[,1],pch=21,bg=groups,cex=1.25)}
+    if(length(label!=0)){text(CAC,RSC,seq(1,n),adj=c(-.7,-.7))}
+    if(is.null(groups)){
+      if(warpgrids==T && dim(A)[2]==2){
+        tps(ref,Ahat[,,which.min(csz)],20)
+        tps(ref,Ahat[,,which.max(csz)],20)
+      }
     }
     layout(1)
   }
@@ -190,7 +199,7 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
   if(verbose==TRUE){ 
     if(method=="CAC"){return(list(allom.score=CAC,resid.shape=RSC,logCsize=csz,ProcDist.lm=lm.res,pred.shape=Ahat))}
     if(method=="RegScore"){return(list(allom.score=Reg.proj,logCsize=csz,ProcDist.lm=lm.res,pred.shape=Ahat))}
-    if(method=="PredLine"){return(list(allom.score=pred.val,logCsize=csz,ProcDist.lm=lm.res,pred.shape=Ahat))}
+    if(method=="PredLine"){return(list(allom.score=pred.val,logCsize=csz,ProcDist.lm=lm.res2,pred.shape=Ahat))}
   }
   if(verbose==FALSE){ return(list(ProcDist.lm=lm.res))}
 }

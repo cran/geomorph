@@ -140,9 +140,15 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
             }
         }
       }
-    if(verbose==TRUE){return(list(symm.shape=symm.component,asymm.shape=asymm.component, 
+    if(verbose==TRUE){
+    	class(res.size) <- c("anova", class(res.size))
+    	class(res.shape) <- c("anova", class(res.shape))
+    	return(list(symm.shape=symm.component,asymm.shape=asymm.component, 
                                      ANOVA.size=res.size,ANOVA.Shape=res.shape)) }
-    if(verbose==FALSE){return(list(ANOVA.size=res.size,ANOVA.Shape=res.shape)) }
+    if(verbose==FALSE){
+    	class(res.size) <- c("anova", class(res.size))
+    	class(res.shape) <- c("anova", class(res.shape))
+    	return(list(ANOVA.size=res.size,ANOVA.Shape=res.shape)) }
     }
   
   if(object.sym==TRUE){
@@ -174,7 +180,7 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
     P<-array(NA,nrow(res.shape)); P[1]<-1-pf(F[1],res.shape[1,1],res.shape[3,1])
     P[2]<-1-pf(F[2],res.shape[2,1],res.shape[3,1]); if(!is.null(replicate)){
       P[3]<-1-pf(F[3],res.shape[3,1],res.shape[4,1])}
-    res.shape<-cbind(res.shape[,-4],F,P)
+    res.shape[,4]<-F; res.shape[,5]<-P
     res.shape<-res.shape[-nrow(res.shape),]
     colnames(res.shape)[4]<-"F.Goodall";colnames(res.shape)[5]<-"P.param"
     if(!is.null(replicate)){rownames(res.shape)[4]<-"replicate=error"}  
@@ -215,8 +221,12 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
           }  
         }
       } 
-    if(verbose==TRUE){return(list(symm.shape=symm.component,asymm.shape=asymm.component, 
+    if(verbose==TRUE){
+    	class(res.shape) <- c("anova", class(res.shape))
+    	return(list(symm.shape=symm.component,asymm.shape=asymm.component, 
                                 ANOVA.Shape=res.shape)) }
-    if(verbose==FALSE){return(ANOVA.Shape=res.shape) }
+    if(verbose==FALSE){
+    	class(res.shape) <- c("anova", class(res.shape))
+    	return(ANOVA.Shape=res.shape) }
   }
 }

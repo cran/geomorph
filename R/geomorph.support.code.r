@@ -11,7 +11,6 @@
 #' 
 #' @import rgl 
 #' @importFrom geiger sim.char
-#' @importFrom calibrate textxy
 #' @importFrom jpeg readJPEG
 #' @importFrom vegan adonis
 #' @importFrom ape is.binary.tree ace compute.brlen vcv.phylo summary.phylo Ntip
@@ -358,7 +357,23 @@ writeland.nts <- function(A, spec.name, comment=NULL){
 picscale<- function(scale){
   digscale<-NULL
   digscale<-locator(2,type="o",lwd=2,col="red",lty="11")
-  sqrt(sum(diff(digscale$x)^2+diff(digscale$y)^2))*scale
+  cat(paste("Keep scale (y/n)?"), "\n")
+  ans <- readLines(n = 1)
+  if (ans == "n") {
+    cat(paste("Set scale again"), "\n")
+  }
+  while (ans == "n") {
+    digscale<-NULL
+    digscale<-locator(2,type="o",lwd=2,col="red",lty="11")
+    cat(paste("Keep scale (y/n)?"), "\n")
+    ans <- readLines(n = 1)
+    if (ans == "y") { 
+    }
+    if (ans == "n") {
+      cat(paste("Set scale again"), "\n")
+    }
+  }
+  scale/sqrt(sum(diff(digscale$x)^2+diff(digscale$y)^2))      
 }
 
 # Function written by person who wrote identify() - called by define.modules
@@ -377,14 +392,125 @@ identifyPch <- function(x, y = NULL, n = length(x), pch = 19, col="red", ...)
   res
 } 
 
-#' Defunct functions in geomorph
-#'
-#' The following functions are no longer supported in geomorph
-#'
-#' read.vrml:  Convert to ascii ply (e.g., using MeshLab) 
-#' @export
-read.vrml<-function(){
-  .Defunct()
+# submodel prediction  (for procD.lm RRPP method)
+submod.pred = function(X,Y){
+	fit = lm(Y~X-1)
+	B = as.matrix(coef(fit))
+	if(nrow(B) == nrow(na.omit(B))) Yhat = X%*%B
+	if(nrow(B) > nrow(na.omit(B))){
+			B = na.omit(B)
+			Yhat = (X)[,-attr(B, "na.action")]%*%B}
+	Yhat
+}
+
+# residual randomization  (for procD.lm RRPP method)
+RRP.submodels = function(Xs, Y){
+	p = ncol(Y)
+	n = nrow(Y)
+	k = dim(Xs)[3]
+	E = Yh = array(0,c(n,p,k))
+	for(i in 1:k){
+		yhat = submod.pred(Xs[,,i],Y)
+		Yh[,,i] = yhat
+		E[,,i] = Y-yhat
+	}
+	Er = E[sample(nrow(E)),,]
+	Yr = Yh + Er
+}
+
+# P-values  (for procD.lm RRPP method)
+pval = function(s){# s = sampling distribution
+	p = length(s)
+	r = rank(s)[1]-1
+	pv = 1-r/p
+	pv
+}
+
+#P value matrix  (for procD.lm RRPP method)
+Pval.matrix = function(M){
+	P = matrix(0,dim(M)[1],dim(M)[2])
+	for(i in 1:dim(M)[1]){
+		for(j in 1:dim(M)[2]){
+			y = M[i,j,]
+			p = pval(y)
+			P[i,j]=p
+		}
+	}
+	if(dim(M)[1] > 1 && dim(M)[2] >1) diag(P)=1
+	rownames(P) = dimnames(M)[[1]]
+	colnames(P) = dimnames(M)[[2]]
+	P
+}
+
+# SSE via squared distances  (for procD.lm RRPP method)
+SSE = function(L){# L is a linear model
+	r = as.matrix(resid(L))
+	S = r%*%t(r)
+	sse = sum(diag(S))
+	sse
+}
+
+##Support functions for pairwise.slope.test
+vec.cor <- function(v1, v2){
+  v1 = matrix(v1)
+  v2 = matrix(v2)
+  d1 = sqrt(t(v1)%*%v1)
+  d2 = sqrt(t(v2)%*%v2)
+  r =t(v1%*%solve(d1))%*%v2%*%solve(d2)
+  r
+}
+
+
+vec.cor.matrix <- function(M) {
+  M= as.matrix(M)
+  w = solve(diag(sqrt(diag(M%*%t(M)))))
+                 w = solve(diag(w))
+                 z = w%*%as.matrix(M)
+                 vc = z%*%t(z)
+                 vc
+}
+
+vec.ang.matrix <- function(M){
+  M= as.matrix(M)
+  w = sqrt(diag(M%*%t(M)))
+  w = solve(diag(w))
+  z = w%*%as.matrix(M)
+  vc = z%*%t(z)
+  options(warn = -1)
+  vc = acos(vc)
+  diag(vc) = 0
+  vc
+}
+
+# PLS calculations for two.b.pls analysis
+
+pls = function(x,y){ # x and y must be vectors or matrices
+  px <- ncol(x)
+  py <- ncol(y)
+  XY.vcv <- var(cbind(x, y))
+  S12 <- XY.vcv[1:px, (px + 1):(px + py)]
+  pls <- svd(S12)
+  U <- pls$u
+  V <- pls$v
+  if(px && py == 1) {
+    XScores <- x 
+    YScores <- y 
+  }
+  if(px > 1 && py > 1) {
+    XScores <- x %*% U
+    YScores <- y %*% V
+  }
+  if(px == 1 && py > 1){
+    XScores <- x %*% V
+    YScores <- y %*% U
+  } 
+  if(px > 1 && py == 1) {
+    XScores <- x %*% U
+    YScores <- y %*% V
+  }
+  
+  r <- cor(XScores[, 1], YScores[, 1])
+  list(r=r, XScores = matrix(XScores[,1]), YScores = matrix(YScores[,1]))
 }
 
 

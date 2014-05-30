@@ -2,7 +2,8 @@
 \alias{two.b.pls}
 \title{Two-block partial least squares analysis for shape data}
 \usage{
-two.b.pls(A1, A2, warpgrids = TRUE, iter = 999, verbose = FALSE)
+two.b.pls(A1, A2, warpgrids = TRUE, iter = 999, verbose = FALSE,
+  label = NULL)
 }
 \arguments{
   \item{A1}{A matrix (n x [p x k]) or 3D array (p x k x n)
@@ -13,6 +14,9 @@ two.b.pls(A1, A2, warpgrids = TRUE, iter = 999, verbose = FALSE)
 
   \item{iter}{Number of iterations for significance
   testing}
+
+  \item{label}{An optional vector indicating labels for
+  each specimen that are to be displayed}
 
   \item{warpgrids}{A logical value indicating whether
   deformation grids for shapes along PC1 should be
@@ -39,10 +43,13 @@ Procrustes-aligned coordinates (or other variables)
 \details{
 The function quantifies the degree of association between
 two blocks of shape data as defined by landmark coordinates
-using partial least squares (see Rohlf and Corti 2000). It
-is assumed that the landmarks have previously been aligned
-using Generalized Procrustes Analysis (GPA) [e.g., with
-\code{\link{gpagen}}].
+using partial least squares (see Rohlf and Corti 2000). If
+geometric morphometric data are used, it is assumed that
+the landmarks have previously been aligned using
+Generalized Procrustes Analysis (GPA) [e.g., with
+\code{\link{gpagen}}]. If other variables are used, they
+must be input as a 2-Dimensional matrix (rows = specimens,
+columns = variables).
 
 A plot of PLS scores from Block1 versus Block2 is provided
 for the first set of PLS axes. Thin-plate spline

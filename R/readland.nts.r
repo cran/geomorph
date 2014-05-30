@@ -14,6 +14,11 @@
 #'   (2,3) and begins with "DIM=". If specimen and variable labels are included, these are designated placing 
 #'   an "L" immediately following the specimen or variable values in the parameter file. The labels then 
 #'   precede the data matrix.
+#'   
+#'   Missing data may also be represented by designating them using 'NA'. In
+#'   this case, the standard NTSYS header is used with no numeric designation for missing data (i.e. the fourth value is '0').
+#'   The positions of missing landmarks may then be estimated using estimate.missing.
+
 #'
 #' Function is for *.nts file containing landmark coordinates for multiple specimens. Note that *.dta files in the 
 #' nts format written by Landmark Editor \url{http://graphics.idav.ucdavis.edu/research/projects/EvoMorph},
@@ -59,7 +64,9 @@ readland.nts<-function(file){
     tmp<-tmp[-(1:length(speclab))]   }
   if(c.lab==TRUE){ tmp<-tmp[-(1:(p*k))] }
   if(missdata==TRUE){tmp<-sub(missval,NA,tmp)}
+  options(warn=-1)
   landdata<-matrix(as.numeric(tmp),ncol=k,byrow=TRUE)
+  if(sum(which(is.na(landdata)==TRUE))>0){print("NOTE.  Missing data identified.")}
   coords <- aperm(array(t(landdata), c(k,p,n)), c(2,1,3))
   dimnames(coords)[[3]]<-speclab
   return(coords=coords)

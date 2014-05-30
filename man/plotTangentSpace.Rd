@@ -3,7 +3,7 @@
 \title{Plot specimens in tangent space}
 \usage{
 plotTangentSpace(A, axis1 = 1, axis2 = 2, warpgrids = TRUE, mesh = NULL,
-  label = FALSE, groups = NULL, verbose = FALSE)
+  label = NULL, groups = NULL, verbose = FALSE)
 }
 \arguments{
   \item{A}{An array (p x k x n) containing landmark
@@ -21,10 +21,10 @@ plotTangentSpace(A, axis1 = 1, axis2 = 2, warpgrids = TRUE, mesh = NULL,
   displayed as the X-axis (default = PC1)}
 
   \item{axis2}{A value indicating which PC axis should be
-  displayed as the X-axis (default = PC2)}
+  displayed as the Y-axis (default = PC2)}
 
-  \item{label}{A logical value indicating whether labels
-  for each specimen should be displayed}
+  \item{label}{An optional vector indicating labels for
+  each specimen are to be displayed}
 
   \item{groups}{An optional factor vector specifying group
   identity for each specimen}
@@ -60,14 +60,20 @@ PC1. If groups are provided, specimens from each group are
 plotted using distinct colors based on the order in which
 the groups are found in the dataset, and using R's standard
 color palette: black, red, green, blue, cyan, magenta,
-yellow, and gray.
+yellow, and gray. NOTE: to change the colors of the groups,
+simply substitute a vector of the desired colors for each
+specimen (see example below).
 }
 \examples{
 data(plethodon)
 Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
-ref<-mshape(Y.gpa$coords)
 
 plotTangentSpace(Y.gpa$coords, groups = paste(plethodon$species, plethodon$site))
+
+##To change colors of groups
+col.gp<-c(rep("black",10),rep("red",10),rep("yellow",10),rep("orange",10))
+
+plotTangentSpace(Y.gpa$coords, groups = col.gp)
 }
 \author{
 Dean Adams & Emma Sherratt

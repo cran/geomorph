@@ -35,6 +35,7 @@ morphol.disparity <- function(A, groups, iter = 999){
     cat("groups variable coerced into factor.\n")
   }
   m <- length(levels(groups))
+  y = resid(lm(y ~ groups))
   procvar <- function(x){sum(dist(x)^2)/(nrow(x)^2)}
   if(m ==1){ d.obs <- procvar(y)
              return(d.obs)}

@@ -1,3 +1,33 @@
+  	CHANGES IN GEOMORPH VERSION 2.1
+
+NEW FUNCTIONS
+
+    o procD.pgls() added to assess high-dimensional ANOVA and regression models in a phylogenetic context
+
+    o pairwise.slope.test() added to compare slopes of regression lines
+
+NEW FEATURES
+
+    o Residual randomization options added to procD.lm() and pairwise.d.test()
+
+    o Enhanced capabilities of digitize2d(). Function now reads multiple images and outputs TPS file, can be used with missing data, and digitizing session can be restarted where previous session stopped.
+
+BUG FIXES
+
+    o Fixed scale issue in digitize2d()
+
+OTHER CHANGES
+
+    o Ability to plot specimen labels added to two.b.pls(), morphol.integr(), and phylo.pls()
+
+
+    o Slight ANOVA table output adjustment in bilat.symmetry()
+
+    o Vector of labels can be added for plotting in plotAllometry() and plotTangentSpace()
+
+    o Labels for ancestral states addd to plotGMPhyloMorphoSpace()
+
+
   	CHANGES IN GEOMORPH VERSION 2.0.1
 
     o Small change to C-code for gpagen

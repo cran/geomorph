@@ -2,7 +2,7 @@
 \alias{readland.tps}
 \title{Read landmark data from tps file}
 \usage{
-readland.tps(file, specID = c("None", "ID", "imageID"))
+readland.tps(file, specID = c("None", "ID", "imageID"), warnmsg = T)
 }
 \arguments{
   \item{file}{A *.tps file containing two- or
@@ -11,6 +11,9 @@ readland.tps(file, specID = c("None", "ID", "imageID"))
   \item{specID}{a character specifying whether to extract
   the specimen ID names from the ID or IMAGE lines (default
   is "None").}
+
+  \item{warnmsg}{A logical value stating whether warnings
+  should be printed}
 }
 \value{
 Function returns a (p x k x n) array, where p is the number
@@ -33,6 +36,10 @@ coordinates are multiplied by their scale factor if this is
 provided for all specimens. If one or more specimens are
 missing the scale factor, landmarks are treated in their
 original units.
+
+Missing data may be present in the file. In this case, they
+must be designated by 'NA'. The positions of missing
+landmarks may then be estimated using estimate.missing.
 
 The user may specify whether specimen names are to be
 extracted from the 'ID=' field or 'IMAGE=' field and

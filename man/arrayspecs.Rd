@@ -39,7 +39,7 @@ x2<-matrix(rnorm(18),ncol=2) # Random triangles (each landmark on its own row)
 arrayspecs(x2,3,2)
 }
 \author{
-Dean Adams & Michael Collyer
+Dean Adams & Mike Collyer
 }
 \keyword{utilities}
 

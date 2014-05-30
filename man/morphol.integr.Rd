@@ -3,7 +3,7 @@
 \title{Quantify morphological integration between two modules}
 \usage{
 morphol.integr(A1, A2, method = c("PLS", "RV"), warpgrids = TRUE,
-  iter = 999, verbose = FALSE)
+  iter = 999, label = NULL, verbose = FALSE)
 }
 \arguments{
   \item{A1}{A matrix (n x [p1 x k]) or 3D array (p1 x k x
@@ -24,6 +24,9 @@ morphol.integr(A1, A2, method = c("PLS", "RV"), warpgrids = TRUE,
 
   \item{iter}{Number of iterations for significance
   testing}
+
+  \item{label}{An optional vector indicating labels for
+  each specimen that are to be displayed}
 
   \item{verbose}{A logical value indicating whether the
   output is basic or verbose ({method="PLS"} only) (see

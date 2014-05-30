@@ -42,6 +42,12 @@ immediately following the specimen or variable values in
 the parameter file. The labels then precede the data
 matrix.
 
+Missing data may also be represented by designating them
+using 'NA'. In this case, the standard NTSYS header is used
+with no numeric designation for missing data (i.e. the
+fourth value is '0').  The positions of missing landmarks
+may then be estimated using estimate.missing.
+
 Function is for *.nts file containing landmark coordinates
 for multiple specimens. Note that *.dta files in the nts
 format written by Landmark Editor

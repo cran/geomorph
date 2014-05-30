@@ -171,10 +171,10 @@ trajectory.analysis<-function(f1,data=NULL,estimate.traj=TRUE,traj.pts=NULL,iter
     dir.res<-adonis(dir.form,permutations=iter)[[1]][1:6]
     y.plot<-matrix(t(two.d.array(traj.specs.obs)),ncol=k1,byrow=TRUE)
     trajplot(y.plot,traj.specs.obs)
-    if(p1>2){
+    if(p1<3){
       return(list(MANOVA.location.covariation=lm.res,ANOVA.Size=size.res,ANOVA.Dir=dir.res))
     }
-    if(p1<3){
+    if(p1>2){
       return(list(MANOVA.location.covariation=lm.res,ANOVA.Size=size.res,ANOVA.Dir=dir.res,ANOVA.Shape=shape.res))
     }
   }

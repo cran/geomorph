@@ -35,6 +35,7 @@
 #' @param warpgrids A logical value indicating whether deformation grids for shapes along PLS1 should be displayed
 #'  (only relevant if data for A1 or A2 [or both] were input as 3D array)
 #' @param iter Number of iterations for significance testing
+#' @param label An optional vector indicating labels for each specimen that are to be displayed
 #' @param verbose A logical value indicating whether the output is basic or verbose ({method="PLS"} only) (see Value below)
 #' @export
 #' @keywords analysis
@@ -64,7 +65,7 @@
 #'   ref<-mshape(Y.gpa$coords)   #overall reference
 #'   plotRefToTarget(ref,Y.gpa$coords[,,which.min(res$x.scores)],method="TPS") #Min along PLS1
 #'   plotRefToTarget(ref,Y.gpa$coords[,,which.max(res$x.scores)],method="TPS") #Max along PLS1
-morphol.integr<-function(A1,A2,method=c("PLS","RV"),warpgrids=TRUE,iter=999, verbose=FALSE){
+morphol.integr<-function(A1,A2,method=c("PLS","RV"),warpgrids=TRUE,iter=999, label=NULL,verbose=FALSE){
   method <- match.arg(method)
   if(any(is.na(A1))==T){
     stop("Data matrix 1 contains missing values. Estimate these first (see 'estimate.missing').")  }
@@ -128,6 +129,7 @@ morphol.integr<-function(A1,A2,method=c("PLS","RV"),warpgrids=TRUE,iter=999, ver
     xsc<-0; ysc<-0
     if (length(dim(A1))==2 && length(dim(A2))==2){
       plot(XScores[,1],YScores[,1],pch=21,bg="black",main="PLS Plot",xlab = "PLS1 Block 1",ylab = "PLS1 Block 2")
+      if(length(label!=0)){text(XScores[,1],YScores[,1],label,adj=c(-.7,-.7))}
     }
     if (length(dim(A1))==3){A1.ref<-mshape(A1); xsc<-1
                             pls1.min<-A1[,,which.min(XScores[,1])];pls1.max<-A1[,,which.max(XScores[,1])]}
@@ -138,6 +140,7 @@ morphol.integr<-function(A1,A2,method=c("PLS","RV"),warpgrids=TRUE,iter=999, ver
       if(xsc==1 && ysc!=1){layout(matrix(c(1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,3),4,4))}
       if(xsc!=1 && ysc==1){layout(matrix(c(2,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1),4,4))}
       plot(XScores[,1],YScores[,1],pch=21,bg="black",main="PLS1 Plot: Block 1 (X) vs. Block 2 (Y) ",xlab = "PLS1 Block 1",ylab = "PLS1 Block 2")
+      if(length(label!=0)){text(XScores[,1],YScores[,1],label,adj=c(-.7,-.7))}
       if(warpgrids==TRUE){
         if (xsc==1){
           tps(A1.ref, pls1.min, 20)
@@ -153,6 +156,7 @@ morphol.integr<-function(A1,A2,method=c("PLS","RV"),warpgrids=TRUE,iter=999, ver
 
     if (length(dim(A1))==3  && dim(A1)[2] == 3) {
       plot(XScores[,1],YScores[,1],pch=21,bg="black",main="PLS Plot",xlab = "PLS1 Block 1",ylab = "PLS1 Block 2")
+      if(length(label!=0)){text(XScores[,1],YScores[,1],label,adj=c(-.7,-.7))}
       open3d()
       plot3d(pls1.min, type = "s", col = "gray", main = paste("PLS Block1 negative"),size = 1.25, aspect = FALSE)
       open3d()

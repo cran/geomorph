@@ -8,15 +8,16 @@
 #'  deformation grids can be requested, which display the shape of specimens at the ends 
 #'  of the range of variability along PC1. If groups are provided, specimens from 
 #'  each group are plotted using distinct colors based on the order in which the groups are found in the dataset, 
-#'  and using R's standard color palette: black, red, green, blue, cyan, magenta, yellow, and gray. 
+#'  and using R's standard color palette: black, red, green, blue, cyan, magenta, yellow, and gray. NOTE: to change
+#'  the colors of the groups, simply substitute a vector of the desired colors for each specimen (see example below).
 #'
 #' @param A An array (p x k x n) containing landmark coordinates for a set of aligned specimens 
 #' @param warpgrids A logical value indicating whether deformation grids for shapes along X-axis should be displayed
 #' @param mesh A mesh3d object to be warped to represent shape deformation along X-axis (when {warpgrids=TRUE})
 #' as described in \code{\link{plotRefToTarget}}.
 #' @param axis1 A value indicating which PC axis should be displayed as the X-axis (default = PC1)
-#' @param axis2 A value indicating which PC axis should be displayed as the X-axis (default = PC2)
-#' @param label A logical value indicating whether labels for each specimen should be displayed
+#' @param axis2 A value indicating which PC axis should be displayed as the Y-axis (default = PC2)
+#' @param label An optional vector indicating labels for each specimen are to be displayed
 #' @param groups An optional factor vector specifying group identity for each specimen
 #' @param verbose A logical value indicating whether the output is basic or verbose (see Value below)
 #' @return Function returns a table summarizing the percent variation explained by each
@@ -32,10 +33,14 @@
 #' @examples
 #' data(plethodon) 
 #' Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
-#' ref<-mshape(Y.gpa$coords)
 #' 
 #' plotTangentSpace(Y.gpa$coords, groups = paste(plethodon$species, plethodon$site)) 
-plotTangentSpace<-function (A, axis1 = 1, axis2 = 2, warpgrids = TRUE, mesh = NULL, label = FALSE, groups=NULL, verbose=FALSE){
+#' 
+#' ##To change colors of groups
+#' col.gp<-c(rep("black",10),rep("red",10),rep("yellow",10),rep("orange",10))
+#' 
+#' plotTangentSpace(Y.gpa$coords, groups = col.gp)
+plotTangentSpace<-function (A, axis1 = 1, axis2 = 2, warpgrids = TRUE, mesh = NULL, label = NULL, groups=NULL, verbose=FALSE){
   if (length(dim(A)) != 3) {
     stop("Data matrix not a 3D array (see 'arrayspecs').") }
   if(any(is.na(A))==T){
@@ -54,7 +59,7 @@ plotTangentSpace<-function (A, axis1 = 1, axis2 = 2, warpgrids = TRUE, mesh = NU
     if(!is.null(groups)){points(pcdata[, axis1], pcdata[, axis2],pch=21,bg=groups,cex=2)}
     segments(min(pcdata[, axis1]), 0, max(pcdata[, axis1]), 0, lty = 2, lwd = 1)
     segments(0, min(pcdata[, axis2]), 0, max(pcdata[, axis2]), lty = 2, lwd = 1)
-    if (label == T) {text(pcdata[, axis1], pcdata[, axis2], seq(1, n), adj = c(-0.7, -0.7)) }
+    if (length(label!=0)) {text(pcdata[, axis1], pcdata[, axis2], seq(1, n), adj = c(-0.7, -0.7)) }
   }
   pcaxis.min.1 <- min(pcdata[, axis1])
   pcaxis.max.1 <- max(pcdata[, axis1])
@@ -86,7 +91,7 @@ plotTangentSpace<-function (A, axis1 = 1, axis2 = 2, warpgrids = TRUE, mesh = NU
       if(!is.null(groups)){points(pcdata[, axis1], pcdata[, axis2],pch=21,bg=groups,cex=2)}
     segments(min(pcdata[, axis1]), 0, max(pcdata[, axis1]), 0, lty = 2, lwd = 1)
     segments(0, min(pcdata[, axis2]), 0, max(pcdata[, axis2]), lty = 2, lwd = 1)
-      if (label == T) {text(pcdata[, axis1], pcdata[, axis2], seq(1, n), adj = c(-0.7, -0.7))}
+      if (length(label!=0)) {text(pcdata[, axis1], pcdata[, axis2], seq(1, n), adj = c(-0.7, -0.7))}
     if (k == 2) {
       arrows(min(pcdata[, axis1]), (0.7 * max(pcdata[,axis2])), min(pcdata[, axis1]), 0, length = 0.1,lwd = 2)
       arrows(max(pcdata[, axis1]), (0.7 * min(pcdata[,axis2])), max(pcdata[, axis1]), 0, length = 0.1,lwd = 2)

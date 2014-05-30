@@ -75,6 +75,8 @@ physignal<-function(phy,A,iter=249,method=c("Kmult","SSC")){
     stop("Data matrix missing some taxa present on the tree.")
   if(length(match(phy$tip.label,rownames(x)))!=N) 
     stop("Tree missing some taxa in the data matrix.")
+  if (any(is.na(match(sort(phy$tip.label), sort(rownames(x))))) == T) {
+    stop("Names do not match between tree and data matrix.") }
   x<-x[phy$tip.label,]
   if(is.null(dim(x)) == TRUE){ x <- matrix(x, dimnames=list(names(x))) }
   if (method=="Kmult"){

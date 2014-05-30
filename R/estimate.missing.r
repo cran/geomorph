@@ -100,9 +100,7 @@ estimate.missing<-function(A,method=c("TPS","Reg")){
       x<-A.2d[-spec.NA,-missing]
       y<-A.2d[-spec.NA,missing]
       XY.vcv<-cov(cbind(x,y))      
-      S12<-XY.vcv[1:dim(x)[2],(dim(x)[2]+1):(dim(x)[2]+dim(y)[2])]; S21<-t(S12)
-      S11<-XY.vcv[1:dim(x)[2],1:dim(x)[2]]
-      S22<-XY.vcv[(dim(x)[2]+1):(dim(x)[2]+dim(y)[2]),(dim(x)[2]+1):(dim(x)[2]+dim(y)[2])]
+      S12<-XY.vcv[1:dim(x)[2],(dim(x)[2]+1):(dim(x)[2]+dim(y)[2])]
       pls<-svd(S12)
       U<-pls$u; V<-pls$v
       XScores<-x%*%U; YScores<-y%*%V

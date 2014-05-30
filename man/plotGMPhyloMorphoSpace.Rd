@@ -13,7 +13,7 @@ plotGMPhyloMorphoSpace(phy, A, labels = TRUE, ancStates = TRUE)
   specimens}
 
   \item{labels}{A logical value indicating whether taxa
-  labels should be included}
+  labels (tips and ancestors) should be included}
 
   \item{ancStates}{A logical value indicating whether
   ancestral state values should be returned}

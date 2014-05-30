@@ -1,0 +1,109 @@
+\name{pairwise.slope.test}
+\alias{pairwise.slope.test}
+\title{Pairwise Comparisons of Slopes}
+\usage{
+pairwise.slope.test(f1, iter = 999, het.slopes = T, angle.type = c("r",
+  "rad", "deg"), RRPP = FALSE)
+}
+\arguments{
+  \item{f1}{A formula for the linear model from which
+  groups are to be compared (e.g., y~x1+x2)}
+
+  \item{iter}{Number of iterations for permutation test}
+
+  \item{het.slopes}{A logical value indicting whether
+  slopes are to be compared}
+
+  \item{angle.type}{A value specifying whether differences
+  between slopes should be represented by vector
+  correlations (r), radians (rad) or degrees (deg)}
+
+  \item{RRPP}{a logical value indicating whether residual
+  randomization should be used for significance testing}
+}
+\value{
+Function returns a list with the following components:
+\item{ANOVA.table}{An ANOVA table assessing the linear
+model} \item{Obs.LS.Dist}{A matrix of pairwise differences
+between intercepts (least squares means) if het.slopes =
+FALSE } \item{Slope.Dist}{A matrix of pairwise differences
+between slopes represented as correlations, radians, or
+degrees, if het.slopes = TRUE} \item{Prob.Dist}{A matrix of
+pairwise significance levels based on permutation for
+either intercepts or slopes} \item{Magnitude.Diff}{A matrix
+of pairwise differences in magnitude between regression
+lines (from smallest to largest specimen, if het.slopes =
+TRUE)} \item{Prob.Mag}{A matrix of pairwise significance
+levels based on permutation for magnitude differences}
+}
+\description{
+Function performs pairwise comparisons among slopes for
+groups as specified by a linear model.
+}
+\details{
+The function performs pairwise comparisons to identify
+differences in slopes between groups. The function is
+designed as a post-hoc test to MANCOVA, where the latter
+has identified significant shape variation explained by a
+covariate*group interaction term.
+
+As input the user provides a formula describing the linear
+model of how shape varies as a function of several
+explanatory variables. This MUST be in the form of:
+[y~covariate + group], and the shape data (y) must be in
+the form of a two-dimensional data matrix of dimension (n x
+[p x k]), rather than a 3D array.  It is assumed that the
+landmarks have previously been aligned using Generalized
+Procrustes Analysis (GPA) [e.g., with
+\code{\link{gpagen}}]. The function
+\code{\link{two.d.array}} can be used to obtain a
+two-dimensional data matrix from a 3D array of landmark
+coordinates. From the data, the slopes for each group are
+estimated, and pairwise differences in slopes determined.
+
+For the model, one can specify whether slopes or intercepts
+are to be evaluated. Slopes are compared if (heterogenous
+slopes) het.slopes=TRUE.To evaluate significance of the
+pairwise differences, two possible resampling procedures
+are provided. First, if RRPP=FALSE, the rows of the matrix
+of shape variables are randomized relative to the design
+matrix. This is analogous to a 'full' randomization.
+Second, if RRPP=TRUE, a residual randomization permutation
+procedure is utilized (Collyer et al. 2014). Here, residual
+shape values from a reduced model are obtained, and are
+randomized with respect to the linear model under
+consideration. These are then added to predicted values
+from the remaining effects to obtain pseudo-values from
+which SS are calculated. NOTE: for single-factor designs,
+the two approaches are identical.  However, when evaluating
+factorial models it has been shown that RRPP attains higher
+statistical power and thus has greater ability to identify
+patterns in data should they be present (see Anderson and
+terBraak 2003).
+}
+\examples{
+### MANCOVA example for Goodall's F test (multivariate shape vs. factors)
+data(plethodon)
+Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
+y<-two.d.array(Y.gpa$coords)
+
+## Pairwise slope test
+pairwise.slope.test(y~Y.gpa$Csize+plethodon$site,iter=49,angle.type="rad")
+
+## Using RRPP
+pairwise.slope.test(y~Y.gpa$Csize+plethodon$site,iter=49,angle.type="rad",RRPP=TRUE)
+}
+\author{
+Mike Collyer
+}
+\references{
+Anderson MJ. and C.J.F. terBraak. 2003. Permutation tests
+for multi-factorial analysis of variance.  Journal of
+Statistical Copmutation and Simulation 73: 85-113.
+
+Collyer, M.L., D.J. Sekora, and D.C. Adams. 2014. A method
+for analysis of phenotypic change for phenotypes described
+by high-dimensional data. Heredity. (In Press).
+}
+\keyword{analysis}
+

@@ -493,8 +493,7 @@ void DoSlide(int *ProcDin, int *pin, int *kin, int *nin, double *matin, double *
           U[j][kk]=0; 
         }
       }		   
- 	  if(ncurve == 0){ncurve=ncurve;}  
-	  else{	   //Curve portion of U
+ 	  if(ncurve > 0){	   //Curve portion of U
 	    for (j=0;j<ncurve;j++){
           U[(curves[j][1]-1)][(curves[j][1]-1)] = coords[(curves[j][2]-1)][0][i]- coords[(curves[j][0]-1)][0][i];
           U[(p+curves[j][1]-1)][(curves[j][1]-1)] = coords[(curves[j][2]-1)][1][i]- coords[(curves[j][0]-1)][1][i];
@@ -508,8 +507,7 @@ void DoSlide(int *ProcDin, int *pin, int *kin, int *nin, double *matin, double *
       MAKE_2ARRAY(distmat,p,p);
       MAKE_1ARRAY(distvec,p);
       double * distvec_p[p];
-      if(nsurf == 0){nsurf=nsurf;} //Surface portion of U: find nearest neigbors (from dist.mat), PCA for tangent directions
-      else{  
+      if(nsurf >0){ //Surface portion of U: find nearest neigbors (from dist.mat), PCA for tangent directions
         for (j=0;j<p;j++){
           for (kk=0;kk<p;kk++){
             distmat[j][kk]=0;     

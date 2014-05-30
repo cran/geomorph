@@ -3,7 +3,7 @@
 \title{Plot allometric patterns in landmark data}
 \usage{
 plotAllometry(A, sz, groups = NULL, method = c("CAC", "RegScore",
-  "PredLine"), warpgrids = TRUE, iter = 99, label = FALSE, mesh = NULL,
+  "PredLine"), warpgrids = TRUE, iter = 249, label = NULL, mesh = NULL,
   verbose = FALSE)
 }
 \arguments{
@@ -21,7 +21,8 @@ plotAllometry(A, sz, groups = NULL, method = c("CAC", "RegScore",
 
   \item{warpgrids}{A logical value indicating whether
   deformation grids for small and large shapes should be
-  displayed}
+  displayed (note: if groups are provided no TPS grids are
+  shown)}
 
   \item{mesh}{A mesh3d object to be warped to represent
   shape deformation of the directional and fluctuating
@@ -31,8 +32,8 @@ plotAllometry(A, sz, groups = NULL, method = c("CAC", "RegScore",
   \item{iter}{Number of iterations for significance
   testing}
 
-  \item{label}{A logical value indicating whether labels
-  for each specimen should be displayed}
+  \item{label}{An optional vector indicating labels for
+  each specimen that are to be displayed}
 
   \item{verbose}{A logical value indicating whether the
   output is basic or verbose (see Value below)}
@@ -90,7 +91,9 @@ examine the interaction term use \code{\link{procD.lm}}).
 Specimens from each group are plotted using distinct colors
 based on the order in which the groups are found in the
 dataset, and using R's standard color palette: black, red,
-green, blue, cyan, magenta, yellow, and gray.
+green, blue, cyan, magenta, yellow, and gray. NOTE: to
+change the colors of the groups, simply substitute a vector
+of the desired colors for each specimen.
 }
 \examples{
 data(ratland)

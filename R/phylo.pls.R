@@ -21,6 +21,7 @@
 #' @param warpgrids A logical value indicating whether deformation grids for shapes along PC1 should be displayed
 #'  (only relevant if data for A1 or A2 [or both] were input as 3D array)
 #' @param iter Number of iterations for significance testing
+#' @param label An optional vector indicating labels for each specimen that are to be displayed
 #' @param verbose A logical value indicating whether the output is basic or verbose (see Value below)
 #' @export
 #' @keywords analysis
@@ -40,7 +41,7 @@
 #' 
 #' phylo.pls(Y.gpa$coords[1:5,,],Y.gpa$coords[6:11,,],plethspecies$phy,iter=5)
 
-phylo.pls <-function(A1, A2, phy, warpgrids=TRUE,iter=999, verbose=FALSE){ 
+phylo.pls <-function(A1, A2, phy, warpgrids=TRUE,iter=999, label=NULL,verbose=FALSE){ 
   if(any(is.na(A1))==T){
     stop("Data matrix 1 contains missing values. Estimate these first(see 'estimate.missing').")  } 
   if(any(is.na(A2))==T){
@@ -131,6 +132,7 @@ phylo.pls <-function(A1, A2, phy, warpgrids=TRUE,iter=999, verbose=FALSE){
   P.val<-P.val/(iter+1)
   if (length(dim(A1))==2 && length(dim(A2))==2){
     plot(XScores[,1],YScores[,1],pch=21,bg="black",main="PLS Plot",xlab = "PLS1 Block 1",ylab = "PLS1 Block 2")
+    if(length(label!=0)){text(XScores[,1],YScores[,1],label,adj=c(-.7,-.7))}
   }
   if (length(dim(A1))==3){A1.ref<-mshape(A1);
                           pls1.min<-A1[,,which.min(XScores[,1])];pls1.max<-A1[,,which.max(XScores[,1])]}
@@ -140,6 +142,7 @@ phylo.pls <-function(A1, A2, phy, warpgrids=TRUE,iter=999, verbose=FALSE){
     split.screen(matrix(c(0.22,1,0.22,1,.19,.39,0,.19,.8,1,0,.19,0,.19,.19,.39,0,.19,.8,1), byrow=T, ncol=4))
     screen(1)
       plot(XScores[,1],YScores[,1],pch=21,bg="black",main="PLS1 Plot: Block 1 (X) vs. Block 2 (Y) ",xlab = "PLS1 Block 1",ylab = "PLS1 Block 2")
+      if(length(label!=0)){text(XScores[,1],YScores[,1],label,adj=c(-.7,-.7))}
     if(warpgrids==TRUE){
       if (length(dim(A1))==3  && dim(A1)[2]==2){
         screen(2);       tps(A1.ref, pls1.min, 20,sz=.7)
@@ -155,6 +158,7 @@ phylo.pls <-function(A1, A2, phy, warpgrids=TRUE,iter=999, verbose=FALSE){
   }
   if (length(dim(A1))==3  && dim(A1)[2] == 3) {
     plot(XScores[,1],YScores[,1],pch=21,bg="black",main="PLS Plot",xlab = "PLS1 Block 1",ylab = "PLS1 Block 2")
+    if(length(label!=0)){text(XScores[,1],YScores[,1],label,adj=c(-.7,-.7))}
     open3d()
     plot3d(pls1.min, type = "s", col = "gray", main = paste("PLS Block1 negative"),size = 1.25, aspect = FALSE)
     open3d()

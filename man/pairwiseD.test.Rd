@@ -2,14 +2,16 @@
 \alias{pairwiseD.test}
 \title{Pairwise Group Comparisons}
 \usage{
-pairwiseD.test(y, x, iter = 999)
+pairwiseD.test(f1, iter = 999, RRPP = FALSE)
 }
 \arguments{
-  \item{y}{A two-dimensional array of shape data}
-
-  \item{x}{A factor defining groups}
+  \item{f1}{A formula for the linear model from which
+  groups are to be compared (e.g., y~x1+x2)}
 
   \item{iter}{Number of iterations for permutation test}
+
+  \item{RRPP}{a logical value indicating whether residual
+  randomization should be used for significance testing}
 }
 \value{
 Function returns a list with the following components:
@@ -23,24 +25,40 @@ the Euclidean distances among group means.
 }
 \details{
 The function performs pairwise comparisons to identify
-shape among groups. The function is designed as a post-hoc
-test to Procrustes ANOVA, where the latter has identified
-significant shape variation explained by a grouping factor.
-The function takes as input the shape data (y), and a
-grouping factor (x). It then estimates the Euclidean
-distances among group means, which are used as test values.
-These are then statistically evaluated through permutation,
-where the rows of the shape matrix are randomized relative
-to the grouping variable.
+shape differences among groups. The function is designed as
+a post-hoc test to Procrustes ANOVA, where the latter has
+identified significant shape variation explained by a
+grouping factor.
 
-The input for the shape data (y) must be in the form of a
-two-dimensional data matrix of dimension (n x [p x k]),
-rather than a 3D array.  It is assumed that the landmarks
-have previously been aligned using Generalized Procrustes
-Analysis (GPA) [e.g., with \code{\link{gpagen}}]. The
-function \code{\link{two.d.array}} can be used to obtain a
+As input the user provides a formula describing the linear
+model of how shape (y) varies as a function of groups (x).
+Multiple factors may be examined. The shape data (y) must
+be in the form of a two-dimensional data matrix of
+dimension (n x [p x k]), rather than a 3D array.  It is
+assumed that the landmarks have previously been aligned
+using Generalized Procrustes Analysis (GPA) [e.g., with
+\code{\link{gpagen}}]. The function
+\code{\link{two.d.array}} can be used to obtain a
 two-dimensional data matrix from a 3D array of landmark
-coordinates.
+coordinates. From the data, the Euclidean distances among
+group means are estimated, and used as test values.
+
+To evaluate significance of group differences, two possible
+resampling procedures are provided. First, if RRPP=FALSE,
+the rows of the matrix of shape variables are randomized
+relative to the design matrix. This is analogous to a
+'full' randomization. Second, if RRPP=TRUE, a residual
+randomization permutation procedure is utilized (Collyer et
+al. 2014). Here, residual shape values from a reduced model
+are obtained, and are randomized with respect to the linear
+model under consideration. These are then added to
+predicted values from the remaining effects to obtain
+pseudo-values from which SS are calculated. NOTE: for
+single-factor designs, the two approaches are identical.
+However, when evaluating factorial models it has been shown
+that RRPP attains higher statistical power and thus has
+greater ability to identify patterns in data should they be
+present (see Anderson and terBraak 2003).
 }
 \examples{
 data(plethodon)
@@ -49,11 +67,23 @@ y<-two.d.array(Y.gpa$coords)
 ### Procrustes ANOVA
 procD.lm(y~plethodon$species,iter=99)
 
-### Pairwise comparisons
-pairwiseD.test(y,plethodon$species,iter=99)
+### Pairwise comparisons: full randomization
+pairwiseD.test(y~plethodon$species*plethodon$site,iter=99)
+
+## Pairwise comparisons: using RRPP
+#' pairwiseD.test(y~plethodon$species*plethodon$site,iter=99,RRPP=TRUE)
 }
 \author{
-Dean Adams
+Mike Collyer and Dean Adams
+}
+\references{
+Anderson MJ. and C.J.F. terBraak. 2003. Permutation tests
+for multi-factorial analysis of variance.  Journal of
+Statistical Copmutation and Simulation 73: 85-113.
+
+Collyer, M.L., D.J. Sekora, and D.C. Adams. 2014. A method
+for analysis of phenotypic change for phenotypes described
+by high-dimensional data. Heredity. (In Press).
 }
 \keyword{analysis}
 

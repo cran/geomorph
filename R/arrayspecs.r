@@ -13,7 +13,7 @@
 #' @param k Number of dimensions (2 or 3)
 #' @export
 #' @keywords utilities
-#' @author Dean Adams & Michael Collyer
+#' @author Dean Adams & Mike Collyer
 #' @return Function returns a (p x k x n) array, where p is the number of landmark points, k is the number 
 #'   of landmark dimensions (2 or 3), and n is the number of specimens. The third dimension of this array 
 #'   contains names for each specimen if specified in the original input matrix.

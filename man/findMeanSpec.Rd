@@ -5,7 +5,7 @@
 findMeanSpec(A)
 }
 \arguments{
-  \item{A}{An array (p x k x n) containing landmark
+  \item{A}{A 3D array (p x k x n) containing landmark
   coordinates for a set of aligned specimens}
 }
 \value{

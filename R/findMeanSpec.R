@@ -8,7 +8,7 @@
 #' address of the closest specimen. This function can be used
 #' to identify the specimen to be used by \code{\link{warpRefMesh}}. 
 #' 
-#' @param A An array (p x k x n) containing landmark coordinates for a set of aligned specimens
+#' @param A A 3D array (p x k x n) containing landmark coordinates for a set of aligned specimens
 #' @export
 #' @seealso  \code{\link{warpRefMesh}}
 #' @keywords utilities

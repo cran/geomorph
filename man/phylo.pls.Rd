@@ -2,7 +2,8 @@
 \alias{phylo.pls}
 \title{Quantify phylogenetic morphological integration between two sets of variables}
 \usage{
-phylo.pls(A1, A2, phy, warpgrids = TRUE, iter = 999, verbose = FALSE)
+phylo.pls(A1, A2, phy, warpgrids = TRUE, iter = 999, label = NULL,
+  verbose = FALSE)
 }
 \arguments{
   \item{A1}{A 2D array (n x [p1 x k1]) or 3D array (p1 x k1
@@ -22,6 +23,9 @@ phylo.pls(A1, A2, phy, warpgrids = TRUE, iter = 999, verbose = FALSE)
 
   \item{iter}{Number of iterations for significance
   testing}
+
+  \item{label}{An optional vector indicating labels for
+  each specimen that are to be displayed}
 
   \item{verbose}{A logical value indicating whether the
   output is basic or verbose (see Value below)}

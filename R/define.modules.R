@@ -2,8 +2,8 @@
 #' 
 #' An interactive function to define which landmarks should be assigned to each module (landmark partition).
 #' 
-#' Function takes a matrix of two-dimensional digitized landmark coordinates such as made by \code{\link{digitize2d}},
-#' and allows user assign landmarks to each module. The output is a list of which 
+#' Function takes a matrix of two-dimensional digitized landmark coordinates and allows the user to assign 
+#' landmarks to each module. The output is a list of which 
 #' landmarks belong in which partition, to be used by \code{\link{compare.modular.partitions}}. 
 #' The number of modules is chosen by the user (up to five). 
 #'  

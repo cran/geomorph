@@ -2,14 +2,16 @@
 \alias{compare.modular.partitions}
 \title{Compare modular signal to alternative landmark subsets}
 \usage{
-compare.modular.partitions(A, landgroups, iter = 999)
+compare.modular.partitions(A, partition.gp, iter = 999)
 }
 \arguments{
-  \item{A}{An array (p x k x n) containing GPA-aligned
-  coordinates for all specimens}
+  \item{A}{A 3D array (p x k x n) containing GPA-aligned
+  coordinates for all specimens, or a matrix (n x
+  variables)}
 
-  \item{landgroups}{A list of which landmarks belong in
-  which partition (e.g. A,A,A,B,B,B,C,C,C)}
+  \item{partition.gp}{A list of which landmarks (or
+  variables) belong in which partition (e.g.
+  A,A,A,B,B,B,C,C,C)}
 
   \item{iter}{Number of iterations for significance
   testing}
@@ -52,7 +54,12 @@ coefficients obtained via resampling is presented, with the
 observed value designated by an arrow in the plot.
 
 Landmark groups can be defined using
-\code{\link{define.modules}}.
+\code{\link{define.modules}}, or made by hand (see example
+below).  To use this method with other data (i.e., a set of
+length measurements), the input A should be a matrix of n
+rows of specimens and variables arranged in columns.  In
+this case, the partition.gp input should have each variable
+assigned to a partition.
 }
 \examples{
 data(plethodon)
