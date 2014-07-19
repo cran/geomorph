@@ -76,6 +76,8 @@ digit.fixed <- function(spec, fixed, index=FALSE, ptsize = 1, center = TRUE)    
     f<-keep<-ans<-NULL
     f<-select3d(button="right")
     keep<-f(specimen)
+      if(anyNA(specimen[which(keep==TRUE)[1],])==TRUE){
+      cat(paste("No vertex selected, type n below"),"\n") } 
     selected[i,]<-as.numeric(specimen[which(keep==TRUE)[1],])
     fix<-c(fix,which(keep==TRUE)[1])   
     points3d(selected[i,1],selected[i,2],selected[i,3],size=10,color="red",add=TRUE)
@@ -100,6 +102,8 @@ digit.fixed <- function(spec, fixed, index=FALSE, ptsize = 1, center = TRUE)    
       f<-keep<-NULL
       f<-select3d(button="right")
       keep<-f(specimen)
+        if(anyNA(specimen[which(keep==TRUE)[1],])==TRUE){
+        text3d(0,0, texts = "No vertex selected, see console")} 
       selected[i,]<-as.numeric(specimen[which(keep==TRUE)[1],])
       fix<-c(fix,which(keep==TRUE)[1])   
       points3d(selected[i,1],selected[i,2],selected[i,3],size=10,color="red",add=TRUE)

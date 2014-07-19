@@ -41,7 +41,7 @@
 #' @references Klingenberg, C. P., and N. A. Gidaszewski. 2010. Testing and quantifying phylogenetic signals 
 #'   and homoplasy in morphometric data. Syst. Biol. 59:245-261.
 #' @references Adams, D.C. 2014. A generalized K statistic for estimating phylogenetic signal from shape and 
-#' other high-dimensional multivariate data. Systematic Biology. (In Press).
+#' other high-dimensional multivariate data. Systematic Biology. 63. DOI:10.1093/sysbio/syu030.
 #' @examples
 #' data(plethspecies) 
 #' Y.gpa<-gpagen(plethspecies$land)    #GPA-alignment    
@@ -113,8 +113,12 @@ physignal<-function(phy,A,iter=249,method=c("Kmult","SSC")){
     return(list(phy.signal=K.obs,pvalue=P.val))     
   }
   if (method=="SSC"){
-    options(warn=-1)  
-    anc.states<-apply(x,2,function(x) ace(x,compute.brlen(phy,1), type="continuous", method="ML")$ace)
+    anc.states<-NULL
+    options(warn=-1)      
+    for (i in 1:ncol(x)){
+      tmp <- as.vector(fastAnc(phy, x[, i]))
+      anc.states<-cbind(anc.states,tmp)   }
+    colnames(anc.states)<-NULL
     dist.mat<-as.matrix(dist(rbind(as.matrix(x),as.matrix(anc.states)))^2)   
     SSC.o<-0
     for (i in 1:nrow(phy$edge)){
@@ -125,8 +129,12 @@ physignal<-function(phy,A,iter=249,method=c("Kmult","SSC")){
       x.r<-x[sample(nrow(x)),] 
       if(is.null(dim(x.r)) == TRUE){ x.r <- matrix(x.r) }
       row.names(x.r)<-row.names(x)
-      options(warn=-1)  
-      anc.states.r<-apply(x.r,2,function(x.r) ace(x.r,compute.brlen(phy,1), type="continuous", method="ML")$ace)
+      anc.states.r<-NULL
+      options(warn=-1)      
+      for (i in 1:ncol(x.r)){
+        tmp <- as.vector(fastAnc(phy, x.r[, i]))
+        anc.states.r<-cbind(anc.states.r,tmp)   }
+      colnames(anc.states.r)<-NULL
       dist.mat.r<-as.matrix(dist(rbind(as.matrix(x.r),as.matrix(anc.states.r)))^2)   
       SSC.r<-0
       for (i in 1:nrow(phy$edge)){

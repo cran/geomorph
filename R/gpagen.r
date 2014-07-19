@@ -34,6 +34,7 @@
 #'   into tangent space 
 #' @param ProcD A logical value indicating whether or not Procrustes distance should be used as the criterion
 #'   for optimizing the positions of semilandmarks
+#' @param PrinAxes A logical value indicating whether or not to align the shape data by principal axes 
 #' @param curves An optional matrix defining which landmarks should be treated as semilandmarks on boundary 
 #'   curves, and which landmarks specify the tangent directions for their sliding
 #' @param pointscale An optional value defining the size of the points for all specimens
@@ -75,7 +76,7 @@
 #' @examples
 #' #Example 1: fixed points only
 #' data(plethodon) 
-#' gpagen(plethodon$land)
+#' gpagen(plethodon$land,PrinAxes=FALSE)
 #' points(mshape(gpagen(plethodon$land)$coords),pch=22,col="red",bg="red",cex=1.2)    
 #' 
 #' #Example 2: points and semilandmarks on curves
@@ -92,7 +93,8 @@
 #' #Using Procrustes Distance for sliding
 #' gpagen(A=scallops$coorddata, curves=scallops$curvslide, surfaces=scallops$surfslide) 
 #' @useDynLib geomorph
-gpagen<-function(A, Proj=TRUE,ProcD=TRUE,ShowPlot=TRUE,curves = NULL, surfaces = NULL,pointscale=1){
+gpagen<-function(A, Proj=TRUE,ProcD=TRUE,PrinAxes=TRUE,ShowPlot=TRUE,curves = NULL, surfaces = NULL,
+                 pointscale=1){
   if (length(dim(A))!=3){
     stop("Data matrix not a 3D array (see 'arrayspecs').")  }
   if(any(is.na(A))==T){
@@ -124,6 +126,10 @@ gpagen<-function(A, Proj=TRUE,ProcD=TRUE,ShowPlot=TRUE,curves = NULL, surfaces =
   dimnames(temp)[[3]]<-dimnames(A)[[3]]
   names(specs.size)<-dimnames(A)[[3]]
   ptsz<-pointscale
+  if(PrinAxes==TRUE){
+    rot <- prcomp(mshape(temp))$rotation
+    for(i in 1:dim(temp)[[3]]){temp[,,i]<-temp[,,i] %*% rot }
+  }
   if(ShowPlot==TRUE){ plotAllSpecimens(temp,pointscale=ptsz)}
   return(list(coords=temp,Csize=specs.size))
 }

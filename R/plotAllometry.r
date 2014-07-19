@@ -7,8 +7,8 @@
 #'   derived from landmark data (i.e., allometry). It is assumed that the landmarks have previously been 
 #'   aligned using Generalized Procrustes Analysis (GPA) [e.g., with \code{\link{gpagen}}]. The abscissa 
 #'   of the plot is log(centroid size) while the ordinate represents shape [NOTE: the function takes the 
-#'   input size and performed log-transformation automatically, as log(Csize) should be used]. Three complementary approaches 
-#'   can be implemented to visualize allometry: 
+#'   input size and performed log-transformation automatically by default (logsz = TRUE), as log(CSize) should be used]. 
+#'   Three complementary approaches can be implemented to visualize allometry: 
 #'  \enumerate{
 #'   \item {If "method=CAC" (the default) the function calculates the 
 #'   common allometric component of the shape data, which is an estimate of the average allometric trend 
@@ -38,10 +38,11 @@
 #' @param method Method for estimating allometric shape components; see below for details
 #' @param warpgrids A logical value indicating whether deformation grids for small and large shapes 
 #'  should be displayed (note: if groups are provided no TPS grids are shown)
-#'  @param mesh A mesh3d object to be warped to represent shape deformation of the directional and fluctuating components
-#' of asymmetry if {warpgrids= TRUE} (see \code{\link{warpRefMesh}}).
 #' @param iter Number of iterations for significance testing
 #' @param label An optional vector indicating labels for each specimen that are to be displayed
+#' @param mesh A mesh3d object to be warped to represent shape deformation of the directional and fluctuating components
+#' of asymmetry if {warpgrids= TRUE} (see \code{\link{warpRefMesh}}).
+#' @param logsz A logical value indicating whether the log(centroid size) is used 
 #' @param verbose A logical value indicating whether the output is basic or verbose (see Value below)
 #' @keywords analysis
 #' @keywords visualization
@@ -75,7 +76,7 @@
 #' #Using predicted allometry curve for plot
 #' plotAllometry(Y.gpa$coords,Y.gpa$Csize,method="PredLine", iter=5)
 plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),warpgrids=TRUE,
-                        iter=249,label=NULL, mesh=NULL, verbose=FALSE){
+                        iter=249,label=NULL, mesh=NULL, logsz = TRUE, verbose=FALSE){
   method <- match.arg(method)
   if (length(dim(A))!=3){
     stop("Data matrix 1 not a 3D array (see 'arrayspecs').")  }
@@ -83,7 +84,8 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
     stop("Data matrix contains missing values. Estimate these first (see 'estimate.missing').")  }
   if(is.null(dimnames(A)[[3]])){
     print("No specimen names in data matrix. Assuming specimens in same order.")  }
-  csz<-as.matrix(log(sz))
+  if(logsz == TRUE){csz<-as.matrix(log(sz)); xlab<-"log(CSize)" } 
+  if(logsz == FALSE) { csz<-as.matrix(sz); xlab<-"CSize" }
   n<-nrow(csz)
   if(is.null(rownames(csz))){
     print("No specimen names in size vector. Assuming specimens in same order.")  }
@@ -121,7 +123,7 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
     y.mn<-predict(lm(y~groups))
     B<-coef(lm(y~csz+groups))
     yhat<-predict(lm(y~csz*groups))
-    if(lm.res2[3,5]>0.05){
+    if(lm.res2[3,6]>0.05){
       yhat<-predict(lm(y~csz+groups))      
     }
   }
@@ -137,7 +139,7 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
   if(method!="CAC"){
     layout(matrix(c(2,1,1,1,1,1,1,1,3),3,3))   
     if(method=="RegScore"){
-      plot(csz,Reg.proj,xlab="log(CSize)", ylab="Shape (Regression Score)",pch=21,bg="black",cex=1.25,asp=1)
+      plot(csz,Reg.proj,xlab=xlab, ylab="Shape (Regression Score)",pch=21,bg="black",cex=1.25,asp=1)
       if(!is.null(groups)){points(csz,Reg.proj,pch=21,bg=groups,cex=1.25)}
       if(length(label!=0)){text(csz,Reg.proj,label,adj=c(-.7,-.7))}
       if(warpgrids==T && dim(A)[2]==2){
@@ -146,7 +148,7 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
       }
     } 
     if(method=="PredLine"){
-      plot(csz,pred.val,xlab="log(CSize)", ylab="Shape (Predicted)",pch=21,bg="black",cex=1.25,asp=1)
+      plot(csz,pred.val,xlab=xlab, ylab="Shape (Predicted)",pch=21,bg="black",cex=1.25,asp=1)
       if(!is.null(groups)){points(csz,pred.val,pch=21,bg=groups,cex=1.25)}
       if(length(label!=0)){text(csz,pred.val,label,adj=c(-.7,-.7))}
       if(warpgrids==T && dim(A)[2]==2){
@@ -164,7 +166,7 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
   }
   if(method=="CAC"){
     layout(matrix(c(3,1,1,1,1,1,1,1,4,2,2,2,2,2,2,2,2,2),3,6))   
-    plot(csz,CAC,xlab="log(CSize)", ylab="CAC",pch=21,bg="black",cex=1.25,asp=1)
+    plot(csz,CAC,xlab=xlab, ylab="CAC",pch=21,bg="black",cex=1.25,asp=1)
     if(warpgrids==T && dim(A)[2]==2){
       arrows(min(csz), (0.7*max(CAC)), min(csz), 0, length = 0.1,lwd = 2)
       arrows(max(csz), (0.7 * min(CAC)), max(csz), 0, length = 0.1,lwd = 2)

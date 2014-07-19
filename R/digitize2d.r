@@ -24,7 +24,7 @@
 #' using the LEFT mouse button (or regular button for Mac users):
 #' \enumerate{
 #'  \item Digitize the scale bar (if requested) by selecting the two end points. Use a single click for start and end points. The
-#'   user is asked whether the system shyould keep or discard the digitized scale bar. 
+#'   user is asked whether the system should keep or discard the digitized scale bar. 
 #'  \item Digitize each landmark with single click and the landmark is shown in red. 
 #' }
 #' If verbose = TRUE, digitizing is interactive between landmark selection using a mouse and the R console. 
@@ -39,7 +39,7 @@
 #' If verbose = FALSE the digitizing of landmarks is continuous and uninterupted. Here the user
 #'  will not be prompted to approve each landmark selection. 
 #'  
-#'   At the end of digitizing, the landmark coordinates are written to a TPS file. The x,y values are scaled if a vector of scales 
+#'   At the end of digitizing, the landmark coordinates are written to a TPS file. The x,y values are scaled if a vector fo scales 
 #'   is included."}
 #' 
 #' @param filelist A list of names of jpeg images to be digitized. 
@@ -50,7 +50,7 @@
 #' @return Function returns a tps file containing the digitized landmark coordinates.
 #' @keywords digitizing
 #' @export
-#' @author Dean Adams, Erik Otarola-Castillo and Emma Sherratt
+#' @author Dean Adams Erik Otarola-Castillo and Emma Sherratt
 digitize2d <- function (filelist, nlandmarks, scale = NULL, tpsfile, verbose = TRUE) 
 {
   flist <- dir()

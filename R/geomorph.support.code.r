@@ -2,7 +2,7 @@
 #' @docType package
 #' @aliases geomorph
 #' @title Geometric morphometric analyses for 2D/3D data
-#' @author Dean C. Adams, Erik Otarola-Castillo, & Emma Sherratt
+#' @author Dean C. Adams, Michael Collyer, Erik Otarola-Castillo, & Emma Sherratt
 #'
 #' Functions in this package allow one to read, manipulate, and digitize landmark data; generate shape
 #'  variables via Procrustes analysis for points, curves and surface data, perform statistical analyses
@@ -12,8 +12,9 @@
 #' @import rgl 
 #' @importFrom geiger sim.char
 #' @importFrom jpeg readJPEG
+#' @importFrom phytools fastAnc
 #' @importFrom vegan adonis
-#' @importFrom ape is.binary.tree ace compute.brlen vcv.phylo summary.phylo Ntip
+#' @importFrom ape is.binary.tree compute.brlen vcv.phylo summary.phylo Ntip
 
 NULL
 

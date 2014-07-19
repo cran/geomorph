@@ -34,18 +34,20 @@
 #' data(plethodon) 
 #' Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
 #' 
-#' plotTangentSpace(Y.gpa$coords, groups = paste(plethodon$species, plethodon$site)) 
+#' gp <- as.factor(paste(plethodon$species, plethodon$site)) # group must be a factor
+#' plotTangentSpace(Y.gpa$coords, groups = gp) 
 #' 
 #' ##To change colors of groups
-#' col.gp<-c(rep("black",10),rep("red",10),rep("yellow",10),rep("orange",10))
+#' col.gp<-c(rep("black",10),rep("red",10),rep("yellow",10),rep("orange",10)) # must not be a factor
 #' 
 #' plotTangentSpace(Y.gpa$coords, groups = col.gp)
-plotTangentSpace<-function (A, axis1 = 1, axis2 = 2, warpgrids = TRUE, mesh = NULL, label = NULL, groups=NULL, verbose=FALSE){
+plotTangentSpace<-function (A, axis1 = 1, axis2 = 2, warpgrids = TRUE, mesh = NULL, label = NULL, 
+                            groups=NULL, verbose=FALSE){
   if (length(dim(A)) != 3) {
     stop("Data matrix not a 3D array (see 'arrayspecs').") }
   if(any(is.na(A))==T){
     stop("Data matrix contains missing values. Estimate these first (see 'estimate.missing').") }
-  if(!is.null(groups)){groups<-factor(groups)}
+  #if(!is.null(groups)){groups<-factor(groups)} #removed because it makes the col.gp not work
   k <- dim(A)[2]
   p <- dim(A)[1]
   n <- dim(A)[3]

@@ -52,15 +52,23 @@
 #' y<-two.d.array(Y.gpa$coords)
 #' 
 #' ## Pairwise slope test
+#' # Assuming heterogenous slopes
 #' pairwise.slope.test(y~Y.gpa$Csize+plethodon$site,iter=49,angle.type="rad")
 #' 
+#' # Assuming parallel slopes
+#' pairwise.slope.test(y~Y.gpa$Csize+plethodon$site,het.slopes=FALSE, iter=49, angle.type="rad") 
+#' 
 #' ## Using RRPP
-#' pairwise.slope.test(y~Y.gpa$Csize+plethodon$site,iter=49,angle.type="rad",RRPP=TRUE)
-pairwise.slope.test <- function (f1, iter = 999, het.slopes = T, angle.type = c("r", "rad", "deg"), RRPP = FALSE) {
+#' # Assuming heterogenous slopes
+#' pairwise.slope.test(y~Y.gpa$Csize+plethodon$site,iter=49, angle.type="rad", RRPP=TRUE)
+#' # Assuming parallel slopes
+#' pairwise.slope.test(y~Y.gpa$Csize+plethodon$site, het.slopes=FALSE, 
+#'       iter=49, angle.type="rad", RRPP=TRUE)
+pairwise.slope.test <- function (f1, iter = 999, het.slopes = T, angle.type = "r", RRPP = FALSE) {
   data = NULL
   form.in <- formula(f1)
   Terms <- terms(form.in, keep.order = T)
-  Term.labels = c(attr(Terms, "term.labels"),paste(attr(Terms, "term.labels")[1],attr(Terms, "term.labels")[2],sep=":"))
+  Term.labels = c(attr(Terms, "term.labels"), paste(attr(Terms, "term.labels")[1], attr(Terms, "term.labels")[2], sep=":"))
   Y <- eval(form.in[[2]], parent.frame())
   X <- model.matrix(Terms)
   j <- ncol(attr(Terms, "factors"))
@@ -73,6 +81,10 @@ pairwise.slope.test <- function (f1, iter = 999, het.slopes = T, angle.type = c(
   if (any(is.na(Y)) == T) {
     stop("\nResponse data matrix (shape) contains missing values. Estimate these first (see 'estimate.missing').")
   } 
+  if(any(angle.type == c("r", "deg","rad")) == FALSE){
+  	print("angle.type not one of r, deg, or rad; assuming angle.type = r")
+  	angle.type = "r"
+  }
   
   if (j < 2) stop ("\nFormula must contain at least one covariate and one factor")
   
@@ -82,17 +94,16 @@ pairwise.slope.test <- function (f1, iter = 999, het.slopes = T, angle.type = c(
   if (class(dat[,3]) != "factor") stop("\nSecond variable in formula must be a factor")
   
   if(het.slopes == FALSE){
-    g <- Xdims[2]
-    SS.tmp <- numeric(2)
+    g <- Xdims[2]-2
+    SS.tmp <- numeric(j)
     Xs <- array(0, c(Xdims, 3))
     Xs[,1,1] <- 1
     for(i in 1:2){
-      x <- as.matrix(model.matrix(Terms[1:i]))
+      x <- as.matrix(model.matrix(Terms[1:i], data = dat))
       Xs[,1:ncol(x),(i+1)] <- x
-      mod.mat <- model.matrix(Terms[1:i], data = dat)
-      SS.tmp[i] <- SSE(lm(Y ~ mod.mat-1))
+      SS.tmp[i] <- SSE(lm(Y ~ x -1))
     }
-    df <- c(1,g-2)
+    df <- c(1,g)
     SS.null <- (c(SSE(lm(Y~1)),SS.tmp))[1:j]
     SS.obs <- SS.null - SS.tmp
     MS <- SS.obs/df
@@ -105,10 +116,9 @@ pairwise.slope.test <- function (f1, iter = 999, het.slopes = T, angle.type = c(
     Rsq <- SS.obs/SS.tot
     F <- MS/MS.res
     
-    Xm <- model.matrix(terms(f1, keep.order=F))
-    Xm[,2] <- mean(Xm[,2])
-    Xm <- unique(Xm)
-    m <- Xm%*%coef(lm(Y~Xs[,,3]-1))
+    Xm <- rbind(0,diag(1,g))
+    Xm <- cbind(1, mean(X[,2]),Xm)
+    m <- Xm%*%coef(lm(Y~X-1))
     rownames(m) <- levels(dat[,3])
     
     P <- array(0,c(dim(matrix(SS.obs)),iter+1))
@@ -124,7 +134,7 @@ pairwise.slope.test <- function (f1, iter = 999, het.slopes = T, angle.type = c(
           SS.tmp[ii] <- SSE(lm(Yr[,,ii] ~ Xs[,,ii+1] -1))				
         }
         P[,,i+1] <- SS.null-SS.tmp
-        D[,,i+1]	 <- as.matrix(dist(Xm%*%coef(lm(Yr[,,3]~Xs[,,3]-1))))
+        D[,,i+1]	 <- as.matrix(dist(Xm%*%coef(lm(Yr[,,2]~ Xs[,,3] -1))))
       }
       P.val <- Pval.matrix(P)
       D.p.val <- Pval.matrix(D)
@@ -135,11 +145,11 @@ pairwise.slope.test <- function (f1, iter = 999, het.slopes = T, angle.type = c(
       for(i in 1:iter){
         Yr <- Y[sample(nrow(Y)),]
         for (ii in 1:2) {
-          SS.tmp[ii] <- SSE(lm(Yr ~ Xs[,,ii+1] -1))				
+          SS.tmp[ii] <- SSE(lm(Yr ~ Xs[,,ii+1] -1))
+          SS.null <- c(SSE(lm(Yr ~ 1)), SS.tmp)[1:2]			
         }
-        SS.null[2] <- SS.tmp[1]	
         P[,,i+1] <- SS.null-SS.tmp
-        D[,,i+1] <- as.matrix(dist(Xm%*%coef(lm(Yr~Xs[,,3]-1))))		
+        D[,,i+1] <- as.matrix(dist(Xm%*%coef(lm(Yr ~ Xs[,,3] -1))))		
       }
       P.val <- Pval.matrix(P)
       D.p.val <- Pval.matrix(D)
@@ -151,7 +161,7 @@ pairwise.slope.test <- function (f1, iter = 999, het.slopes = T, angle.type = c(
                             Rsq = c(Rsq, NA, NA),
                             F = c(F, NA, NA),
                             P.val = c(P.val, NA, NA))
-    rownames(anova.tab) <- c(attr(Terms, "term.labels"), "Residuals","Total")
+    rownames(anova.tab) <- c(attr(Terms, "term.labels")[1:2], "Residuals","Total")
     if(RRPP == TRUE) anova.title = "\nRandomized Residual Permutation Procedure used\n"
     if(RRPP == FALSE) anova.title = "\nRandomization of Raw Values used\n"
     attr(anova.tab, "heading") <- paste("\nType I (Sequential) Sums of Squares and Cross-products\n",anova.title)
@@ -162,8 +172,8 @@ pairwise.slope.test <- function (f1, iter = 999, het.slopes = T, angle.type = c(
   
   if(het.slopes == T){
     g <- ncol(model.matrix(Terms[1:2]))
-    SS.tmp <- numeric(2)
-    Xdims[2] <- Xdims[2]+(g-2)
+    Xdims[2] = Xdims[2] + Xdims[2] - 2
+    SS.tmp <- numeric(3)
     Xs <- array(0, c(Xdims, 4))
     Xs[,1,1] <- 1
     for(i in 1:2){
@@ -172,8 +182,8 @@ pairwise.slope.test <- function (f1, iter = 999, het.slopes = T, angle.type = c(
       mod.mat <- model.matrix(Terms[1:i], data = dat)
       SS.tmp[i] <- SSE(lm(Y ~ mod.mat-1))
     }
-    Xs[,,4] <- cbind(Xs[,1:g,3],Xs[,2,3]*Xs[,3:g,3])
-    SS.tmp <- c(SS.tmp, SSE(lm(Y ~ Xs[,,4]-1)))
+    Xs[,,4] <- cbind(X, X[,2]*X[,-(1:2)])
+    SS.tmp[3] <- SSE(lm(Y ~ Xs[,,4]-1))
     df <- c(1,g-2,g-2)
     SS.null <- (c(SSE(lm(Y~1)),SS.tmp))[1:3]
     SS.obs <- SS.null - SS.tmp
@@ -186,10 +196,8 @@ pairwise.slope.test <- function (f1, iter = 999, het.slopes = T, angle.type = c(
     MS.res <- SS.res/df.res
     Rsq <- SS.obs/SS.tot
     F <- MS/MS.res
-    Xm <- model.matrix(terms(f1, keep.order=F))
-    Xm[,2] <- mean(Xm[,2])
-    Xm <- unique(Xm)    	
-    Xm=cbind(Xm[,1:g], (Xm[,2]*Xm[,-(1:2)]))
+    Xm <- rbind(0,diag(1,g-2))
+    Xm <- cbind(1, mean(X[,2]),Xm, mean(X[,2])*Xm)
     B = coef(lm(Y~Xs[,,4]-1))
     m = Xm%*%B
     rownames(m) <- levels(dat[,3])
@@ -210,7 +218,7 @@ pairwise.slope.test <- function (f1, iter = 999, het.slopes = T, angle.type = c(
           SS.tmp[ii] <- SSE(lm(Yr[,,ii] ~ Xs[,,ii+1] -1))				
         }
         P[,,i+1] <- SS.null-SS.tmp
-        Br = coef(lm(Yr[,,4]~Xs[,,4]-1))
+        Br = coef(lm(Yr[,,3]~Xs[,,4]-1))
         Brslopes = rbind(Br[2,], Br[2,]+Br[-(1:g),])
         D[,,i+1] <- as.matrix(dist(Brslopes))
         if(angle.type == "rad") {
@@ -231,9 +239,9 @@ pairwise.slope.test <- function (f1, iter = 999, het.slopes = T, angle.type = c(
       for(i in 1:iter){
         Yr <- Y[sample(nrow(Y)),]
         for (ii in 1:3) {
-          SS.tmp[ii] <- SSE(lm(Yr ~ Xs[,,ii+1] -1))				
+          SS.tmp[ii] <- SSE(lm(Yr ~ Xs[,,ii+1] -1))
+          SS.null <- (c(SSE(lm(Y~1)),SS.tmp))[1:3]				
         }
-        SS.null[2] <- SS.tmp[1]	
         P[,,i+1] <- SS.null-SS.tmp
         Br = coef(lm(Yr~Xs[,,4]-1))
         Brslopes = rbind(Br[2,], Br[2,]+Br[-(1:g),])

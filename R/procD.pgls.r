@@ -29,7 +29,7 @@
 #' @return Function returns an ANOVA table of statistical results for all factors: df (for each factor), SS, MS,
 #' F ratio, Prand, and Rsquare.
 #' @references Adams, D.C. 2014. A method for assessing phylogenetic least squares models for shape and other high-dimensional 
-#' multivariate data. Evolution. (In Press). 
+#' multivariate data. Evolution. 68. DOI:10.1111/evo.12463. 
 #' @examples
 #' ### Example of D-PGLS for high-dimensional data 
 #' data(plethspecies)

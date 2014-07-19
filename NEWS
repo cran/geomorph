@@ -1,22 +1,42 @@
-  	CHANGES IN GEOMORPH VERSION 2.1
+CHANGES IN GEOMORPH VERSION 2.1.1
 
-NEW FUNCTIONS
+  BUG FIXES
+
+    o Fixed concatenated SSCP matrix issue in procD.lm(), pairwise.D.test() and pairwise.slope.test()
+
+    o Corrected issue reading specimen names in readland.tps()
+
+    o Corrected color options for plotting groups in plotTangentSpace()
+
+    o Corrected test for slope:group interaction in plotAllometry()
+
+  NEW FEATURES
+
+    o Specimens rotated to their principal axes in gpagen() with option to disable
+
+  OTHER CHANGES
+
+    o Underlying code for ancestral state estimation changed to use fastAnc (phytools)
+
+CHANGES IN GEOMORPH VERSION 2.1
+
+  NEW FUNCTIONS
 
     o procD.pgls() added to assess high-dimensional ANOVA and regression models in a phylogenetic context
 
     o pairwise.slope.test() added to compare slopes of regression lines
 
-NEW FEATURES
+  NEW FEATURES
 
     o Residual randomization options added to procD.lm() and pairwise.d.test()
 
     o Enhanced capabilities of digitize2d(). Function now reads multiple images and outputs TPS file, can be used with missing data, and digitizing session can be restarted where previous session stopped.
 
-BUG FIXES
+  BUG FIXES
 
     o Fixed scale issue in digitize2d()
 
-OTHER CHANGES
+  OTHER CHANGES
 
     o Ability to plot specimen labels added to two.b.pls(), morphol.integr(), and phylo.pls()
 
@@ -28,13 +48,13 @@ OTHER CHANGES
     o Labels for ancestral states addd to plotGMPhyloMorphoSpace()
 
 
-  	CHANGES IN GEOMORPH VERSION 2.0.1
+CHANGES IN GEOMORPH VERSION 2.0.1
 
     o Small change to C-code for gpagen
 
-    CHANGES IN GEOMORPH VERSION 2.0
+CHANGES IN GEOMORPH VERSION 2.0
 
-NEW FEATURES
+  NEW FEATURES
 
     o New function phylo.pls() for assessing the multivariate association between two blocks of variables in a phylogenetic context
 
@@ -54,7 +74,7 @@ NEW FEATURES
 
     o Verbose output = T/F added to the following functions: bilat.symmetry(), phylo.pls(), two.b.pls(), morphol.integr(), plotAllometry(), plotTangentSpace(), physignal()
 
-OTHER CHANGES
+  OTHER CHANGES
 
     o Added calculation of pairwise Pvalues, and the option to assess a single group in  function compare.evol.rates() 
 
@@ -72,7 +92,7 @@ OTHER CHANGES
 
     o read.vrml now defunct
 
-INTERNAL CODING CHANGES
+  INTERNAL CODING CHANGES
 
     o Major re-organization of underlying R code structure and format
 
@@ -80,15 +100,15 @@ INTERNAL CODING CHANGES
 
     o Simplified plotting options in bilat.symmetry()
 
-BUG FIXES 
+  BUG FIXES 
 
     o Corrected small coding error in digitize2D and updated flexibility of the function
 
 ######
 
-    CHANGES IN GEOMORPH VERSION 1.1-6
+CHANGES IN GEOMORPH VERSION 1.1-6
 
-OTHER CHANGES
+  OTHER CHANGES
 
     o Minor I/O enhancements in readmulti.nts()
 
@@ -99,9 +119,9 @@ OTHER CHANGES
     o Added name.check for groups in compare.evol.rates()
  
 
-		CHANGES IN GEOMORPH VERSION 1.1-5
+CHANGES IN GEOMORPH VERSION 1.1-5
 
-NEW FEATURES
+  NEW FEATURES
 
     o New function compare.evol.rates() for comparing multivariate evolutionary rates on phylogenies
 
@@ -109,35 +129,35 @@ NEW FEATURES
 
     o Option allowing specimens to be colored by group added to plotTangentSpace() and PlotAllometry() 
 
-BUG FIXES 
+  BUG FIXES 
 
     o Corrected parameter estimates when groups specified for Regression Score option in plotAllometry()
 
 
-OTHER CHANGES
+  OTHER CHANGES
 
     o Simplified options in morphol.integr()
 
     o curves2d() and digit.curves() deprecated 
 
 
-		CHANGES IN GEOMORPH VERSION 1.1-4
+CHANGES IN GEOMORPH VERSION 1.1-4
 
-NEW FEATURES
+  NEW FEATURES
 
     o Enhanced plotting of ply files in read.ply()
 
     o digitsurface(), buildtemplate(), plotspec(), digitfixed(), and digitcurves() now support ply file input
 
-OTHER CHANGES
+  OTHER CHANGES
 
     o Minor changes to plot window options in plotting functions
 
     o Change to magnification factor usage in plotRefToTartget()
 
-		CHANGES IN GEOMORPH VERSION 1.1-3
+CHANGES IN GEOMORPH VERSION 1.1-3
 
-OTHER CHANGES
+  OTHER CHANGES
 
     o Improved NAMESPACE file and package usage
 
@@ -145,15 +165,15 @@ OTHER CHANGES
 
 
 
-		CHANGES IN GEOMORPH VERSION 1.1-2
+CHANGES IN GEOMORPH VERSION 1.1-2
 
-NEW FEATURES
+  NEW FEATURES
 
     o pairwiseD.test() function added
 
     o bilat.symmetry() output includes symmetric and asymmetric shape components
 
-BUG FIXES 
+  BUG FIXES 
 
     o Corrected readland.tps() to allow for non-numeric ID and reading a single specimen per file
 
@@ -169,7 +189,7 @@ BUG FIXES
  
     o Corrected ancestral state output in physignal() and PlotGMPhyloMorphoSpace()
 
-OTHER CHANGES
+  OTHER CHANGES
 
     o Adjusted plotting routines in morphol.integr() to be compatible with new CRAN guidelines
 
@@ -180,16 +200,16 @@ OTHER CHANGES
     o Alternative ancestral state reconstruction and tests for bifurcating tree implemeneted in PlotGMPhyloMorphoSpace()
 
 
-		CHANGES IN GEOMORPH VERSION 1.1-1
+CHANGES IN GEOMORPH VERSION 1.1-1
 
     o Removed dependency in physignal() on getAncStates() from geiger, which is no longer supported
 
     o Removed dependency in plotGMPhyloMorphoSpace() on getAncStates() from geiger, which is no longer supported
 
 
-		CHANGES IN GEOMORPH VERSION 1.1-0
+CHANGES IN GEOMORPH VERSION 1.1-0
 
-NEW FEATURES
+  NEW FEATURES
 
     o bilat.symmetry() function added
 
@@ -215,7 +235,7 @@ NEW FEATURES
 
     o Option added to include specimen numbers to plotTangentSpace()
 
-BUG FIXES
+  BUG FIXES
 
     o buildtemplate() positional error in plot between template and scan corrected
 
@@ -223,7 +243,7 @@ BUG FIXES
 
     o gpgen() occassional reflection issue corrected
 
-OTHER CHANGES
+  OTHER CHANGES
 
     o read.morphologika() accepts greater variety of input file formats
 

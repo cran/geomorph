@@ -45,7 +45,7 @@
 #' ### Pairwise comparisons: full randomization
 #' pairwiseD.test(y~plethodon$species*plethodon$site,iter=99)
 #' 
-#' ## Pairwise comparisons: using RRPP
+#' ## Pairwise comparisons: residual randomization
 #' #' pairwiseD.test(y~plethodon$species*plethodon$site,iter=99,RRPP=TRUE)
 pairwiseD.test <- function (f1, iter = 999, RRPP = FALSE) {
 	data=NULL
@@ -53,12 +53,10 @@ pairwiseD.test <- function (f1, iter = 999, RRPP = FALSE) {
     Terms <- terms(form.in, keep.order = T)
     Y <- eval(form.in[[2]], parent.frame())
     X <- model.matrix(Terms)
-    Xm <-unique(model.matrix(terms(form.in, keep.order=F)))
     j <- ncol(attr(Terms, "factors"))
-    	dat <- model.frame(form.in, data=NULL)
-    	Xdims <- dim(X)
-    	df <- df.tmp <- SS.tmp <- SS.obs <- F <- Rsq <- array()
-    	
+    dat <- model.frame(form.in, data=NULL)
+    Xdims <- dim(X)
+    df <- df.tmp <- SS.tmp <- SS.obs <- F <- Rsq <- array()
     	
     if(any(X!=1 & X!=0)) 
     stop("pairwise D test only meaningful for factors\nConsider using pairwise.slope.test for covariates")
@@ -72,13 +70,12 @@ pairwiseD.test <- function (f1, iter = 999, RRPP = FALSE) {
  	
  	if(j==1){
 		SS.null <- SSE(lm(Y~1))
-		mod.mat <- model.matrix(Terms[1], data = dat)
-		fit <- lm(Y~mod.mat-1)
+		fit <- lm(Y~X-1)
 		SS.tmp <- SSE(fit)
 		SS.obs <- SS.null-SS.tmp
 		SS.tot <- SS.null
 		SS.res <- SS.tot-SS.obs
-		df <- ncol(mod.mat)-1
+		df <- ncol(X)-1
 		MS <- SS.obs/df
 		df.tot <- nrow(Y) - 1
         df.res <- nrow(Y) - df -1
@@ -86,6 +83,8 @@ pairwiseD.test <- function (f1, iter = 999, RRPP = FALSE) {
         MS.res <- SS.res/df.res
         Rsq <- SS.obs/SS.tot
         F <- MS/MS.res
+        Xm <-diag(1,Xdims[2])
+        Xm[,1] <- 1
         m <- Xm%*%coef(fit)
         rownames(m) <-levels(model.frame(Terms)[,2])
         P <- array(c(SS.obs,rep(0,iter)))
@@ -93,7 +92,7 @@ pairwiseD.test <- function (f1, iter = 999, RRPP = FALSE) {
         D[,,1] <- as.matrix(dist(m))
     	for(i in 1:iter){
 			Yr <- Y[sample(nrow(Y)),]
-			fit.r <- lm(Yr~mod.mat-1)
+			fit.r <- lm(Yr~X-1)
     		SS.tmp <- SSE(fit.r)
     		P[i+1] <- SS.null-SS.tmp
     		mr <- Xm%*%coef(fit.r)
@@ -110,11 +109,10 @@ pairwiseD.test <- function (f1, iter = 999, RRPP = FALSE) {
 		Xs <- array(0, c(Xdims, (j+1)))
 		Xs[,1,1] <- 1
 		for(i in 1:j){
-			x <- as.matrix(model.matrix(Terms[1:i]))
+			x <- as.matrix(model.matrix(Terms[1:i], data=dat))
 			Xs[,1:ncol(x),(i+1)] <- x
-        	mod.mat <- model.matrix(Terms[1:i], data = dat)
-        	SS.tmp[i] <- SSE(lm(Y ~ mod.mat-1))
-        	df.tmp[i] <- ifelse(ncol(mod.mat) == 1, 1, (ncol(mod.mat) - 1))
+        	SS.tmp[i] <- SSE(lm(Y ~ x -1))
+        	df.tmp[i] <- ifelse(ncol(x) == 1, 1, (ncol(x) - 1))
         	ifelse(i == 1, df[i] <- df.tmp[i], df[i] <- (df.tmp[i] - df.tmp[i - 1]))
     	}
     	SS.null <- (c(SSE(lm(Y~1)),SS.tmp))[1:j]
@@ -128,8 +126,8 @@ pairwiseD.test <- function (f1, iter = 999, RRPP = FALSE) {
     	MS.res <- SS.res/df.res
     	Rsq <- SS.obs/SS.tot
     	F <- MS/MS.res
-    	mod.mat <- Xs[,,j+1]
-    	m <- Xm%*%coef(lm(Y~mod.mat-1))
+    	Xm <- unique(X[do.call(order, lapply(1:ncol(X), function(i) X[, i])), ])
+    	m <- Xm%*%coef(lm(Y~X-1))
     	nm=(model.frame(Terms))[,2]
         for(i in 3:j){nm <- factor(paste(nm,(model.frame(Terms))[,j]))}
         rownames(m)<-levels(nm)
@@ -146,7 +144,7 @@ pairwiseD.test <- function (f1, iter = 999, RRPP = FALSE) {
         			SS.tmp[ii] <- SSE(lm(Yr[,,ii] ~ Xs[,,ii+1] -1))				
 				}
     	  	P[,,i+1] <- SS.null-SS.tmp
-    	  	D[,,i+1]	 <- as.matrix(dist(Xm%*%coef(lm(Yr[,,j+1]~mod.mat-1))))
+    	  	D[,,i+1] <- as.matrix(dist(Xm%*%coef(lm(Yr[,,j]~ X -1))))
     		}
 		P.val <- Pval.matrix(P)
 		D.p.val <- Pval.matrix(D)
@@ -156,10 +154,11 @@ pairwiseD.test <- function (f1, iter = 999, RRPP = FALSE) {
     		for(i in 1:iter){
 			Yr <- Y[sample(nrow(Y)),]
     			for (ii in 1:j) {
-        			SS.tmp[ii] <- SSE(lm(Yr ~ Xs[,,ii+1] -1))				
+        			SS.tmp[ii] <- SSE(lm(Yr ~ Xs[,,ii+1] -1))	
+        			SS.null <- (c(SSE(lm(Y~1)),SS.tmp))[1:j]			
 				}
     	  	P[,,i+1] <- SS.null-SS.tmp
-    	  	D[,,i+1] <- as.matrix(dist(Xm%*%coef(lm(Yr~mod.mat-1))))		
+    	  	D[,,i+1] <- as.matrix(dist(Xm%*%coef(lm(Yr~ X -1))))		
     		}
 		P.val <- Pval.matrix(P)
 		D.p.val <- Pval.matrix(D)

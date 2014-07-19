@@ -108,11 +108,10 @@ procD.lm <- function(f1, iter = 999, RRPP = FALSE, verbose=FALSE){
 	Xs <- array(0, c(Xdims, (j+1)))
 	Xs[,1,1] <- 1
 	for(i in 1:j){
-		x <- as.matrix(model.matrix(Terms[1:i]))
+		x <- as.matrix(model.matrix(Terms[1:i], data=dat))
 		Xs[,1:ncol(x),(i+1)] <- x
-        mod.mat <- model.matrix(Terms[1:i], data = dat)
-        SS.tmp[i] <- SSE(lm(Y ~ mod.mat-1))
-        df.tmp[i] <- ifelse(ncol(mod.mat) == 1, 1, (ncol(mod.mat) - 1))
+        SS.tmp[i] <- SSE(lm(Y ~ x -1))
+        df.tmp[i] <- ifelse(ncol(x) == 1, 1, (ncol(x) - 1))
         ifelse(i == 1, df[i] <- df.tmp[i], df[i] <- (df.tmp[i] - df.tmp[i - 1]))
     	}
     SS.null <- (c(SSE(lm(Y~1)),SS.tmp))[1:j]
@@ -127,10 +126,9 @@ procD.lm <- function(f1, iter = 999, RRPP = FALSE, verbose=FALSE){
     Rsq <- SS.obs/SS.tot
     F <- MS/MS.res
     P <- array(0,c(dim(matrix(SS.obs)),iter+1))
-    P[,,1]=SS.obs
+    P[,,1] <- SS.obs
     
     if(RRPP==TRUE){
-    
     		for(i in 1:iter){
 			Yr <- RRP.submodels(Xs,Y)
     			for (ii in 1:j) {
@@ -141,12 +139,13 @@ procD.lm <- function(f1, iter = 999, RRPP = FALSE, verbose=FALSE){
 		P.val <- Pval.matrix(P)
 		}
     
-        if(RRPP==FALSE){
+    if(RRPP==FALSE){
     
     		for(i in 1:iter){
 			Yr <- Y[sample(nrow(Y)),]
     			for (ii in 1:j) {
-        			SS.tmp[ii] <- SSE(lm(Yr ~ Xs[,,ii+1] -1))				
+        			SS.tmp[ii] <- SSE(lm(Yr ~ Xs[,,ii+1] -1))	
+        			SS.null <- (c(SSE(lm(Y~1)),SS.tmp))[1:j]	
 			}
     	  	P[,,i+1] <- SS.null-SS.tmp		
     		}

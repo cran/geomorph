@@ -5,7 +5,7 @@
 #' The function creates a plot of the first two dimensions of tangent space for a set of Procrustes-aligned 
 #'   specimens. The phylogenetic tree for these specimens is superimposed in this plot revealing how shape 
 #'   evolves (e.g., Rohlf 2002; Klingenberg and Gidaszewski 2010). The plot also displays the ancestral 
-#'   states for each node of the phylogenetic tree (obtained from \code{\link[ape]{ace}}), whose values can optionally be returned. 
+#'   states for each node of the phylogenetic tree (obtained from \code{\link[phytools]{fastAnc}}), whose values can optionally be returned. 
 #'
 #' @param phy A phylogenetic tree of {class phylo} - see \code{\link[ape]{read.tree}} in library ape
 #' @param A A matrix (n x [p x k]) or 3D array (p x k x n) containing GPA-aligned coordinates for a set of specimens
@@ -13,7 +13,7 @@
 #' @param ancStates A logical value indicating whether ancestral state values should be returned
 #' @export
 #' @keywords visualization
-#' @author Dean Adams
+#' @author Dean Adams & Emma Sherratt
 #' @return Function returns estimated ancestral states if {ancStates=TRUE}
 #' @references Klingenberg, C. P., and N. A. Gidaszewski. 2010. Testing and quantifying phylogenetic 
 #'   signals and homoplasy in morphometric data. Syst. Biol. 59:245-261.
@@ -26,7 +26,7 @@
 #' plotGMPhyloMorphoSpace(plethspecies$phy,Y.gpa$coords)
 plotGMPhyloMorphoSpace<-function(phy,A,labels=TRUE,ancStates=TRUE){
   if(any(is.na(A))==T){
-    stop("Data matrix contains missing values. Estimate these first(see 'estimate.missing').")  }
+    stop("Data matrix contains missing values. Estimate these first (see 'estimate.missing').")  }
   if (length(dim(A))==3){ 
     if(is.null(dimnames(A)[[3]])){
       stop("Data matrix does not include taxa names as dimnames for 3rd dimension.")  }
@@ -51,7 +51,7 @@ plotGMPhyloMorphoSpace<-function(phy,A,labels=TRUE,ancStates=TRUE){
   anc.states<-NULL
   for (i in 1:ncol(x)){
     options(warn=-1)  
-    tmp<-as.vector(ace(x[,i], compute.brlen(phy,1), type="continuous", method="ML")$ace)
+    tmp <- as.vector(fastAnc(phy, x[, i]))
     anc.states<-cbind(anc.states,tmp)   }
   colnames(anc.states)<-NULL
   ## add labels to anc.states
