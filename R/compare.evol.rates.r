@@ -28,7 +28,7 @@
 #'   \item{sigmad.all}{The phylogenetic evolutionary rate for each group of species on the phylogeny}
 #'   \item{sigmad.ratio}{The ratio of maximum to minimum evolutionary rates}
 #'   \item{pvalue}{The significance level of the observed ratio}
-#'   \item{pairwise.pvalue}{Matrix of pairwise significance levels comaring each pair of rates}
+#'   \item{pairwise.pvalue}{Matrix of pairwise significance levels comparing each pair of rates}
 #'   
 #' @references Adams, D.C. 2014. Quantifying and comparing phylogenetic evolutionary rates for 
 #'  shape and other high-dimensional phenotypic data. Syst. Biol. 63:166-177.

@@ -19,99 +19,101 @@
 #'   model (y~x), from which sums-of-squares, F-ratios, and R^2 are estimated for each factor in the model (see Adams, 2014). 
 #'   Data are then permuted across the tips of the phylogeny, and estimates of statistical values are obtained for the permuted data,
 #'   which are  compared to the observed value to assess significance. 
+#'   
+#'   Two possible resampling procedures are provided. First, if RRPP=FALSE, 
+#'   the rows of the matrix of shape variables 
+#'   are randomized relative to the design matrix. This is analogous to a 'full' randomization. Second, if RRPP=TRUE,
+#'   a residual randomization permutation procedure is utilized (Collyer et al. 2014). Here, residual shape values from a reduced model are
+#'   obtained, and are randomized with respect to the linear model under consideration. These are then added to 
+#'   predicted values from the remaining effects to obtain pseudo-values from which SS are calculated. NOTE: for
+#'   single-factor designs, the two approaches are identical.  However, when evaluating factorial models it has been
+#'   shown that RRPP attains higher statistical power and thus has greater ability to identify patterns in data should
+#'   they be present (see Anderson and terBraak 2003). Effect-sizes (Z-scores) are computed as standard deviates of the sampling 
+#'   distributions (of F values) generated, which might be more intuitive for P-values than F-values (see Collyer et al. 2014).  In the case  
+#'   that multiple factor or factor-covariate interactions are used in the model formula, one can specify whether all main effects should be  
+#'    added to the model first, or interactions should precede subsequent main effects 
+#'   (i.e., Y ~ a + b + c + a:b + ..., or Y ~ a + b + a:b + c + ..., respectively.)
 #'
 #' @param f1 A formula for the linear model (e.g., y~x1+x2)
 #' @param phy A phylogenetic tree of {class phylo} - see \code{\link[ape]{read.tree}} in library ape
 #' @param iter Number of iterations for significance testing
+#' @param RRPP A logical value indicating whether residual randomization should be used for significance testing
+#' @param int.first A logical value to indicate if interactions of first main effects should precede subsequent main effects
+#' @param verbose A logical value specifying whether additional output should be displayed
 #' @keywords analysis
 #' @export
-#' @author Dean Adams
+#' @author Dean Adams and Michael Collyer
 #' @return Function returns an ANOVA table of statistical results for all factors: df (for each factor), SS, MS,
 #' F ratio, Prand, and Rsquare.
 #' @references Adams, D.C. 2014. A method for assessing phylogenetic least squares models for shape and other high-dimensional 
-#' multivariate data. Evolution. 68. DOI:10.1111/evo.12463. 
+#' multivariate data. Evolution. 68:2675-2688. 
+#' @references Collyer, M.L., D.J. Sekora, and D.C. Adams. 2014. A method for analysis of phenotypic change for phenotypes described 
+#' by high-dimensional data. Heredity. 113: doi:10.1038/hdy.2014.75.
 #' @examples
 #' ### Example of D-PGLS for high-dimensional data 
 #' data(plethspecies)
 #' Y.gpa<-gpagen(plethspecies$land)    #GPA-alignment
-#' 
 #' procD.pgls(two.d.array(Y.gpa$coords)~Y.gpa$Csize,plethspecies$phy,iter=49)
-procD.pgls<-function(f1,phy,iter=999){
-    data=NULL
-    form.in<-formula(f1)
-    Terms<-terms(form.in,keep.order=TRUE)
-    Y<-as.matrix(eval(form.in[[2]],parent.frame()))
-    N<-length(phy$tip.label)
-    p<-ncol(Y)
-    if(is.null(rownames(Y))){
-      stop("No species names with Y-data.")  }
-    if(length(match(rownames(Y), phy$tip.label))!=N) 
-      stop("Data matrix missing some taxa present on the tree.")
-    if(length(match(phy$tip.label,rownames(Y)))!=N) 
-      stop("Tree missing some taxa in the data matrix.")
-    if (any(is.na(match(sort(phy$tip.label), sort(rownames(Y)))) == T)) {
-      stop("Names do not match between tree and data matrix.")}
-
-    C<-vcv.phylo(phy); C<-C[rownames(Y),rownames(Y)]  
-    eigC <- eigen(C)
-    D.mat<-solve(eigC$vectors %*% diag(sqrt(eigC$values)) %*% t(eigC$vectors)) 
-    Y.new<-D.mat %*% (Y)    
-    ones.new<-D.mat%*%(array(1,N))
-    pred.1<- predict(lm(Y.new~ones.new-1)) 
-    dat<-model.frame(form.in,data)
-    df<-df.tmp<-SS.tmp<-SS.obs<-F<-array()
-    for (i in 1:ncol(attr(Terms, "factors"))){
-      mod.mat<-model.matrix(Terms[1:i],data=dat)
-      x.new<-D.mat%*%mod.mat
-      pred.y<-predict(lm(Y.new~x.new-1))
-      G<-(pred.y-pred.1)%*%t(pred.y-pred.1)
-      SS.tmp[i]<-sum(diag(G))   
-      ifelse(i==1, SS.obs[i]<-SS.tmp[i], SS.obs[i]<-(SS.tmp[i]-SS.tmp[i-1]))
-      df.tmp[i]<-ifelse(ncol(mod.mat)==1,1,(ncol(mod.mat)-1))
-      ifelse(i==1, df[i]<-df.tmp[i], df[i]<-(df.tmp[i]-df.tmp[i-1]))
-    }
-    MS<-SS.obs/df
-    mod.mat<-model.matrix(Terms)
-    x.new<-D.mat%*%mod.mat
-    y.res<-residuals(lm(Y.new~x.new-1))
-    SS.res<-sum(diag(y.res%*%t(y.res)))  
-    df.res<-nrow(Y)-1-sum(df)
-    MS.res<-SS.res/df.res
-    Rsq<-SS.obs/(sum(SS.obs)+SS.res)
-    F<-MS/MS.res
-    F.r<-P.val<-array(1,dim=length(SS.obs))
-    for(i in 1:iter){
-      SS.tmp<-SS.r<-array()
-      Y.r<-as.matrix(Y[sample(nrow(Y)),])  
-      row.names(Y.r)<-row.names(Y)
-      Y.r.new<-D.mat %*% (Y.r)    
-      pred.1.r<- predict(lm(Y.r.new~ones.new-1)) 
-      for (ii in 1:ncol(attr(Terms, "factors"))){
-        mod.mat<-model.matrix(Terms[1:ii])
-        x.new<-D.mat%*%mod.mat
-        pred.y.r<-predict(lm(Y.r.new~x.new-1))
-        G.r<-(pred.y.r-pred.1.r)%*%t(pred.y.r-pred.1.r)
-        SS.tmp[ii]<-sum(diag(G.r))   
-        ifelse(ii==1, SS.r[ii]<-SS.tmp[ii], SS.r[ii]<-(SS.tmp[ii]-SS.tmp[ii-1]))
-      }
-      MS.r<-SS.r/df
-      mod.mat<-model.matrix(Terms)
-      x.new<-D.mat%*%mod.mat
-      y.res.r<-residuals(lm(Y.r.new~x.new-1))
-      SS.r.res<-sum(diag(y.res.r%*%t(y.res.r)))  
-      MS.r.res<-SS.r.res/df.res
-      F.r<-MS.r/MS.r.res
-      P.val<-ifelse(F.r>=F, P.val+1,P.val) 
-    }
-    P.val<-P.val/(iter+1)
-    
-    anova.tab <- data.frame(df = c(df,df.res), 
-    SS = c(SS.obs, SS.res), 
-    MS = c(MS, MS.res),
-    Rsq = c(Rsq, NA),
-    F = c(F, NA),
-    P.val = c(P.val, NA))
-    rownames(anova.tab) <- c(attr(Terms, "term.labels"), "Residuals")
-    class(anova.tab) <- c("anova", class(anova.tab))
-    return(anova.tab)
+#'
+#' ### Example of D-PGLS for high-dimensional data, using RRPP
+#' procD.pgls(two.d.array(Y.gpa$coords)~Y.gpa$Csize,plethspecies$phy,iter=49, RRPP=TRUE)
+procD.pgls<-function(f1, phy, iter=999, int.first = FALSE, RRPP=FALSE, verbose=FALSE){
+  data=NULL
+  form.in <- formula(f1)
+  if(int.first == TRUE) ko = TRUE else ko = FALSE
+  Terms <- terms(form.in, keep.order = ko)
+  k <- length(attr(Terms, "term.labels"))
+  Y <- as.matrix(eval(form.in[[2]], parent.frame()))
+  if (length(dim(Y)) != 2) {
+    stop("Response matrix (shape) not a 2D array. Use 'two.d.array' first.")
+  }  
+  if (any(is.na(Y)) == T) {
+    stop("Response data matrix (shape) contains missing values. Estimate these first (see 'estimate.missing').")
   }
+  if (is.null(dimnames(Y)[[1]])) {
+    stop("No species names with Y-data")
+  }
+  N<-length(phy$tip.label)
+  if(length(match(rownames(Y), phy$tip.label))!=N) 
+    stop("Data matrix missing some taxa present on the tree.")
+  if(length(match(phy$tip.label,rownames(Y)))!=N) 
+    stop("Tree missing some taxa in the data matrix.")
+  C<-vcv.phylo(phy); C<-C[rownames(Y),rownames(Y)]  
+  eigC <- eigen(C)
+  lambda <- zapsmall(eigC$values)
+  if(any(lambda == 0)){
+    warning("Singular phylogenetic covariance matrix. Proceed with caution")
+    lambda = lambda[lambda > 0]
+  }
+  eigC.vect = eigC$vectors[,1:(length(lambda))]
+  Pcor <- solve(eigC.vect%*% diag(sqrt(lambda)) %*% t(eigC.vect)) 
+  PY <- Pcor%*%Y   #Garland & Ives 2000 transformation
+  Xs = mod.mats(form.in)
+  
+  anova.parts.obs <- anova.pgls.parts(form.in, X=NULL, Pcor, Yalt = "observed", keep.order=ko)
+  anova.tab <-anova.parts.obs$table  
+  df <- anova.parts.obs$df[1:k]
+  dfE <-anova.parts.obs$df[k+1]
+  
+  P <-array(0, c(k, 1, iter+1))
+  P[,,1] <- SS.obs <- anova.parts.obs$F[1:k]
+  for(i in 1:iter){
+    if(RRPP == TRUE) {    
+      SS.ran <- SS.pgls.random(Y, Xs, SS=SS.obs, Pcor,Yalt = "RRPP")
+    } else SS.ran <- SS.pgls.random(Y, Xs, Pcor, SS=SS.obs, Yalt = "resample")
+    SS.r <- SS.ran$SS
+    Yr <- SS.ran$Y
+    SSE.r <- SS.ran$SSE
+    Fs.r <- (SS.r/df)/(SSE.r/dfE)
+    P[,,i+1] <- Fs.r
+  }  
+  P.val <- Pval.matrix(P)
+  Z <- Effect.size.matrix(P)
+  anova.tab <- data.frame(anova.tab, Z = c(Z, NA, NA), P.value = c(P.val, NA, NA))
+  anova.title = "\nRandomization of Raw Values used\n"
+  attr(anova.tab, "heading") <- paste("\nType I (Sequential) Sums of Squares and Cross-products\n",anova.title)
+  class(anova.tab) <- c("anova", class(anova.tab))
+  if(verbose==TRUE)  {
+    list(anova.table = anova.tab, call=match.call(), SS.rand = P)
+  } else anova.tab
+}

@@ -41,7 +41,7 @@
 #' @references Klingenberg, C. P., and N. A. Gidaszewski. 2010. Testing and quantifying phylogenetic signals 
 #'   and homoplasy in morphometric data. Syst. Biol. 59:245-261.
 #' @references Adams, D.C. 2014. A generalized K statistic for estimating phylogenetic signal from shape and 
-#' other high-dimensional multivariate data. Systematic Biology. 63. DOI:10.1093/sysbio/syu030.
+#' other high-dimensional multivariate data. Systematic Biology.  63:685-697.
 #' @examples
 #' data(plethspecies) 
 #' Y.gpa<-gpagen(plethspecies$land)    #GPA-alignment    

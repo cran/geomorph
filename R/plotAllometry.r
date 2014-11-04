@@ -65,7 +65,7 @@
 #'   Comparison of cranial ontogenetic trajectories among great apes and humans. J. Hum. Evol. 46:679-698.
 #' @examples
 #' data(ratland) 
-#' Y.gpa<-gpagen(ratland)    #GPA-alignment
+#' Y.gpa<-gpagen(ratland,PrinAxes=FALSE)    #GPA-alignment
 #' 
 #' #Using CAC for plot
 #' plotAllometry(Y.gpa$coords,Y.gpa$Csize,method="CAC", iter=5)
@@ -142,18 +142,22 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
       plot(csz,Reg.proj,xlab=xlab, ylab="Shape (Regression Score)",pch=21,bg="black",cex=1.25,asp=1)
       if(!is.null(groups)){points(csz,Reg.proj,pch=21,bg=groups,cex=1.25)}
       if(length(label!=0)){text(csz,Reg.proj,label,adj=c(-.7,-.7))}
-      if(warpgrids==T && dim(A)[2]==2){
-        arrows(min(csz), (0.7*max(Reg.proj)), min(csz), 0, length = 0.1,lwd = 2)
-        arrows(max(csz), (0.7 * min(Reg.proj)), max(csz), 0, length = 0.1,lwd = 2)
+      if(is.null(groups)){
+        if(warpgrids==T && dim(A)[2]==2){
+          arrows(min(csz), (0.7*max(Reg.proj)), min(csz), 0, length = 0.1,lwd = 2)
+          arrows(max(csz), (0.7 * min(Reg.proj)), max(csz), 0, length = 0.1,lwd = 2)
+        }
       }
     } 
     if(method=="PredLine"){
       plot(csz,pred.val,xlab=xlab, ylab="Shape (Predicted)",pch=21,bg="black",cex=1.25,asp=1)
       if(!is.null(groups)){points(csz,pred.val,pch=21,bg=groups,cex=1.25)}
       if(length(label!=0)){text(csz,pred.val,label,adj=c(-.7,-.7))}
-      if(warpgrids==T && dim(A)[2]==2){
-        arrows(min(csz), (0.7*max(pred.val)), min(csz), 0, length = 0.1,lwd = 2)
-        arrows(max(csz), (0.7 * min(pred.val)), max(csz), 0, length = 0.1,lwd = 2)
+      if(is.null(groups)){
+        if(warpgrids==T && dim(A)[2]==2){
+          arrows(min(csz), (0.7*max(pred.val)), min(csz), 0, length = 0.1,lwd = 2)
+          arrows(max(csz), (0.7 * min(pred.val)), max(csz), 0, length = 0.1,lwd = 2)
+        }
       }
     }
     if(is.null(groups)){
@@ -167,9 +171,11 @@ plotAllometry<-function(A,sz,groups=NULL,method=c("CAC","RegScore","PredLine"),w
   if(method=="CAC"){
     layout(matrix(c(3,1,1,1,1,1,1,1,4,2,2,2,2,2,2,2,2,2),3,6))   
     plot(csz,CAC,xlab=xlab, ylab="CAC",pch=21,bg="black",cex=1.25,asp=1)
-    if(warpgrids==T && dim(A)[2]==2){
-      arrows(min(csz), (0.7*max(CAC)), min(csz), 0, length = 0.1,lwd = 2)
-      arrows(max(csz), (0.7 * min(CAC)), max(csz), 0, length = 0.1,lwd = 2)
+    if(is.null(groups)){
+      if(warpgrids==T && dim(A)[2]==2){
+        arrows(min(csz), (0.7*max(CAC)), min(csz), 0, length = 0.1,lwd = 2)
+        arrows(max(csz), (0.7 * min(CAC)), max(csz), 0, length = 0.1,lwd = 2)
+      }
     }
     if(!is.null(groups)){points(csz,CAC,pch=21,bg=groups,cex=1.25)}
     if(length(label!=0)){text(csz,CAC,label,adj=c(-.7,-.7))}

@@ -1,12 +1,12 @@
 #' Compare modular signal to alternative landmark subsets
 #'
-#' Function quantifies the degree of morphological integration between two or more modules of Procrustes-aligned 
+#' Function quantifies the degree of modularity between two or more hypothesized modules of Procrustes-aligned 
 #'   landmark coordinates and compares this to patterns found by randomly assigning landmarks into subsets
 #'
-#' The function quantifies the degree of morphological integration between two or more modules of shape data as 
-#'   defined by landmark coordinates, and compares this to modular signals found by randomly assigning landmarks 
-#'   to modules. It is assumed that the landmarks have previously been aligned using Generalized 
-#'   Procrustes Analysis (GPA) [e.g., with \code{\link{gpagen}}]. The degree of morphological integration 
+#' The function quantifies the degree of modularity in two or more hypothesized modules of shape data as 
+#'   defined by landmark coordinates, and compares this to the degree of modular signal found in random assignment of
+#'   landmarks to modules. It is assumed that the landmarks have previously been aligned using Generalized 
+#'   Procrustes Analysis (GPA) [e.g., with \code{\link{gpagen}}]. The degree of modularity  
 #'   is quantified using the RV coefficient (Klingenberg 2009). If more than two modules are defined, the average
 #'   RV coefficient is utilized (see Klingenberg 2009). The RV coefficient for the observed modular 
 #'   hypothesis is then compared to a distribution of values obtained by randomly assigning landmarks into 
@@ -27,7 +27,7 @@
 #' @keywords analysis
 #' @author Dean Adams
 #' @return Function returns a list with the following components: 
-#'   \item{RV}{The estimate of morphological integration}
+#'   \item{RV}{The estimate of the observed modular signal}
 #'   \item{pvalue}{The significance level of the observed signal}
 #'   \item{RV.min}{The minimal RV coefficient found via landmark permutation}
 #'   \item{RV.min.partitions}{A list of landmarks assigned to partitions that yields the minimal RV coefficient}

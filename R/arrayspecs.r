@@ -26,7 +26,7 @@
 arrayspecs<-function(A,p,k){  
   names <- rownames(A)
   n <- length(unlist(A))/(p * k)
-  if(k < 2 | k > 3) stop("Only 2- or 3-dimensional landmarks can be used")
+  if(k < 2 ) stop("One-dimensional data cannot be used")
   if(abs(n)-round(abs(n)) > 0) stop("Matrix dimensions do not match input")
   specimens <- aperm(array(t(A), c(k,p,n)), c(2,1,3)) 
   if (length(names) == n) {dimnames(specimens)[[3]] <- names}

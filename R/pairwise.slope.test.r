@@ -6,16 +6,16 @@
 #' designed as a post-hoc test to MANCOVA, where the latter has identified significant shape variation explained by a 
 #' covariate*group interaction term. 
 #' 
-#'  As input the user provides a formula describing the linear model of how shape varies as a function of several explanatory 
-#'  variables. This MUST be in the form of: [y~covariate + group], and the shape data (y) must be in the form of a 
-#'  two-dimensional data matrix of dimension 
-#'  (n x [p x k]), rather than a 3D array.  It is assumed that the landmarks have previously 
-#'   been aligned using Generalized Procrustes Analysis (GPA) [e.g., with \code{\link{gpagen}}]. The function
-#'   \code{\link{two.d.array}} can be used to obtain a two-dimensional data matrix from a 3D array of landmark
-#'   coordinates. From the data, the slopes for each group are estimated, and pairwise differences in slopes determined.
+#'  As input the user provides a formula describing the linear model of how shape (y) varies as a function of a factor (a) 
+#'  or factorial interaction (a*b). A single covariate must also be added.  The shape data (y) 
+#'  must be in the form of a two-dimensional data matrix of dimension (n x [p x k]), rather than a 3D array.  
+#'  It is assumed that the landmarks have previously been aligned using Generalized Procrustes Analysis (GPA)
+#'    [e.g., with \code{\link{gpagen}}]. The function \code{\link{two.d.array}} can be used to
+#'    obtain a two-dimensional data matrix from a 3D array of landmark coordinates.
+#'    From the data, the slopes for each group are estimated, and pairwise differences in slopes determined.
 #'   
-#'   For the model, one can specify whether slopes or intercepts are to be evaluated. Slopes are compared if (heterogenous slopes) 
-#'   het.slopes=TRUE.To evaluate significance of the pairwise differences, two possible resampling procedures are provided. First, if 
+#'   It is assumed that one has verified a significant group*covariate interaction [e.g., with \code{\link{procD.lm}}].
+#'   To evaluate significance of the pairwise differences, two possible resampling procedures are provided. First, if 
 #'   RRPP=FALSE, the rows of the matrix of shape variables are randomized relative to the design matrix. This is 
 #'   analogous to a 'full' randomization. Second, if RRPP=TRUE, a residual randomization permutation procedure 
 #'   is utilized (Collyer et al. 2014). Here, residual shape values from a reduced model are
@@ -23,272 +23,121 @@
 #'   predicted values from the remaining effects to obtain pseudo-values from which SS are calculated. NOTE: for
 #'   single-factor designs, the two approaches are identical.  However, when evaluating factorial models it has been
 #'   shown that RRPP attains higher statistical power and thus has greater ability to identify patterns in data should
-#'   they be present (see Anderson and terBraak 2003). 
+#'   they be present (see Anderson and terBraak 2003). Effect-sizes (Z-scores) are computed as standard deviates of the sampling 
+#'   distributions generated, which might be more intuitive for P-values than F-values (see Collyer et al. 2014).
+#'   
+#'   Slopes can differ in two ways: the amount of shape change per covariate unit change and the direction of shape change 
+#'   associated with covariate change.  Tests statistics to compare these attributes between groups are the differences in length 
+#'   and direction between slope vectors, respectively.  These statistics are calculated with the exact same random permutations used
+#'   to calculate random SS for ANOVA.
 #'
-#' @param f1 A formula for the linear model from which groups are to be compared (e.g., y~x1+x2)
+#'   This test is essentially the same as procD.lm with post-hoc comparisons among slopes for appropriate
+#'   models.  However, differences in slopes are calculated simultaneously with the same random permutations peformed for ANOVA,
+#'   making it less so a post-hoc test and more so a simultaneous test of pairwise contrasts (see Collyer et al. 2014).
+#'   
+#' @param f1 A formula for the linear model from which groups are to be compared (e.g., y~x1*x2)
+#' @param covariate A data farme of covariate values (contunuous quantitative variable).  Must be a data frame
+#' to preserve variable name.  Otherwise "covariate" will be returned.
 #' @param iter Number of iterations for permutation test
-#' @param het.slopes A logical value indicting whether slopes are to be compared
+#' @param int.first A logical value to indicate if interactions of first main effects should precede subsequent main effects
 #' @param angle.type A value specifying whether differences between slopes should be represented by vector
 #' correlations (r), radians (rad) or degrees (deg)
 #' @param RRPP a logical value indicating whether residual randomization should be used for significance testing
 #' @keywords analysis
 #' @export
-#' @author Mike Collyer
+#' @author Michael Collyer
 #' @references Anderson MJ. and C.J.F. terBraak. 2003. Permutation tests for multi-factorial analysis of variance.
-#'    Journal of Statistical Copmutation and Simulation 73: 85-113.
+#'    Journal of Statistical Computation and Simulation 73: 85-113.
 #' @references Collyer, M.L., D.J. Sekora, and D.C. Adams. 2014. A method for analysis of phenotypic change for phenotypes described 
-#' by high-dimensional data. Heredity. (In Press).
+#' by high-dimensional data. Heredity. 113: doi:10.1038/hdy.2014.75.
 #' @return Function returns a list with the following components: 
 #'   \item{ANOVA.table}{An ANOVA table assessing the linear model}
-#'   \item{Obs.LS.Dist}{A matrix of pairwise differences between intercepts (least squares means) if het.slopes = FALSE }
-#'   \item{Slope.Dist}{A matrix of pairwise differences between slopes represented as correlations, radians, or degrees, if het.slopes = TRUE}
-#'   \item{Prob.Dist}{A matrix of pairwise significance levels based on permutation for either intercepts or slopes}
-#'   \item{Magnitude.Diff}{A matrix of pairwise differences in magnitude between regression lines (from smallest to largest specimen, if het.slopes = TRUE)}
-#'   \item{Prob.Mag}{A matrix of pairwise significance levels based on permutation for magnitude differences}
+#'   \item{Slope.Dist}{A matrix of pairwise differences between slope magnitudes}
+#'   \item{Prob.Dist}{Associated matrix of pairwise significance levels based on permutations}
+#'   \item{Slope.cor}{A matrix of pairwise slope vector correlations (if vector correlation is chosen)}
+#'   \item{Prob.cor}{Associated matrix of pairwise significance levels based on permutations}
+#'   \item{Slope.angle}{A matrix of pairwise angular differences in slope (if "rad" or "deg" chosen)}
+#'   \item{Prob.angle}{Associated matrix of pairwise significance levels based on permutations}
 #'   @examples
 #' ### MANCOVA example for Goodall's F test (multivariate shape vs. factors)
 #' data(plethodon) 
 #' Y.gpa<-gpagen(plethodon$land)    #GPA-alignment    
 #' y<-two.d.array(Y.gpa$coords)
 #' 
-#' ## Pairwise slope test
-#' # Assuming heterogenous slopes
-#' pairwise.slope.test(y~Y.gpa$Csize+plethodon$site,iter=49,angle.type="rad")
+#' ## Pairwise slope vector correlations
+#' pairwise.slope.test(y~plethodon$site, covariate = data.frame(CS = Y.gpa$Csize), 
+#'         iter=49, angle.type="r")
 #' 
-#' # Assuming parallel slopes
-#' pairwise.slope.test(y~Y.gpa$Csize+plethodon$site,het.slopes=FALSE, iter=49, angle.type="rad") 
+#' ## Pairwise angular difference between slopes
+#' pairwise.slope.test(y~plethodon$site, covariate = data.frame(CS = Y.gpa$Csize), 
+#'           iter=49, angle.type="rad")
 #' 
 #' ## Using RRPP
-#' # Assuming heterogenous slopes
-#' pairwise.slope.test(y~Y.gpa$Csize+plethodon$site,iter=49, angle.type="rad", RRPP=TRUE)
-#' # Assuming parallel slopes
-#' pairwise.slope.test(y~Y.gpa$Csize+plethodon$site, het.slopes=FALSE, 
-#'       iter=49, angle.type="rad", RRPP=TRUE)
-pairwise.slope.test <- function (f1, iter = 999, het.slopes = T, angle.type = "r", RRPP = FALSE) {
-  data = NULL
+#' pairwise.slope.test(y~plethodon$site, covariate = data.frame(CS = Y.gpa$Csize),
+#'           iter=49, angle.type="rad", RRPP=TRUE)
+pairwise.slope.test <- function (f1, covariate, iter = 999, int.first = FALSE, angle.type = c("r", "deg", "rad"), RRPP = FALSE){
   form.in <- formula(f1)
-  Terms <- terms(form.in, keep.order = T)
-  Term.labels = c(attr(Terms, "term.labels"), paste(attr(Terms, "term.labels")[1], attr(Terms, "term.labels")[2], sep=":"))
-  Y <- eval(form.in[[2]], parent.frame())
-  X <- model.matrix(Terms)
-  j <- ncol(attr(Terms, "factors"))
-  dat <- model.frame(form.in, data=NULL)
-  Xdims <- dim(X)
+  angle.type = match.arg(angle.type)
+  if(int.first == TRUE) ko = TRUE else ko = FALSE
+  Terms <- terms(form.in, keep.order = ko)
+  Y <- as.matrix(eval(form.in[[2]], parent.frame()))
+  if (length(dim(Y)) != 2) stop("Response matrix (shape) not a 2D array. Use 'two.d.array' first.")
+  if (any(is.na(Y)) == T) stop("Response data matrix (shape) contains missing values. Estimate these first (see 'estimate.missing').")
+  Xfacs <- model.matrix(Terms)
+  newfac <- single.factor(form.in, keep.order = ko)
+  if(any(Xfacs != 1 & Xfacs != 0)) stop("Only factors allowed as independent variables in model formula. 
+                                        \nMake sure the covariate is input separately.")
+  if(is.null(covariate)) stop("A covariate must be included, separate from the model formula")
+  if(ncol(model.matrix(~newfac)) != ncol(Xfacs)) stop("Model formula must be for either a single factor or full-factorial model\n  e.g., Shape ~ Factor.A  -or-  Shape ~ Factor.A * Factor.B * ...")
   
-  if (length(dim(Y)) != 2) {
-    stop("\nResponse matrix (shape) not a 2D array. Use 'two.d.array' first.")
+  Xcov <- data.frame(covariate, check.names = TRUE)
+  Xs <- mod.mats.w.cov(form.in, Xcov, keep.order=ko, interaction = TRUE)
+  k <- length(Xs$Xs) - 1
+  X <- Xs$Xs[[k+1]]
+  anova.parts.obs <- anova.parts(form.in, X = Xs,Yalt = "observed", keep.order=ko)
+  anova.tab <-anova.parts.obs$table 
+  SS.obs <- anova.parts.obs$SS[1:k]
+  Bslopes <- slopes(newfac, Xcov, Y)
+  slope.lengths <- sqrt(diag(Bslopes%*%t(Bslopes)))
+  db <- as.matrix(dist(Bslopes))
+  cb <- vec.ang.matrix(Bslopes, type = angle.type)
+  dimnames(cb)=dimnames(db)
+  P <- array(0, c(k, 1, iter+1))
+  P[,,1] <- SS.obs
+  P.sl <- array(,c(length(slope.lengths),1,iter+1))
+  P.sl[,,1] <- slope.lengths
+  P.dist <- P.cor <- array(0,c(dim(db), iter+1))
+  P.dist[,,1] <- db
+  P.cor[,,1] <- 1 - vec.cor.matrix(Bslopes)
+  
+  for(i in 1: iter){
+    if(RRPP == TRUE) {
+      SSr <- SS.random(Y, Xs, SS.obs, Yalt = "RRPP")
+      Bslopes.r <- slopes(newfac, Xcov, SSr$Y)
+    } else {
+      SSr <- SS.random(Y, Xs, SS.obs, Yalt = "resample")
+      Bslopes.r <- slopes(newfac, Xcov, SSr$Y)
+    }
+    P[,,i+1] <- SSr$SS
+    P.dist[,,i+1] <- as.matrix(dist(Bslopes.r))	
+    P.cor[,, i+1] <- 1 - vec.cor.matrix(Bslopes.r)
+    P.sl[,,i+1] <- sqrt(diag(Bslopes.r%*%t(Bslopes.r)))
   }
-  if (any(is.na(Y)) == T) {
-    stop("\nResponse data matrix (shape) contains missing values. Estimate these first (see 'estimate.missing').")
-  } 
-  if(any(angle.type == c("r", "deg","rad")) == FALSE){
-  	print("angle.type not one of r, deg, or rad; assuming angle.type = r")
-  	angle.type = "r"
-  }
-  
-  if (j < 2) stop ("\nFormula must contain at least one covariate and one factor")
-  
-  if (j > 2) stop ("\n Formula can only contain one covariate and one factor, in that order")
-  
-  if (class(dat[,2]) != "numeric") stop("\nFirst variable in formula must be a covariate")
-  if (class(dat[,3]) != "factor") stop("\nSecond variable in formula must be a factor")
-  
-  if(het.slopes == FALSE){
-    g <- Xdims[2]-2
-    SS.tmp <- numeric(j)
-    Xs <- array(0, c(Xdims, 3))
-    Xs[,1,1] <- 1
-    for(i in 1:2){
-      x <- as.matrix(model.matrix(Terms[1:i], data = dat))
-      Xs[,1:ncol(x),(i+1)] <- x
-      SS.tmp[i] <- SSE(lm(Y ~ x -1))
-    }
-    df <- c(1,g)
-    SS.null <- (c(SSE(lm(Y~1)),SS.tmp))[1:j]
-    SS.obs <- SS.null - SS.tmp
-    MS <- SS.obs/df
-    SS.tot <- SSE(lm(Y~1))
-    SS.res <- SS.tot - sum(SS.obs)
-    df.tot <- nrow(Y) - 1
-    df.res <- nrow(Y) - 1 - sum(df)
-    MS.tot <- SS.tot/df.tot
-    MS.res <- SS.res/df.res
-    Rsq <- SS.obs/SS.tot
-    F <- MS/MS.res
-    
-    Xm <- rbind(0,diag(1,g))
-    Xm <- cbind(1, mean(X[,2]),Xm)
-    m <- Xm%*%coef(lm(Y~X-1))
-    rownames(m) <- levels(dat[,3])
-    
-    P <- array(0,c(dim(matrix(SS.obs)),iter+1))
-    P[,,1]=SS.obs
-    D <- array(0,c(nrow(m),nrow(m),iter+1))
-    D[,,1] <- as.matrix(dist(m))
-    dimnames(D)[1:2] <- dimnames(as.matrix(dist(m)))
-    
-    if(RRPP==TRUE){
-      for(i in 1:iter){
-        Yr <- RRP.submodels(Xs,Y)
-        for (ii in 1:2) {
-          SS.tmp[ii] <- SSE(lm(Yr[,,ii] ~ Xs[,,ii+1] -1))				
-        }
-        P[,,i+1] <- SS.null-SS.tmp
-        D[,,i+1]	 <- as.matrix(dist(Xm%*%coef(lm(Yr[,,2]~ Xs[,,3] -1))))
-      }
-      P.val <- Pval.matrix(P)
-      D.p.val <- Pval.matrix(D)
-    }
-    
-    
-    if(RRPP==FALSE){
-      for(i in 1:iter){
-        Yr <- Y[sample(nrow(Y)),]
-        for (ii in 1:2) {
-          SS.tmp[ii] <- SSE(lm(Yr ~ Xs[,,ii+1] -1))
-          SS.null <- c(SSE(lm(Yr ~ 1)), SS.tmp)[1:2]			
-        }
-        P[,,i+1] <- SS.null-SS.tmp
-        D[,,i+1] <- as.matrix(dist(Xm%*%coef(lm(Yr ~ Xs[,,3] -1))))		
-      }
-      P.val <- Pval.matrix(P)
-      D.p.val <- Pval.matrix(D)
-    }	
-    
-    anova.tab <- data.frame(df = c(df,df.res,df.tot), 
-                            SS = c(SS.obs, SS.res, SS.tot), 
-                            MS = c(MS, MS.res, MS.tot),
-                            Rsq = c(Rsq, NA, NA),
-                            F = c(F, NA, NA),
-                            P.val = c(P.val, NA, NA))
-    rownames(anova.tab) <- c(attr(Terms, "term.labels")[1:2], "Residuals","Total")
-    if(RRPP == TRUE) anova.title = "\nRandomized Residual Permutation Procedure used\n"
-    if(RRPP == FALSE) anova.title = "\nRandomization of Raw Values used\n"
-    attr(anova.tab, "heading") <- paste("\nType I (Sequential) Sums of Squares and Cross-products\n",anova.title)
-    class(anova.tab) <- c("anova", class(anova.tab))
-    dm <- data.frame(as.matrix(D[,,1]))
-    result <- list(anova.tab=anova.tab, Obs.LS.dist = dm, Prob.dist = D.p.val)
-  }
-  
-  if(het.slopes == T){
-    g <- ncol(model.matrix(Terms[1:2]))
-    Xdims[2] = Xdims[2] + Xdims[2] - 2
-    SS.tmp <- numeric(3)
-    Xs <- array(0, c(Xdims, 4))
-    Xs[,1,1] <- 1
-    for(i in 1:2){
-      x <- as.matrix(model.matrix(Terms[1:i]))
-      Xs[,1:ncol(x),(i+1)] <- x
-      mod.mat <- model.matrix(Terms[1:i], data = dat)
-      SS.tmp[i] <- SSE(lm(Y ~ mod.mat-1))
-    }
-    Xs[,,4] <- cbind(X, X[,2]*X[,-(1:2)])
-    SS.tmp[3] <- SSE(lm(Y ~ Xs[,,4]-1))
-    df <- c(1,g-2,g-2)
-    SS.null <- (c(SSE(lm(Y~1)),SS.tmp))[1:3]
-    SS.obs <- SS.null - SS.tmp
-    MS <- SS.obs/df
-    SS.tot <- SSE(lm(Y~1))
-    SS.res <- SS.tot - sum(SS.obs)
-    df.tot <- nrow(Y) - 1
-    df.res <- nrow(Y) - 1 - sum(df)
-    MS.tot <- SS.tot/df.tot
-    MS.res <- SS.res/df.res
-    Rsq <- SS.obs/SS.tot
-    F <- MS/MS.res
-    Xm <- rbind(0,diag(1,g-2))
-    Xm <- cbind(1, mean(X[,2]),Xm, mean(X[,2])*Xm)
-    B = coef(lm(Y~Xs[,,4]-1))
-    m = Xm%*%B
-    rownames(m) <- levels(dat[,3])
-    Bslopes = rbind(B[2,], B[2,]+B[-(1:g),])
-    P <- array(0,c(dim(matrix(SS.obs)),iter+1))
-    P[,,1]=SS.obs
-    D <- V <- array(0,c(nrow(Bslopes),nrow(Bslopes),iter+1))
-    D[,,1] <- as.matrix(dist(Bslopes))
-    dimnames(D)[1:2] <- dimnames(as.matrix(dist(m)))
-    if(angle.type == "r") V[,,1] = vec.cor.matrix(Bslopes) 
-    if(angle.type == "rad") V[,,1] = vec.ang.matrix(Bslopes)  
-    if(angle.type == "deg") V[,,1] = vec.ang.matrix(Bslopes)*180/pi   
-    
-    if(RRPP==TRUE){ 
-      for(i in 1:iter){
-        Yr <- RRP.submodels(Xs,Y)
-        for (ii in 1:3) {
-          SS.tmp[ii] <- SSE(lm(Yr[,,ii] ~ Xs[,,ii+1] -1))				
-        }
-        P[,,i+1] <- SS.null-SS.tmp
-        Br = coef(lm(Yr[,,3]~Xs[,,4]-1))
-        Brslopes = rbind(Br[2,], Br[2,]+Br[-(1:g),])
-        D[,,i+1] <- as.matrix(dist(Brslopes))
-        if(angle.type == "rad") {
-          V[,,i+1] <- vec.ang.matrix(Brslopes)
-        } else { 
-          if(angle.type == "deg"){
-            V[,,i+1] <- vec.ang.matrix(Brslopes)*180/pi
-          } else {V[,,i+1] <- vec.cor.matrix(Brslopes)	}
-        }}
-      
-      P.val <- Pval.matrix(P)
-      D.p.val <- Pval.matrix(D)
-      V.p.val <- Pval.matrix(abs(V))
-    }
-    
-    
-    if(RRPP==FALSE){
-      for(i in 1:iter){
-        Yr <- Y[sample(nrow(Y)),]
-        for (ii in 1:3) {
-          SS.tmp[ii] <- SSE(lm(Yr ~ Xs[,,ii+1] -1))
-          SS.null <- (c(SSE(lm(Y~1)),SS.tmp))[1:3]				
-        }
-        P[,,i+1] <- SS.null-SS.tmp
-        Br = coef(lm(Yr~Xs[,,4]-1))
-        Brslopes = rbind(Br[2,], Br[2,]+Br[-(1:g),])
-        D[,,i+1] <- as.matrix(dist(Brslopes))
-        if(angle.type == "rad") {
-          V[,,i+1] <- vec.ang.matrix(Brslopes)
-        } else { 
-          if(angle.type == "deg"){
-            V[,,i+1] <- vec.ang.matrix(Brslopes)*180/pi
-          } else {V[,,i+1] <- vec.cor.matrix(Brslopes)	}
-        }}
-      P.val <- Pval.matrix(P)
-      D.p.val <- Pval.matrix(D)
-      V.p.val <- Pval.matrix(abs(V))
-    }	
-    
-    if(angle.type == "r")	{
-      anova.tab <- data.frame(df = c(df,df.res,df.tot), 
-                              SS = c(SS.obs, SS.res, SS.tot), 
-                              MS = c(MS, MS.res, MS.tot),
-                              Rsq = c(Rsq, NA, NA),
-                              F = c(F, NA, NA),
-                              P.val = c(P.val, NA, NA))
-      rownames(anova.tab) <- c(Term.labels, "Residuals","Total")
-      if(RRPP == TRUE) anova.title = "\nRandomized Residual Permutation Procedure used\n"
-      if(RRPP == FALSE) anova.title = "\nRandomization of Raw Values used\n"
-      attr(anova.tab, "heading") <- paste("\nType I (Sequential) Sums of Squares and Cross-products\n",anova.title)
-      class(anova.tab) <- c("anova", class(anova.tab))
-      dm <- data.frame(as.matrix(D[,,1]))
-      result <- list(anova.tab=anova.tab, Vector.magnitude.difference = dm, VM.prob.dist = D.p.val, Vector.correlation = V[,,1], VC.prob.dist = V.p.val)
-    } 
-    else {
-      anova.tab <- data.frame(df = c(df,df.res,df.tot), 
-                              SS = c(SS.obs, SS.res, SS.tot), 
-                              MS = c(MS, MS.res, MS.tot),
-                              Rsq = c(Rsq, NA, NA),
-                              F = c(F, NA, NA),
-                              P.val = c(P.val, NA, NA))
-      rownames(anova.tab) <- c(Term.labels, "Residuals","Total")
-      if(RRPP == TRUE) anova.title = "\nRandomized Residual Permutation Procedure used\n"
-      if(RRPP == FALSE) anova.title = "\nRandomization of Raw Values used\n"
-      attr(anova.tab, "heading") <- paste("\nType I (Sequential) Sums of Squares and Cross-products\n",anova.title)
-      class(anova.tab) <- c("anova", class(anova.tab))
-      dm <- data.frame(as.matrix(D[,,1]))
-      result <- list(anova.tab=anova.tab, Vector.magnitude.difference = dm, VM.prob.dist = D.p.val, Angle = V[,,1], Angle.prob.dist = V.p.val)
-    }
-    
-  }
-  result
+  P.val <- Pval.matrix(P)
+  Z <- Effect.size.matrix(P)
+  dimnames(P.dist)[1:2] = dimnames(P.cor) = dimnames(db)
+  dimnames(P.sl)[[1]] <- names(slope.lengths)
+  anova.tab <- data.frame(anova.tab, Z = c(Z, NA, NA), P.value = c(P.val, NA, NA))
+  if(RRPP == TRUE) {anova.title = "\nRandomized Residual Permutation Procedure used\n"
+  } else {anova.title = "\nRandomization of Raw Values used\n"}
+  attr(anova.tab, "heading") <- paste("\nType I (Sequential) Sums of Squares and Cross-products\n",anova.title)
+  class(anova.tab) <- c("anova", class(anova.tab))
+  Prob.dist <- Pval.matrix(P.dist)
+  Prob.cor <- Pval.matrix(P.cor)
+  Prob.slope.length <- as.vector(Pval.matrix(P.sl))
+  names(Prob.slope.length) <- names(slope.lengths)
+  if(angle.type == "r") {
+    list(anova.table=anova.tab, Slope.lengths = slope.lengths, Prob.slope.length = Prob.slope.length, 
+         Slope.dist = db, Prob.dist = Prob.dist, Slope.cor = cb, Prob.cor = Prob.cor)
+  } else list(anova.table=anova.tab, Slope.lengths = slope.lengths, Prob.slope.length = Prob.slope.length, Slope.dist = db, Prob.dist = Prob.dist, Slope.angle = cb, Prob.angle = Prob.cor)
 }

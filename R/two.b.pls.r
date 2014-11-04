@@ -18,6 +18,7 @@
 #' @param warpgrids A logical value indicating whether deformation grids for shapes along PC1 should be displayed
 #'  (only relevant if data for A1 or A2 [or both] were input as 3D array)
 #' @param verbose A logical value indicating whether the output is basic or verbose (see Value below)
+#' @param ShowPlot A logical value indicating whether or not a plot of Procrustes residuals should be displayed
 #' @export
 #' @keywords analysis
 #' @author Dean Adams
@@ -35,7 +36,7 @@
 #' #2B-PLS between head shape and food use data
 #' two.b.pls(Y.gpa$coords,plethShapeFood$food,iter=99)
 #' 
-two.b.pls<- function (A1, A2, warpgrids = TRUE, iter = 999, verbose = FALSE, label = NULL){
+two.b.pls<- function (A1, A2, warpgrids = TRUE, iter = 999, verbose = FALSE, label = NULL,ShowPlot=TRUE){
     if (any(is.na(A1)) == T) {
       stop("Data matrix 1 contains missing values. Estimate these first (see 'estimate.missing').")
     }
@@ -112,68 +113,73 @@ two.b.pls<- function (A1, A2, warpgrids = TRUE, iter = 999, verbose = FALSE, lab
       pls2.min <- A2[, , which.min(XScores[, 1])]
       pls2.max <- A2[, , which.max(XScores[, 1])]
     }
-    if (length(dim(A1)) != 3 && length(dim(A2)) != 3) {
-      plot(XScores[, 1], YScores[, 1], pch = 21, bg = "black", 
-           main = "PLS Plot", xlab = "PLS1 Block 1", ylab = "PLS1 Block 2")
-      if (length(label != 0)) {
-        text(XScores[, 1], YScores[, 1], label, adj = c(-0.7, 
-                                                        -0.7))
-      }
-    }
-    if (length(dim(A1)) == 3 || length(dim(A2)) == 3) {
-      
-      par(mar = c(1, 1, 1, 1) + 0.1)
-      split.screen(matrix(c(0.22, 1, 0.22, 1, 0.19, 0.39, 0, 
-                            0.19, 0.8, 1, 0, 0.19, 0, 0.19, 0.19, 0.39, 0, 0.19, 
-                            0.8, 1), byrow = T, ncol = 4))
-      screen(1)
-      plot(XScores[, 1], YScores[, 1], pch = 21, bg = "black", 
-           main = "PLS1 Plot: Block 1 (X) vs. Block 2 (Y) ", 
-           xlab = "PLS1 Block 1", ylab = "PLS1 Block 2")
-      if (length(label != 0)) {
-        text(XScores[, 1], YScores[, 1], label, adj = c(-0.7, 
-                                                        -0.7))    
-      }
-      
-      if (warpgrids == TRUE) {
-        if (length(dim(A1)) == 3 && dim(A1)[2] == 2) {
-          screen(2)
-          tps(A1.ref, pls1.min, 20, sz = 0.7)
-          screen(3)
-          tps(A1.ref, pls1.max, 20, sz = 0.7)
-        }
-        if (length(dim(A2)) == 3 && dim(A2)[2] == 2) {
-          screen(4)
-          tps(A2.ref, pls2.min, 20, sz = 0.7)
-          screen(5)
-          tps(A2.ref, pls2.max, 20, sz = 0.7)
+    
+    if(ShowPlot==TRUE){
+      if (length(dim(A1)) != 3 && length(dim(A2)) != 3) {
+        plot(XScores[, 1], YScores[, 1], pch = 21, bg = "black", 
+             main = "PLS Plot", xlab = "PLS1 Block 1", ylab = "PLS1 Block 2")
+        if (length(label != 0)) {
+          text(XScores[, 1], YScores[, 1], label, adj = c(-0.7, 
+                                                          -0.7))
         }
       }
-      close.screen(all.screens = TRUE)
-      par(mar = c(5.1, 4.1, 4.1, 2.1))
-    }
-    if (length(dim(A1)) == 3 && dim(A1)[2] == 3) {
-      plot(XScores[, 1], YScores[, 1], pch = 21, bg = "black", 
-           main = "PLS Plot", xlab = "PLS1 Block 1", ylab = "PLS1 Block 2")
-      if (length(label != 0)) {
-        text(XScores[, 1], YScores[, 1], label, adj = c(-0.7, 
-                                                        -0.7))
+      if (length(dim(A1)) == 3 || length(dim(A2)) == 3) {
+        
+        par(mar = c(1, 1, 1, 1) + 0.1)
+        split.screen(matrix(c(0.22, 1, 0.22, 1, 0.19, 0.39, 0, 
+                              0.19, 0.8, 1, 0, 0.19, 0, 0.19, 0.19, 0.39, 0, 0.19, 
+                              0.8, 1), byrow = T, ncol = 4))
+        screen(1)
+        plot(XScores[, 1], YScores[, 1], pch = 21, bg = "black", 
+             main = "PLS1 Plot: Block 1 (X) vs. Block 2 (Y) ", 
+             xlab = "PLS1 Block 1", ylab = "PLS1 Block 2")
+        if (length(label != 0)) {
+          text(XScores[, 1], YScores[, 1], label, adj = c(-0.7, 
+                                                          -0.7))    
+        }
+        
+        if (warpgrids == TRUE) {
+          if (length(dim(A1)) == 3 && dim(A1)[2] == 2) {
+            screen(2)
+            tps(A1.ref, pls1.min, 20, sz = 0.7)
+            screen(3)
+            tps(A1.ref, pls1.max, 20, sz = 0.7)
+          }
+          if (length(dim(A2)) == 3 && dim(A2)[2] == 2) {
+            screen(4)
+            tps(A2.ref, pls2.min, 20, sz = 0.7)
+            screen(5)
+            tps(A2.ref, pls2.max, 20, sz = 0.7)
+          }
+        }
+        close.screen(all.screens = TRUE)
+        par(mar = c(5.1, 4.1, 4.1, 2.1))
       }
-      open3d()
-      plot3d(pls1.min, type = "s", col = "gray", main = paste("PLS Block1 negative"), 
-             size = 1.25, aspect = FALSE)
-      open3d()
-      plot3d(pls1.max, type = "s", col = "gray", main = paste("PLS Block1 positive"), 
-             size = 1.25, aspect = FALSE)
+      if (length(dim(A1)) == 3 && dim(A1)[2] == 3) {
+        plot(XScores[, 1], YScores[, 1], pch = 21, bg = "black", 
+             main = "PLS Plot", xlab = "PLS1 Block 1", ylab = "PLS1 Block 2")
+        if (length(label != 0)) {
+          text(XScores[, 1], YScores[, 1], label, adj = c(-0.7, 
+                                                          -0.7))
+        }
+        open3d()
+        plot3d(pls1.min, type = "s", col = "gray", main = paste("PLS Block1 negative"), 
+               size = 1.25, aspect = FALSE)
+        open3d()
+        plot3d(pls1.max, type = "s", col = "gray", main = paste("PLS Block1 positive"), 
+               size = 1.25, aspect = FALSE)
+      }
+      if (length(dim(A2)) == 3 && dim(A2)[2] == 3) {
+        open3d()
+        plot3d(pls2.min, type = "s", col = "gray", main = paste("PLS Block2 negative"), 
+               size = 1.25, aspect = FALSE)
+        open3d()
+        plot3d(pls2.max, type = "s", col = "gray", main = paste("PLS Block2 positive"), 
+               size = 1.25, aspect = FALSE)
+      }    
+      
     }
-    if (length(dim(A2)) == 3 && dim(A2)[2] == 3) {
-      open3d()
-      plot3d(pls2.min, type = "s", col = "gray", main = paste("PLS Block2 negative"), 
-             size = 1.25, aspect = FALSE)
-      open3d()
-      plot3d(pls2.max, type = "s", col = "gray", main = paste("PLS Block2 positive"), 
-             size = 1.25, aspect = FALSE)
-    }
+
     if (verbose == TRUE) {
       return(list(x.scores = XScores[, 1], y.scores = YScores[, 
                                                               1], PLS.corr = PLS.obs, pvalue = P.val, pls.random = pls.val))

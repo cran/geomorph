@@ -4,11 +4,19 @@
 #'
 #' The function generates a plot of the shape differences of a target specimen relative to a reference 
 #'  specimen. The option {mag} allows the user to indicates the degree of magnification to be used when 
-#'  displaying the shape difference. The function will plot either two- or three-dimensional data. 
-#'  Four methods for plots are available:
+#'  displaying the shape difference. The function will plot either two- or three-dimensional data. For
+#'  two-dimensional data and thin-plate spline deformation plots, the user may also supply boundary curves 
+#'  of the object, which will be deformed from 
+#'  the reference to the target specimen using the thin-plate spline. Such curves are often useful in describing 
+#'  the biological shape differences expressed in the landmark coordinates.  Note that to utilize this option, 
+#'  a boundary curve from a representative specimen must first be warped to the reference specimen using
+#'   \code{\link{warpRefOutline}}.
+#'   
+#'  Four distinct methods for plots are available:
 #'  \enumerate{
 #'  \item {TPS} a thin-plate spline deformation grid is generated. For 3D data, 
-#'  this method will generate thin-plate spline deformations in the x-y and x-z planes.
+#'  this method will generate thin-plate spline deformations in the x-y and x-z planes. A boundary curve 
+#'  will also be deformed if provided by the user.
 #'  \item {vector}: a plot showing the vector displacements between corresponding landmarks in the reference 
 #'  and target specimen is shown. 
 #'  \item {points} a plot is displayed with the landmarks in the target (black) 
@@ -24,28 +32,26 @@
 #' @param M1 Matrix of landmark coordinates for the first (reference) specimen
 #' @param M2 Matrix of landmark coordinates for the second (target) specimen
 #' @param mesh A mesh3d object for use with {method="surface"}
+#' @param outline An x,y curve or curves warped to the reference (2D only)
 #' @param method Method used to visualize shape difference; see below for details
 #' @param mag The desired magnification to be used when visualizing the shape difference (e.g., mag=2)
 #' @param links An optional matrix defining for links between landmarks
-#' @param ... Additional parameters to be passed to \code{\link{plot}}, \code{\link{plot3d}} or \code{\link{shade3d}}.
+#' @param ... Parameters to be passed to \code{\link{plot}}, \code{\link{plot3d}} or \code{\link{shade3d}}
 #' @return If using {method="surface"}, function will return the warped mesh3d object.
 #' @keywords visualization
 #' @export
 #' @author Dean Adams & Emma Sherratt
 #' @references Claude, J. 2008. Morphometrics with R. Springer, New York. 
 #' @examples
+#' 
 #' data(plethodon) 
 #' Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
 #' ref<-mshape(Y.gpa$coords)
-#' 
-#' # Different plotting options
 #' plotRefToTarget(ref,Y.gpa$coords[,,39])
-#'
-#' plotRefToTarget(ref,Y.gpa$coords[,,39],mag=3)   #magnify difference by 3X
-#'
-#' plotRefToTarget(ref,Y.gpa$coords[,,39],method="vector")
-#'
-#' plotRefToTarget(ref,Y.gpa$coords[,,39],method="points")
+#' plotRefToTarget(ref,Y.gpa$coords[,,39],mag=2,outline=plethodon$outline)   #magnify difference by 2X
+#' plotRefToTarget(ref,Y.gpa$coords[,,39],method="vector",mag=3)
+#' plotRefToTarget(ref,Y.gpa$coords[,,39],method="points",outline=plethodon$outline)
+#' 
 #'
 #' # Three dimensional data
 #' 
@@ -53,7 +59,7 @@
 #' Y.gpa<-gpagen(A=scallops$coorddata, curves=scallops$curvslide, surfaces=scallops$surfslide)
 #' ref<-mshape(Y.gpa$coords)
 #' plotRefToTarget(ref,Y.gpa$coords[,,1],method="points")
-plotRefToTarget<-function(M1,M2,mesh= NULL,method=c("TPS","vector","points","surface"),
+plotRefToTarget<-function(M1,M2,mesh= NULL,outline=NULL,method=c("TPS","vector","points","surface"),
                           mag=1.0,links=NULL,...){
   method <- match.arg(method)
   if(any(is.na(M1))==T){
@@ -71,6 +77,12 @@ plotRefToTarget<-function(M1,M2,mesh= NULL,method=c("TPS","vector","points","sur
   if(k==2){
     if(method=="TPS"){
       tps(M1,M2,20)
+      if(!is.null(outline)){
+        curve.warp <- tps2d(outline, M1, M2)
+      }
+      if(!is.null(outline)){
+        points(curve.warp,pch=19, cex=0.1) 
+      }
       if(is.null(links)==FALSE){
         for (i in 1:nrow(links)){
           segments(M2[links[i,1],1],M2[links[i,1],2],M2[links[i,2],1],M2[links[i,2],2],lwd=2)
@@ -89,6 +101,13 @@ plotRefToTarget<-function(M1,M2,mesh= NULL,method=c("TPS","vector","points","sur
     if(method=="points"){
       plot(M1,asp=1,pch=21,bg="gray",xlim=limits(M1[,1],1.25),ylim=limits(M1[,2],1.25),cex=1,xlab="x",ylab="y",...)
       points(M2,asp=1,pch=21,bg="black",cex=1)
+      if(!is.null(outline)){
+        curve.warp <- tps2d(outline, M1, M2)
+      }
+      if(!is.null(outline)){
+        points(outline,pch=19, cex=0.1,col="gray") 
+        points(curve.warp,pch=19, cex=0.1,col="black") 
+      }
       if(is.null(links)==FALSE){
         for (i in 1:nrow(links)){
           segments(M2[links[i,1],1],M2[links[i,1],2],M2[links[i,2],1],M2[links[i,2],2],lwd=1,lty=2)

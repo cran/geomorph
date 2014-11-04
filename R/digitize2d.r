@@ -36,7 +36,7 @@
 #'  prompted to keep selection, choose 'a' (for absent).  Missing landmarks can only be included during
 #'  the digitizing process when verbose=TRUE. 
 #'  
-#' If verbose = FALSE the digitizing of landmarks is continuous and uninterupted. Here the user
+#' If verbose = FALSE the digitizing of landmarks is continuous and uninterrupted. Here the user
 #'  will not be prompted to approve each landmark selection. 
 #'  
 #'   At the end of digitizing, the landmark coordinates are written to a TPS file. The x,y values are scaled if a vector fo scales 
@@ -56,7 +56,7 @@ digitize2d <- function (filelist, nlandmarks, scale = NULL, tpsfile, verbose = T
   flist <- dir()
   if (sum(which(flist == tpsfile)) == 0) {
     newdata <- array(0, c(nlandmarks, 2, length(filelist)))
-    dimnames(newdata)[[3]] <- filelist
+    dimnames(newdata)[[3]] <- as.list(filelist)
     writeland.tps(newdata, tpsfile)
   }
   newdata <- readland.tps(tpsfile, warnmsg = F, specID = "ID")

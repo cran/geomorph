@@ -46,24 +46,26 @@ phylo.pls <-function(A1, A2, phy, warpgrids=TRUE,iter=999, label=NULL,verbose=FA
     stop("Data matrix 1 contains missing values. Estimate these first(see 'estimate.missing').")  } 
   if(any(is.na(A2))==T){
     stop("Data matrix 2 contains missing values. Estimate these first(see 'estimate.missing').") }
+  if (is.numeric(A1)== FALSE){stop("A1 is not numeric. see ?numeric")}
+  if (is.numeric(A2)== FALSE){stop("A2 is not numeric. see ?numeric")}
   if (class(phy) != "phylo")
    stop("phy must be of class 'phylo.'") 
   if (length(dim(A1)) == 3){x<-two.d.array(A1)}
   if (length(dim(A1)) == 2){x<-A1}
   if (length(dim(A2)) == 3){y<-two.d.array(A2)}
-  if (length(dim(A2)) == 2){ y<-A2  }
+  if (length(dim(A2)) == 2){y<-A2}
   num.taxa.X<-nrow(x)
   namesX<-rownames(x)
   num.taxa.Y<-nrow(y)
   namesY<-rownames(y)
   if (is.null(namesX)){
-    stop("No specimen names in data matrix 1. please assign specimen names.")  } 
+    stop("No specimen names in data matrix 1. Please assign specimen names.")  } 
   if (length(match(phy$tip.label, namesX)) != num.taxa.X && length(phy$tip.label) < num.taxa.X)
     stop("Tree is missing some taxa present in the data matrix") 
   if (length(match(phy$tip.label, namesX)) != num.taxa.X && num.taxa.X < length(phy$tip.label)) 
     stop("Tree contains some taxa not present in present in the data matrix")  
   if (is.null(namesY)){
-    stop("No specimen names in data matrix 2. please assign specimen names")  } 
+    stop("No specimen names in data matrix 2. Please assign specimen names")  } 
   if (is.null(namesX) == FALSE && is.null(namesY) == FALSE) {
     mtch.A <- namesX[is.na(match(namesX, namesY))]
     if (length(mtch.A) > 0) {

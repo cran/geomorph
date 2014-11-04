@@ -77,7 +77,7 @@
 #' #Example 1: fixed points only
 #' data(plethodon) 
 #' gpagen(plethodon$land,PrinAxes=FALSE)
-#' points(mshape(gpagen(plethodon$land)$coords),pch=22,col="red",bg="red",cex=1.2)    
+#' gpagen(plethodon$land)
 #' 
 #' #Example 2: points and semilandmarks on curves
 #' data(hummingbirds)
@@ -127,7 +127,11 @@ gpagen<-function(A, Proj=TRUE,ProcD=TRUE,PrinAxes=TRUE,ShowPlot=TRUE,curves = NU
   names(specs.size)<-dimnames(A)[[3]]
   ptsz<-pointscale
   if(PrinAxes==TRUE){
-    rot <- prcomp(mshape(temp))$rotation
+    ref<-mshape(temp); rot <- prcomp(ref)$rotation
+    flip.mat<-diag(1,k)
+    flip<-apply(sign(ref%*%rot)!=sign(ref),2,all)
+      for(i in 1:k){if(flip[i]==TRUE){flip.mat[i,i]<-flip.mat[i,i]*-1}}
+    rot<-rot%*%flip.mat
     for(i in 1:dim(temp)[[3]]){temp[,,i]<-temp[,,i] %*% rot }
   }
   if(ShowPlot==TRUE){ plotAllSpecimens(temp,pointscale=ptsz)}

@@ -1,3 +1,36 @@
+CHANGES IN GEOMORPH VERSION 2.1.2
+
+  NEW FEATURES
+
+    o New function advanced.procD.lm() for statistically comparing two or explanatory models
+
+    o Added warping of outline in plotRefToTarget()
+
+    o New function to warp a specimen outline to the reference: warpRefOutline()
+
+    o Added ShowPlot option to two.b.pls
+
+    o Added RRPP option to procD.pgls()
+
+    o New dataset pupfish
+
+  BUG FIXES
+
+    o Fixed output of procD.lm() when verbose=TRUE
+
+    o Fixed reflections of aligned coordinate axes when PrinAxes=TRUE in gpagen()
+
+
+  OTHER CHANGES
+
+    o Enhanced underlying code in procD.lm(), procD.pgls() pairwiseD.test() and pairwise.slope.test()
+
+    o Removed k>3 restriction in arrayspecs()
+
+    o Added is.numeric check to phylo.pls()
+
+    o Removed arrows from plots when groups included in plotAllometry()
+
 CHANGES IN GEOMORPH VERSION 2.1.1
 
   BUG FIXES
