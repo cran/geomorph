@@ -52,7 +52,7 @@
 #' #Test for phylogenetic signal in size
 #' Csize <- matrix(Y.gpa$Csize, dimnames=list(names(Y.gpa$Csize))) # make matrix Csize with names
 #' physignal(plethspecies$phy,Csize,method="Kmult",iter=99)
-physignal<-function(phy,A,iter=249,method=c("Kmult","SSC")){
+physignal<-function(phy,A,iter=999,method=c("Kmult","SSC")){
   method <- match.arg(method)
   if(any(is.na(A))==T){
     stop("Data matrix contains missing values. Estimate these first (see 'estimate.missing').")  }
@@ -80,30 +80,41 @@ physignal<-function(phy,A,iter=249,method=c("Kmult","SSC")){
   x<-x[phy$tip.label,]
   if(is.null(dim(x)) == TRUE){ x <- matrix(x, dimnames=list(names(x))) }
   if (method=="Kmult"){
-    Kmult<-function(x,phy){
-      x<-as.matrix(x)
-      N<-length(phy$tip.label)
-      ones<-array(1,N)
-      C<-vcv.phylo(phy)
-      C<-C[row.names(x),row.names(x)]
-      a.obs<-colSums(solve(C))%*%x/sum(solve(C))  #evol.vcv code
-      distmat<-as.matrix(dist(rbind(as.matrix(x),a.obs))) 
+    x<-as.matrix(x)
+    N<-length(phy$tip.label)
+    ones<-array(1,N)
+    C<-vcv.phylo(phy)
+    C<-C[row.names(x),row.names(x)]
+    det.C<-det(C)
+    if(det.C>0){invC<-solve(C)}
+    if(det.C==0){svd.C<-svd(C)
+      Positive <- svd.C$d > max(1e-08 * svd.C$d[1L], 0)
+      invC<- svd.C$v[, Positive, drop = FALSE] %*% ((1/svd.C$d[Positive]) *t(svd.C$u[, Positive, drop = FALSE]))}
+    eigC <- eigen(C)
+    lambda <- zapsmall(eigC$values)
+    if(any(lambda == 0)){
+      warning("Singular phylogenetic covariance matrix. Proceed with caution")
+      lambda = lambda[lambda > 0]
+    }
+    eigC.vect = eigC$vectors[,1:(length(lambda))]
+    D.mat <- solve(eigC.vect%*% diag(sqrt(lambda)) %*% t(eigC.vect))
+    Kmult<-function(x,invC,D.mat){
+      a.obs<-colSums(invC)%*%x/sum(invC)  
+       distmat<-as.matrix(dist(rbind(as.matrix(x),a.obs))) 
       MSEobs.d<-sum(distmat[(1:N),(N+1)]^2)   #sum distances root vs. tips
-      eigC <- eigen(C)
-      D.mat<-solve(eigC$vectors %*% diag(sqrt(eigC$values)) %*% t(eigC$vectors)) 
       dist.adj<-as.matrix(dist(rbind((D.mat%*%(x-(ones%*%a.obs))),0))) 
       MSE.d<-sum(dist.adj[(1:N),(N+1)]^2) #sum distances for transformed data)
       K.denom<-(sum(diag(C))- N*solve(t(ones)%*%solve(C)%*%ones)) / (N-1)
       K.stat<-(MSEobs.d/MSE.d)/K.denom
       return(K.stat)
     }
-    K.obs<-Kmult(x,phy)
+    K.obs<-Kmult(x,invC,D.mat)
     P.val <- 1
     K.val <- rep(0, iter)
     for (i in 1:iter){
       x.r<-as.matrix(x[sample(nrow(x)),])
       rownames(x.r)<-rownames(x)
-      K.rand<-Kmult(x.r,phy)
+      K.rand<-Kmult(x.r,invC,D.mat)
       P.val<-ifelse(K.rand>=K.obs, P.val+1,P.val)     
       K.val[i] <- K.rand
     }   

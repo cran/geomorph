@@ -37,9 +37,9 @@
 #' @param f1 A formula for the linear model (e.g., y~x1+x2)
 #' @param phy A phylogenetic tree of {class phylo} - see \code{\link[ape]{read.tree}} in library ape
 #' @param iter Number of iterations for significance testing
-#' @param RRPP A logical value indicating whether residual randomization should be used for significance testing
 #' @param int.first A logical value to indicate if interactions of first main effects should precede subsequent main effects
 #' @param verbose A logical value specifying whether additional output should be displayed
+#' @param RRPP a logical value indicating whether residual randomization should be used for significance testing
 #' @keywords analysis
 #' @export
 #' @author Dean Adams and Michael Collyer
@@ -47,7 +47,7 @@
 #' F ratio, Prand, and Rsquare.
 #' @references Adams, D.C. 2014. A method for assessing phylogenetic least squares models for shape and other high-dimensional 
 #' multivariate data. Evolution. 68:2675-2688. 
-#' @references Collyer, M.L., D.J. Sekora, and D.C. Adams. 2014. A method for analysis of phenotypic change for phenotypes described 
+#' @references Collyer, M.L., D.J. Sekora, and D.C. Adams. 2015. A method for analysis of phenotypic change for phenotypes described 
 #' by high-dimensional data. Heredity. 113: doi:10.1038/hdy.2014.75.
 #' @examples
 #' ### Example of D-PGLS for high-dimensional data 
@@ -56,14 +56,15 @@
 #' procD.pgls(two.d.array(Y.gpa$coords)~Y.gpa$Csize,plethspecies$phy,iter=49)
 #'
 #' ### Example of D-PGLS for high-dimensional data, using RRPP
-#' procD.pgls(two.d.array(Y.gpa$coords)~Y.gpa$Csize,plethspecies$phy,iter=49, RRPP=TRUE)
+#' procD.pgls(two.d.array(Y.gpa$coords)~Y.gpa$Csize,plethspecies$phy,iter=49,RRPP=TRUE)
 procD.pgls<-function(f1, phy, iter=999, int.first = FALSE, RRPP=FALSE, verbose=FALSE){
   data=NULL
   form.in <- formula(f1)
   if(int.first == TRUE) ko = TRUE else ko = FALSE
   Terms <- terms(form.in, keep.order = ko)
   k <- length(attr(Terms, "term.labels"))
-  Y <- as.matrix(eval(form.in[[2]], parent.frame()))
+  mf <- model.frame(form.in)
+  Y <- as.matrix(mf[1])
   if (length(dim(Y)) != 2) {
     stop("Response matrix (shape) not a 2D array. Use 'two.d.array' first.")
   }  
@@ -88,7 +89,7 @@ procD.pgls<-function(f1, phy, iter=999, int.first = FALSE, RRPP=FALSE, verbose=F
   eigC.vect = eigC$vectors[,1:(length(lambda))]
   Pcor <- solve(eigC.vect%*% diag(sqrt(lambda)) %*% t(eigC.vect)) 
   PY <- Pcor%*%Y   #Garland & Ives 2000 transformation
-  Xs = mod.mats(form.in)
+  Xs = mod.mats(mf)
   
   anova.parts.obs <- anova.pgls.parts(form.in, X=NULL, Pcor, Yalt = "observed", keep.order=ko)
   anova.tab <-anova.parts.obs$table  

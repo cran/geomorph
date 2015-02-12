@@ -38,7 +38,7 @@
 #' @author Michael Collyer
 #' @return Function returns an ANOVA table of statistical results for model comparison: error df (for each model), SS, MS,
 #' F ratio, Z, and Prand.
-#' @references Collyer, M.L., D.J. Sekora, and D.C. Adams. 2014. A method for analysis of phenotypic change for phenotypes described 
+#' @references Collyer, M.L., D.J. Sekora, and D.C. Adams. 2015. A method for analysis of phenotypic change for phenotypes described 
 #' by high-dimensional data. Heredity. 113: doi:10.1038/hdy.2014.75.
 #' @examples
 #' ### Example of comparison of allometries between two populations of pupfish
@@ -77,8 +77,8 @@ advanced.procD.lm<-function(f1, f2, groups = NULL, slope = NULL, angle.type = c(
   if(k1 == k2) stop("Models have same df")
   full.terms <- terms(ff)
   red.terms <- terms(fr)
-  dfr <- nrow(Y) - ncol(model.matrix(red.terms))
-  dff <- nrow(Y) - ncol(model.matrix(full.terms))  
+  dfr <- nrow(Y) - qr(model.matrix(red.terms))$rank
+  dff <- nrow(Y) - qr(model.matrix(full.terms))$rank 
   SSEr <- SSE(lm(Y ~ model.matrix(red.terms) - 1))
   SSEf <- SSE(lm(Y ~ model.matrix(full.terms) - 1))  
   SSm <- SSEr - SSEf
@@ -115,14 +115,14 @@ advanced.procD.lm<-function(f1, f2, groups = NULL, slope = NULL, angle.type = c(
   
   if(pairwise.cond == "means") {
     gr <- as.factor(single.factor(groups, keep.order=FALSE))
-    m <- ls.means(gr, cov.df = NULL, Y)
+    m <- ls.means(gr, cov.mf = NULL, Y)
     P.dist <- array(, c(nrow(m), nrow(m),iter+1))
     P.dist[,,1] <- as.matrix(dist(m))
     for(i in 1:iter){
       Rr <- R[sample(nrow(R)),]
       pseudoY = predict(lm(Y ~ model.matrix(red.terms) - 1)) + Rr
       P[i+1] <- SSE(lm(pseudoY ~ model.matrix(red.terms) - 1)) - SSE(lm(pseudoY ~ model.matrix(full.terms) - 1)) 
-      mr <- ls.means(gr, cov.df = NULL, pseudoY)
+      mr <- ls.means(gr, cov.mf = NULL, pseudoY)
       P.dist[,,i+1] <- as.matrix(dist(mr))  
     }
     P.val <- pval(P)
@@ -143,7 +143,7 @@ advanced.procD.lm<-function(f1, f2, groups = NULL, slope = NULL, angle.type = c(
   
   if(pairwise.cond == "slopes") {
     gr <- as.factor(single.factor(groups, keep.order=FALSE))
-    cov <- model.frame(slope)[1]
+    cov <- model.frame(as.formula(slope))
     m <- ls.means(gr, cov, Y)
     Bslopes <- slopes(gr, cov, Y)
     P.mean.dist <- P.slope.dist <- P.cor <- array(, c(nrow(m), nrow(m),iter+1))

@@ -1,3 +1,32 @@
+CHANGES IN GEOMORPH VERSION 2.1.3
+
+  NEW FEATURES
+
+    o new plotOutliers() function to identify potential outliers
+
+    o new define.links() function for enhanced plotting of shapes
+
+  OTHER CHANGES
+
+    o Additional input options added to pairwiseD.test() and pairwise.slope.test() 
+
+    o Ability to accomodate singular phylogenetic covariance matrices in: physignal(), compare.evol.rates(), procD.pgls() and phylo.pls()
+
+    o Enhanced digitizing capability in: build.template(), define.modules(), define.sliders.3d(), digit.fixed(), digitsurface(), and editTemplate() )
+
+    o plotAllometry() input can be 2D matrix or 3D array
+
+    o read.ply() reads normals for enhanced downstream digitizing from ply files
+
+    o readland.tps()  reads curves from tps files and convert them to landmarks (semilandmarks)
+
+    o plotTangentSpace() has enhanced plotting flexibility with labels and colors
+
+  BUG FIXES
+
+    o Corrected error printing output of ANOVA table of bilat.symmetry()
+
+
 CHANGES IN GEOMORPH VERSION 2.1.2
 
   NEW FEATURES

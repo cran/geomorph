@@ -19,7 +19,7 @@
 #'   To use this method with other data (i.e., a set of length measurements), the input A should be a matrix 
 #'   of n rows of specimens and variables arranged in columns. 
 #'   In this case, the partition.gp input should have each variable assigned to a partition. 
-#'
+#'   
 #' @param A A 3D array (p x k x n) containing GPA-aligned coordinates for all specimens, or a matrix (n x variables)
 #' @param partition.gp A list of which landmarks (or variables) belong in which partition (e.g. A,A,A,B,B,B,C,C,C)
 #' @param iter Number of iterations for significance testing
@@ -33,6 +33,7 @@
 #'   \item{RV.min.partitions}{A list of landmarks assigned to partitions that yields the minimal RV coefficient}
 #' @references Klingenberg, C. P. 2009. Morphometric integration and modularity in configurations of 
 #'   landmarks: tools for evaluating a priori hypotheses. Evol. Develop. 11:405-421.
+#' @seealso  \code{\link{define.modules}}
 #' @examples
 #' data(plethodon) 
 #' Y.gpa<-gpagen(plethodon$land)    #GPA-alignment    

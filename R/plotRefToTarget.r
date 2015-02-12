@@ -36,12 +36,16 @@
 #' @param method Method used to visualize shape difference; see below for details
 #' @param mag The desired magnification to be used when visualizing the shape difference (e.g., mag=2)
 #' @param links An optional matrix defining for links between landmarks
+#' @param label A logical value indicating whether landmark numbers will be plotted 
 #' @param ... Parameters to be passed to \code{\link{plot}}, \code{\link{plot3d}} or \code{\link{shade3d}}
 #' @return If using {method="surface"}, function will return the warped mesh3d object.
 #' @keywords visualization
 #' @export
 #' @author Dean Adams & Emma Sherratt
 #' @references Claude, J. 2008. Morphometrics with R. Springer, New York. 
+#' @seealso  \code{\link{define.links}}
+#' @seealso  \code{\link{warpRefMesh}}
+#' @seealso  \code{\link{warpRefOutline}}
 #' @examples
 #' 
 #' data(plethodon) 
@@ -60,7 +64,7 @@
 #' ref<-mshape(Y.gpa$coords)
 #' plotRefToTarget(ref,Y.gpa$coords[,,1],method="points")
 plotRefToTarget<-function(M1,M2,mesh= NULL,outline=NULL,method=c("TPS","vector","points","surface"),
-                          mag=1.0,links=NULL,...){
+                          mag=1.0,links=NULL, label=FALSE,...){
   method <- match.arg(method)
   if(any(is.na(M1))==T){
     stop("Data contains missing values. Estimate these first (see 'estimate.missing').")  }
@@ -77,6 +81,7 @@ plotRefToTarget<-function(M1,M2,mesh= NULL,outline=NULL,method=c("TPS","vector",
   if(k==2){
     if(method=="TPS"){
       tps(M1,M2,20)
+      if(label == TRUE){text(M2, label = paste(1:dim(M2)[1]), adj = 0.5, pos = 1, cex=0.8)}
       if(!is.null(outline)){
         curve.warp <- tps2d(outline, M1, M2)
       }
@@ -91,6 +96,7 @@ plotRefToTarget<-function(M1,M2,mesh= NULL,outline=NULL,method=c("TPS","vector",
     }
     if(method=="vector"){
       plot(M1,asp=1,pch=21,bg="gray",xlim=limits(M1[,1],1.25),ylim=limits(M1[,2],1.25),cex=1,xlab="x",ylab="y",...)
+      if(label == TRUE){text(M1, label = paste(1:dim(M1)[1]), adj = 0.5, pos = 1, cex=0.8)}
       arrows(M1[,1],M1[,2],M2[,1],M2[,2],length=0.075,lwd=2)
       if(is.null(links)==FALSE){
         for (i in 1:nrow(links)){
@@ -100,6 +106,7 @@ plotRefToTarget<-function(M1,M2,mesh= NULL,outline=NULL,method=c("TPS","vector",
     }
     if(method=="points"){
       plot(M1,asp=1,pch=21,bg="gray",xlim=limits(M1[,1],1.25),ylim=limits(M1[,2],1.25),cex=1,xlab="x",ylab="y",...)
+      if(label == TRUE){text(M1, label = paste(1:dim(M1)[1]), adj = 0.5, pos = 1, col = "gray", cex=0.8)}
       points(M2,asp=1,pch=21,bg="black",cex=1)
       if(!is.null(outline)){
         curve.warp <- tps2d(outline, M1, M2)
@@ -110,7 +117,8 @@ plotRefToTarget<-function(M1,M2,mesh= NULL,outline=NULL,method=c("TPS","vector",
       }
       if(is.null(links)==FALSE){
         for (i in 1:nrow(links)){
-          segments(M2[links[i,1],1],M2[links[i,1],2],M2[links[i,2],1],M2[links[i,2],2],lwd=1,lty=2)
+          segments(M1[links[i,1],1],M1[links[i,1],2],M1[links[i,2],1],M1[links[i,2],2],lwd=1,lty=2, col= "gray")
+          segments(M2[links[i,1],1],M2[links[i,1],2],M2[links[i,2],1],M2[links[i,2],2],lwd=1,lty=2, col= "black")
         }
       }
     }
@@ -120,6 +128,7 @@ plotRefToTarget<-function(M1,M2,mesh= NULL,outline=NULL,method=c("TPS","vector",
   }
   if(k==3){
     if(method=="TPS"){
+      old.par <- par(no.readonly = TRUE)
       layout(matrix(c(1,2),1,2))
       par(mar=c(1,1,1,1))
       tps(M1[,1:2],M2[,1:2],20)
@@ -138,9 +147,11 @@ plotRefToTarget<-function(M1,M2,mesh= NULL,outline=NULL,method=c("TPS","vector",
       }
       title("Y,Z tps grid")
       layout(1)
+      on.exit(par(old.par))
     }
     if(method=="vector"){
       plot3d(M1,type="s",col="gray",size=1.25,aspect=FALSE,...)
+      if(label == TRUE){text3d(M1, texts = paste(1:dim(M1)[1]), adj = 1.3, pos = 4, cex=0.8)}
       for (i in 1:nrow(M1)){
         segments3d(rbind(M1[i,],M2[i,]),lwd=2)
       }
@@ -152,6 +163,7 @@ plotRefToTarget<-function(M1,M2,mesh= NULL,outline=NULL,method=c("TPS","vector",
     }
     if(method=="points"){
       plot3d(M1,type="s",col="gray",size=1.25,aspect=FALSE,...)
+      if(label == TRUE){text3d(M1, texts = paste(1:dim(M1)[1]), adj = 1.3, pos = 4, cex=0.8)}
       points3d(M2,color="black",size=5)
       if(is.null(links)==FALSE){
         for (i in 1:nrow(links)){
@@ -168,6 +180,7 @@ plotRefToTarget<-function(M1,M2,mesh= NULL,outline=NULL,method=c("TPS","vector",
       warp <- tps2d3d(vb, M1, M2)
       warp.PLY$vb <- rbind(t(warp), 1)
       open3d(); shade3d(warp.PLY, ...)
+      if(label == TRUE){text3d(M1, texts = paste(1:dim(M1)[1]), adj = 1.3, pos = 4, cex=0.8)}
       return(warp.PLY)
     }
   }

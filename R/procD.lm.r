@@ -46,7 +46,7 @@
 #'    Austral Ecology 26: 32-46.
 #' @references Anderson MJ. and C.J.F. terBraak. 2003. Permutation tests for multi-factorial analysis of variance.
 #'    Journal of Statistical Copmutation and Simulation 73: 85-113.
-#' @references Collyer, M.L., D.J. Sekora, and D.C. Adams. 2014. A method for analysis of phenotypic change for phenotypes described 
+#' @references Collyer, M.L., D.J. Sekora, and D.C. Adams. 2015. A method for analysis of phenotypic change for phenotypes described 
 #' by high-dimensional data. Heredity. 113: doi:10.1038/hdy.2014.75.
 #' @references Goodall, C. R. 1991. Procrustes methods in the statistical analysis of shape. Journal of the 
 #'    Royal Statistical Society B 53:285-339.
@@ -65,9 +65,10 @@
 #' procD.lm(two.d.array(rat.gpa$coords)~rat.gpa$Csize,iter=99)
 #' 
 #' ## using RRPP
-#'  procD.lm(two.d.array(rat.gpa$coords)~rat.gpa$Csize,iter=99,RRPP=TRUE)
+#'  procD.lm(two.d.array(rat.gpa$coords)~rat.gpa$Csize,iter=49,RRPP=TRUE)
 procD.lm <- function(f1, iter = 999, RRPP = FALSE, int.first = FALSE, verbose=FALSE){
   form.in <- formula(f1)
+  mod.mf <- model.frame(form.in)
   if(int.first == TRUE) ko = TRUE else ko = FALSE
   Terms <- terms(form.in, keep.order = ko)
   Y <- as.matrix(eval(form.in[[2]], parent.frame()))
@@ -82,7 +83,7 @@ procD.lm <- function(f1, iter = 999, RRPP = FALSE, int.first = FALSE, verbose=FA
   }
   anova.parts.obs <- anova.parts(form.in, Yalt = "observed", keep.order=ko)
   anova.tab <-anova.parts.obs$table  
-  Xs <- mod.mats(form.in, keep.order=ko)
+  Xs <- mod.mats(mod.mf, keep.order=ko)
   k <- length(Xs$Xs) - 1
   P <-array(0, c(k, 1, iter+1))
   SS.obs <-anova.parts.obs$SS[1:k]

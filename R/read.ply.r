@@ -8,9 +8,11 @@
 #'  and semilandmarks on curves and surfaces. The surface may also be used as a mesh for visualizing 3D deformations (\code{\link{warpRefMesh}}).
 #'  The function opens the ply file and plots the mesh,
 #'  with faces rendered if file contains faces, and colored if the file contains vertex color.
+#'  Vertex normals allow better visualization and more accurate digitizing with \code{\link{digit.fixed}}.
 #'
 #' @param file An ASCII ply file
-#' @param ShowSpecimen logical A logical value indicating whether or not the ply file should be displayed
+#' @param ShowSpecimen logical Indicating whether or not the ply file should be displayed
+#' @param addNormals logical Indicating whether or not the normals of each vertex should be calculated (using \code{\link[rgl]{addNormals}})
 #' @export
 #' @keywords IO
 #' @author Dean Adams & Emma Sherratt
@@ -23,7 +25,7 @@
 #' myply <- scallopPLY$ply
 #' myply$material <- "gray" # using color word
 #' myply$material <- "#FCE6C9" # using RGB code
-read.ply <- function (file, ShowSpecimen = TRUE) 
+read.ply <- function (file, ShowSpecimen = TRUE, addNormals = TRUE) 
 {
   plyfile <- scan(file = file, what = "char", sep = "\n", strip.white = TRUE, 
                   quiet = TRUE)
@@ -66,6 +68,7 @@ read.ply <- function (file, ShowSpecimen = TRUE)
   mesh <- list(vb = vertices, it = poly, primitivetype = "triangle", 
                material = material)
   class(mesh) <- c("mesh3d", "shape3d")
+  if(addNormals==TRUE){ mesh <- addNormals(mesh)}
   if(ShowSpecimen==TRUE){ 
     clear3d()
     if (length(poly) == 0) { dot3d(mesh) }

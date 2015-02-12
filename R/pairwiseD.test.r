@@ -32,7 +32,7 @@
 #'   making it less so a post-hoc test and more so a simultaneous test of pairwise contrasts (see Collyer et al. 2014).
 #'
 #' @param f1 A formula for the linear model from which groups are to be compared (e.g., y~x1*x2)
-#' @param covariates A vector, matrix, or data frame with covariates (contunuous quantitative variables)
+#' @param f2 A right-side formula for one or more covariates (e.g., ~ CS + altitude)
 #' @param iter Number of iterations for permutation test
 #' @param RRPP a logical value indicating whether residual randomization should be used for significance testing
 #' @param int.first A logical value to indicate if interactions of first main effects should precede subsequent main effects
@@ -41,7 +41,7 @@
 #' @author Michael Collyer and Dean Adams
 #' @references Anderson MJ. and C.J.F. terBraak. 2003. Permutation tests for multi-factorial analysis of variance.
 #'    Journal of Statistical Computation and Simulation 73: 85-113.
-#' @references Collyer, M.L., D.J. Sekora, and D.C. Adams. 2014. A method for analysis of phenotypic change for phenotypes described 
+#' @references Collyer, M.L., D.J. Sekora, and D.C. Adams. 2015. A method for analysis of phenotypic change for phenotypes described 
 #' by high-dimensional data. Heredity. 113: doi:10.1038/hdy.2014.75.
 #' @return Function returns a list with the following components: 
 #'   \item{Obs.dist}{A matrix of Euclidean distances among group means or Least Squares group means}
@@ -60,40 +60,39 @@
 #' pairwiseD.test(y~plethodon$species*plethodon$site,iter=9,RRPP=TRUE)
 #' 
 #' ### Pairwise comparisons: ANCOVA design with full randomization
-#' pairwiseD.test(y~plethodon$species*plethodon$site,covariates = data.frame(CS = Y.gpa$Csize), 
-#'              iter=9)
+#' pairwiseD.test(y~plethodon$species*plethodon$site, ~ Y.gpa$Csize, iter=9)
 #' 
 #' ### Pairwise comparisons: ANCOVA design with residual randomization
-#' pairwiseD.test(y~plethodon$species*plethodon$site,covariates = data.frame(CS = Y.gpa$Csize), 
-#'             iter=9, RRPP = TRUE)
+#' pairwiseD.test(y~plethodon$species*plethodon$site, ~ Y.gpa$Csize, iter=9, RRPP = TRUE)
 #' 
-pairwiseD.test <- function(f1, covariates = NULL, RRPP = FALSE, int.first = FALSE, iter= 999){
-  form.in <- formula(f1)
+pairwiseD.test <- function(f1, f2 = NULL, RRPP = FALSE, int.first = FALSE, iter= 999){
+  f1 <- as.formula(f1)
   if(int.first == TRUE) ko = TRUE else ko = FALSE
-  Terms <- terms(form.in, keep.order = ko)
-  Y <- as.matrix(eval(form.in[[2]], parent.frame()))
+  fTerms <- terms(as.formula(f1), keep.order = ko)
+  fac.mf <- model.frame(f1)
+  Y <- as.matrix(fac.mf[1])
   if (length(dim(Y)) != 2) {
     stop("Response matrix (shape) not a 2D array. Use 'two.d.array' first.")
   }
   if (any(is.na(Y)) == T) {
     stop("Response data matrix (shape) contains missing values. Estimate these first (see 'estimate.missing').")
   }
-  Xfacs <- model.matrix(Terms)
-  newfac <- single.factor(form.in, keep.order = ko)
-  if(is.null(covariates)){
-    Xcov = NULL
-  } else {Xcov = data.frame(covariates)}
+  Xfacs <- model.matrix(fTerms)
+  newfac <- single.factor(f1, keep.order = ko)
+  if(is.null(f2)){
+    cov.mf = NULL
+  } else {cov.mf = model.frame(as.formula(f2))}
   if(any(Xfacs != 1 & Xfacs != 0)) stop("Only factors allowed as independent variables in model formula. 
-                                        \nMake sure covariates are input separately. \ne.g., covariates = cbind(X1, X2,...) or covariates = data.frame(X1, X2,...)")
+                                        \nMake sure covariates are input separately. \ne.g., f2 = ~ X1 + X2 +...")
   if(ncol(model.matrix(~newfac)) != ncol(Xfacs)) stop("Model formula must be for either a single factor or full-factorial model\n  e.g., Shape ~ Factor.A  -or-  Shape ~ Factor.A * Factor.B * ...")
-  if(is.null(covariates)) {Xs <-mod.mats(form.in, keep.order=ko) 
-  } else {Xs <- mod.mats.w.cov(form.in, Xcov, keep.order=ko)}
+  if(is.null(f2)) {Xs <-mod.mats(fac.mf, keep.order=ko) 
+  } else {Xs <- mod.mats.w.cov(fac.mf, cov.mf, keep.order=ko)}
   k <- length(Xs$Xs) - 1
   X <- Xs$Xs[[k+1]]
-  anova.parts.obs <- anova.parts(form.in, X = Xs,Yalt = "observed", keep.order=ko)
+  anova.parts.obs <- anova.parts(f1, X = Xs,Yalt = "observed", keep.order=ko)
   anova.tab <-anova.parts.obs$table
   SS.obs <- anova.parts.obs$SS[1:k]
-  ls.means.obs <- ls.means(newfac, Xcov, Y)
+  ls.means.obs <- ls.means(newfac, cov.mf, Y)
   dm <- as.matrix(dist(ls.means.obs))
   P <- array(0, c(k, 1, iter+1))
   P[,,1] <- SS.obs
@@ -107,7 +106,7 @@ pairwiseD.test <- function(f1, covariates = NULL, RRPP = FALSE, int.first = FALS
       SSr <- SS.random(Y, Xs, SS.obs, Yalt = "resample")
     }
     P[,,i+1] <- SSr$SS
-    P.dist[,,i+1] <- as.matrix(dist(ls.means(newfac, Xcov, SSr$Y)))
+    P.dist[,,i+1] <- as.matrix(dist(ls.means(newfac, cov.mf, SSr$Y)))
   }
   P.val <- Pval.matrix(P)
   Z <- Effect.size.matrix(P)

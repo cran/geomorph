@@ -83,26 +83,30 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
     f1<-as.formula(f1)
     f2<-"gpa.res$Csize~ind*side"; if(!is.null(replicate)){f2<-paste(f2,"ind:side:replicate",sep="+")}
     f2<-as.formula(f2)
-    res.shape<-procD.lm(f1,iter=1)
+    res.shape<-anova.parts(f1,Yalt="observed")$table    
+    res.shape<-res.shape[1:(dim(res.shape)[1]-2),1:(dim(res.shape)[2]-2)]
     res.shape[1,1]<-(nind-1)*shpsp;res.shape[2,1]<-shpsp; res.shape[3,1]<-(nind-1)*shpsp
     if(!is.null(replicate)){res.shape[4,1]<-(nrep-1)*nind*2*shpsp}
     res.shape[,3]<-res.shape[,2]/res.shape[,1] 
-    F<-array(NA,nrow(res.shape)); F[1]<-res.shape[1,3]/res.shape[3,3]
-    F[2]<-res.shape[2,3]/res.shape[3,3]; if(!is.null(replicate)){F[3]<-res.shape[3,3]/res.shape[4,3]}
-    P<-array(NA,nrow(res.shape)); P[1]<-1-pf(F[1],res.shape[1,1],res.shape[3,1])
-    P[2]<-1-pf(F[2],res.shape[2,1],res.shape[3,1]); if(!is.null(replicate)){
-      P[3]<-1-pf(F[3],res.shape[3,1],res.shape[4,1])}
-    res.shape<-cbind(res.shape[,-4],F,P)
-    colnames(res.shape)[4]<-"F.Goodall";colnames(res.shape)[5]<-"P.param"
-    res.shape<-res.shape[-nrow(res.shape),]
-    res.size<-summary(aov(f2))[[1]]; res.size<-res.size[,(1:3)]   
+    Goodall.F<-array(NA,nrow(res.shape));Goodall.F[1]<-res.shape[1,3]/res.shape[3,3]
+    Goodall.F[2]<-res.shape[2,3]/res.shape[3,3]; if(!is.null(replicate)){Goodall.F[3]<-res.shape[3,3]/res.shape[4,3]}
+    P.param<-array(NA,nrow(res.shape)); P.param[1]<-1-pf(Goodall.F[1],res.shape[1,1],res.shape[3,1])
+    P.param[2]<-1-pf(Goodall.F[2],res.shape[2,1],res.shape[3,1]); if(!is.null(replicate)){
+      P.param[3]<-1-pf(Goodall.F[3],res.shape[3,1],res.shape[4,1])}
+    P.param[zapsmall(P.param)==0]=0.00001
+    res.shape<-cbind(res.shape,Goodall.F,P.param)
+    res.size<-summary(aov(f2))[[1]]; res.size<-res.size[,(1:3)] 
+    colnames(res.size) <- c("df", "SS", "MS")
     F<-array(NA,nrow(res.size)); F[1]<-res.size[1,3]/res.size[3,3]
     F[2]<-res.size[2,3]/res.size[3,3]; if(!is.null(replicate)){F[3]<-res.size[3,3]/res.size[4,3]}
     P<-array(NA,nrow(res.size)); P[1]<-1-pf(F[1],res.size[1,1],res.size[3,1])
     P[2]<-1-pf(F[2],res.size[2,1],res.size[3,1]); if(!is.null(replicate)){
       P[3]<-1-pf(F[3],res.size[3,1],res.size[4,1])}
+    P[zapsmall(P)==0]=0.00001
     res.size<-cbind(res.size,F,P);  if(!is.null(replicate)){res.size<-res.size[(1:4),];
                                                             rownames(res.size)[4]<-"replicate"}
+    class(res.shape) <- c("anova", class(res.shape))
+    class(res.size) <- c("anova", class(res.size))
     DA.mns <- arrayspecs((rowsum(predict(lm(shape~side)), 
                                  side)/as.vector(table(side))),p,k)
     MSCP.FA<-summary(manova(lm(f1)))$SS[[3]]/res.shape[3,1]
@@ -139,6 +143,7 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
             title3d(main="Fluctuating Asymmetry")
             }
         }
+      layout(1) 
       }
     if(verbose==TRUE){
     	class(res.size) <- c("anova", class(res.size))
@@ -168,22 +173,24 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
     shape<-two.d.array(gpa.res$coords)    
     f1<-"shape~ind*side"; if(!is.null(replicate)){f1<-paste(f1,"ind:side:replicate",sep="+")}
     f1<-as.formula(f1)
-    res.shape<-procD.lm(f1,iter=1)
+    res.shape<-anova.parts(f1,Yalt="observed")$table    
+    res.shape<-res.shape[1:(dim(res.shape)[1]-2),1:(dim(res.shape)[2]-2)]
+    res.shape[,2]<-res.shape[,2]/2 
     res.shape[,2]<-res.shape[,2]/2 
     res.shape[2,1]<-ifelse(k==2,((2*npairs+nl-2)),((3*npairs+nl-3)))
     res.shape[1,1]<-res.shape[3,1]<-(nind-1)*res.shape[2,1]
     if(k==3){res.shape[1,1]=res.shape[1,1]+((nind-1)*(nl-1))}
     if(!is.null(replicate)){res.shape[4,1]<-(nrep-1)*nind*shpsp}
-    res.shape[,3]<-res.shape[,2]/res.shape[,1]  
-    F<-array(NA,nrow(res.shape)); F[1]<-res.shape[1,3]/res.shape[3,3]
-    F[2]<-res.shape[2,3]/res.shape[3,3]; if(!is.null(replicate)){F[3]<-res.shape[3,3]/res.shape[4,3]}
-    P<-array(NA,nrow(res.shape)); P[1]<-1-pf(F[1],res.shape[1,1],res.shape[3,1])
-    P[2]<-1-pf(F[2],res.shape[2,1],res.shape[3,1]); if(!is.null(replicate)){
-      P[3]<-1-pf(F[3],res.shape[3,1],res.shape[4,1])}
-    res.shape[,4]<-F; res.shape[,5]<-P
-    res.shape<-res.shape[-nrow(res.shape),]
-    colnames(res.shape)[4]<-"F.Goodall";colnames(res.shape)[5]<-"P.param"
-    if(!is.null(replicate)){rownames(res.shape)[4]<-"replicate=error"}  
+    res.shape[,3]<-res.shape[,2]/res.shape[,1] 
+    Goodall.F<-array(NA,nrow(res.shape));Goodall.F[1]<-res.shape[1,3]/res.shape[3,3]
+    Goodall.F[2]<-res.shape[2,3]/res.shape[3,3]; if(!is.null(replicate)){Goodall.F[3]<-res.shape[3,3]/res.shape[4,3]}
+    P.param<-array(NA,nrow(res.shape)); P.param[1]<-1-pf(Goodall.F[1],res.shape[1,1],res.shape[3,1])
+    P.param[2]<-1-pf(Goodall.F[2],res.shape[2,1],res.shape[3,1]); if(!is.null(replicate)){
+      P.param[3]<-1-pf(Goodall.F[3],res.shape[3,1],res.shape[4,1])}
+    P.param[zapsmall(P.param)==0]=0.00001
+    res.shape<-cbind(res.shape,Goodall.F,P.param)
+    class(res.shape) <- c("anova", class(res.shape))
+    
     DA.mns <- arrayspecs((rowsum(predict(lm(shape~side)), 
                                  side)/as.vector(table(side))),p,k)
     MSCP.FA<-summary(manova(lm(f1)))$SS[[3]]/res.shape[3,1]
@@ -220,6 +227,7 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
             title3d(main="Fluctuating Asymmetry")
           }  
         }
+      layout(1) 
       } 
     if(verbose==TRUE){
     	class(res.shape) <- c("anova", class(res.shape))

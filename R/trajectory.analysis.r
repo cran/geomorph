@@ -5,8 +5,8 @@
 #'
 #'  The function quantifies phenotypic shape change trajectories from a set of specimens, and assesses variation 
 #'  in these parameters via permutation. A shape change trajectory is defined by a sequence 
-#'  of shapes in tangent space. These trajectories can be quantified various attributes (their size, orientation, 
-#'  and shape), and comparisons of these attribute enables the statistical comparison of shape change 
+#'  of shapes in tangent space. These trajectories can be quantified for various attributes (their size, orientation, 
+#'  and shape), and comparisons of these attribute enable the statistical comparison of shape change 
 #'  trajectories (see Collyer and Adams 2013; Collyer and Adams 2007; Adams and Collyer 2007; Adams and Collyer 2009). 
 #'
 #'  Data input is specified by a formula (e.g., Y~X), where 'Y' specifies the response variables (trajectory data), 
@@ -28,6 +28,7 @@
 #'  approach is useful when the set of shapes forming each trajectory have been quantified directly 
 #'  (e.g., when motion paths are compared: see Adams and Cerney 2007). With this implementation, variation in 
 #'  trajectory size, shape, and orientation are evaluated for each term in 'X'.(see Adams and Cerney 2007). 
+#'  Currently only single-factor analyses are supportd with this method.
 #'
 #'  Once the function has performed the analysis, it generates a plot of the trajectories as visualized in the 
 #'  space of principal components (PC1 vs. PC2). The first point in each trajectory is displayed as white, the 
@@ -43,15 +44,18 @@
 #' @param traj.pts An optional value specifying the number of points in each trajectory (if estimate.traj=FALSE)
 #' @export
 #' @keywords analysis
-#' @author Dean Adams
+#' @author Dean Adams and Michael Collyer
 #' @return If "estimate.traj=TRUE", the function returns a list with the following components: 
-#'   \item{procDist.lm}{Procrustes ANOVA table}
-#'   \item{traj.size}{A matrix of pairwise differences in trajectory size}
-#'   \item{p.size}{A matrix of pairwise significance levels for trajectory size}
-#'   \item{traj.orient}{A matrix of pairwise differences in trajectory orientation}
-#'   \item{p.orient}{A matrix of pairwise significance levels for trajectory orientation}
-#'   \item{traj.shape}{A matrix of pairwise differences in trajectory shape (if applicable)}
-#'   \item{p.shape}{A matrix of pairwise significance levels for trajectory shape}
+#'   \item{anova.table}{Procrustes ANOVA table}
+#'   \item{Size$Obs.dif}{A matrix of pairwise differences in trajectory size}
+#'   \item{Size$Z}{A matrix of pairwise effect sizes for differences in trajectory size}
+#'   \item{Size$P}{A matrix of pairwise significance levels for differences in trajectory size}
+#'   \item{Direction$Obs.dif}{A matrix of pairwise differences in trajectory orientation}
+#'   \item{Direction$Z}{A matrix of effect sizes for differences in trajectory orientation}
+#'   \item{Direction$P}{A matrix of pairwise significance levels for differences in trajectory orientation}
+#'   \item{tShape$Obs.dif}{A matrix of pairwise differences in trajectory shape (if applicable)}
+#'   \item{tShape$Z}{A matrix of pairwise effect sizes for differences in trajectory shape (if applicable)}
+#'   \item{tShape$P}{A matrix of pairwise significane levels for differences in trajectory shape (if applicable)}
 #' @return If "estimate.traj=FALSE", the function returns a list with the following components: 
 #'   \item{MANOVA.location.covariation}{Procrustes ANOVA table}
 #'   \item{ANOVA.Size}{Results of permutational-ANOVA assessing variation in trajectory size}
@@ -86,96 +90,142 @@
 trajectory.analysis<-function(f1,data=NULL,estimate.traj=TRUE,traj.pts=NULL,iter=99){
   form.in<-formula(f1)
   Terms<-terms(form.in)
-  y<-eval(form.in[[2]],parent.frame())
-  dat<-model.frame(form.in,data)
+  dat<-model.frame(form.in)
+  y<-as.matrix(dat[1])
   ncol.x<-length(attr(Terms,"term.labels"))  
   all.terms<-attr(Terms,"term.labels")
+  k <- length(all.terms)
   if (length(dim(y))!=2){
     stop("Response matrix (shape) not a 2D array. Use 'two.d.array' first.")  }
   if(any(is.na(y))==T){
     stop("Response data matrix (shape) contains missing values. Estimate these first(see 'estimate.missing').")  }
-  lm.res<-procD.lm(form.in,iter=iter)
   
   if(estimate.traj==TRUE){
     y<-prcomp(y)$x
     if(ncol.x<3){
-      stop("X-matrix does not specify enough model factors (see help file).") }
+      stop("Model does not appear to be factorial.  Check model formula (see help file).") }
     int.term<-grep(":",attr(Terms,"term.labels")[ncol.x])
     if(int.term!=1){
       stop("Last col of X-matrix does not contain interaction between main effects (see help file).") }          
-    nterms<-dim(dat)[2]
-    k1<-ncol(y) 
-    n1<-length(levels(dat[,nterms-1]))
-    p1<-length(levels(dat[,nterms]))
-    fac12<-as.factor(paste(dat[,nterms-1],dat[,nterms]))  
-    form.full<-as.formula(paste("y ~", paste(all.terms,collapse="+")))
-    yhat.full<-predict(lm(form.full))
-    lsmeans.obs <- rowsum(yhat.full, fac12)/as.vector(table(fac12))
-    form.red<-as.formula(paste("y ~", paste(all.terms[-ncol.x],collapse="+")))
-    yhat.red<-predict(lm(form.red))
-    res.red<-resid(lm(form.red))
-    traj.specs.obs<- aperm(array(t(lsmeans.obs), c(k1,p1,n1)), c(2,1,3)) 
-    trajsize.obs<-trajsize(traj.specs.obs,n1,p1) 
-    trajdir.obs<-trajorient(traj.specs.obs,n1,k1); diag(trajdir.obs)<-0 
+    p<-ncol(y) 
+    n1<-length(levels(dat[,k-1]))
+    k1<-length(levels(dat[,k]))
+    anova.parts.obs <- anova.parts(form.in, Yalt = "observed", keep.order=TRUE)
+    anova.tab <-anova.parts.obs$table  
+    Xs <- mod.mats(dat, keep.order=TRUE)
+    Plm <-array(, c(k, 1, iter+1))
+    SS.obs <-anova.parts.obs$SS[1:k]
+    Plm[,,1] <- SS.obs    
+    fac12<-single.factor(form.in)
+    lsmeans.obs <- ls.means(fac12, cov.mf=NULL, y)
+    traj.specs.obs<- aperm(array(t(lsmeans.obs), c(p,n1,k1)), c(2,1,3)) 
+    trajsize.obs<-trajsize(traj.specs.obs,n1,k1) 
+    trajdir.obs<-trajorient(traj.specs.obs,n1,p); diag(trajdir.obs)<-0 
     trajshape.obs<-trajshape(traj.specs.obs) 
-    PSize<-POrient<-PShape<-array(1,dim=c(n1,n1))
+    PSize<-POrient<-PShape<-array(,dim=c(n1,n1,iter+1))
+    PSize[,,1] <- trajsize.obs
+    POrient[,,1] <- trajdir.obs
+    PShape[,,1] <- trajshape.obs
     for(i in 1:iter){
-      res.rand<-res.red[sample(nrow(res.red)),]    
-      y.r<-yhat.red+res.rand	
-      form.full.r<-as.formula(paste("y.r ~", paste(all.terms,collapse="+")))
-      yhat.r<-predict(lm(form.full.r))
-      lsmeans.r<-rowsum(yhat.r, fac12)/as.vector(table(fac12))
-      traj.specs.r<- aperm(array(t(lsmeans.r), c(k1,p1,n1)), c(2,1,3)) 
-      trajsize.r<-trajsize(traj.specs.r,n1,p1) 
-      trajdir.r<-trajorient(traj.specs.r,n1,k1); diag(trajdir.r)<-0 
+      SS.r <- SS.random(y, Xs, SS.obs, Yalt = "RRPP")
+      Plm[,,i+1] <- SS.r$SS
+      lsmeans.r <- ls.means(fac12, cov.mf=NULL, SS.r$Y)
+      traj.specs.r<- aperm(array(t(lsmeans.r), c(p,n1,k1)), c(2,1,3)) 
+      trajsize.r<-trajsize(traj.specs.r,n1,k1) 
+      trajdir.r<-trajorient(traj.specs.r,n1,p); diag(trajdir.r)<-0 
       trajshape.r<-trajshape(traj.specs.r) 
-      PSize<-ifelse(trajsize.r>=trajsize.obs, PSize+1,PSize) 
-      POrient<-ifelse(trajdir.r>=trajdir.obs,POrient+1,POrient) 
-      PShape<-ifelse(trajshape.r>=trajshape.obs,PShape+1,PShape) 
+      PSize[,,i+1] <- trajsize.r
+      POrient[,,i+1] <- trajdir.r
+      PShape[,,i+1] <- trajshape.r
     }  
-    PSize<-PSize/(iter+1)
-    POrient<-POrient/(iter+1)
-    PShape<-PShape/(iter+1)
+    P.val.lm <- Pval.matrix(Plm)
+    P.val.size <- Pval.matrix(PSize)
+    P.val.dir <- Pval.matrix(POrient)
+    P.val.shape <- Pval.matrix(PShape)
+    Z.lm <- Effect.size.matrix(Plm)
+    Z.size <- Effect.size.matrix(PSize); diag(Z.size) <- 0
+    Z.dir <- Effect.size.matrix(POrient); diag(Z.dir) <- 0
+    Z.shape <- Effect.size.matrix(PShape); diag(Z.shape) <- 0   
+    anova.tab <- data.frame(anova.tab, Z = c(Z.lm, NA, NA), P.value = c(P.val.lm, NA, NA))
+    anova.title = "\nRandomized Residual Permutation Procedure used\n"
+    attr(anova.tab, "heading") <- paste("\nType I (Sequential) Sums of Squares and Cross-products\n",anova.title)
+    class(anova.tab) <- c("anova", class(anova.tab))
+    results <- list(anova.table = anova.tab, 
+         Size=list(Obs.dif=trajsize.obs,Z=Z.size,P = P.val.size),
+         Direction=list(Obs.dif=trajdir.obs,Z=Z.dir,P = P.val.dir),
+         Shape=list(Obs.dif=trajshape.obs,Z=Z.shape,P = P.val.shape))
+    if(k1 == 2) print(results[-4]) else print(results)
     trajplot(y,traj.specs.obs)
-    if(p1>2){
-      return(list(ProcDist.lm=lm.res,traj.size=trajsize.obs,p.size=PSize,traj.orient=trajdir.obs,
-                  p.orient=POrient,traj.shape=trajshape.obs,p.shape=PShape))
-    }
-    if(p1<3){
-      return(list(ProcDist.lm=lm.res,traj.size=trajsize.obs,p.size=PSize,traj.orient=trajdir.obs,
-                  p.orient=POrient))
-    }
   }
   
   if(estimate.traj==FALSE){
     if(is.null(traj.pts)==TRUE){
       stop("Number of points in the trajectory not specified.") }
-    p1<-traj.pts
+    if(length(attr(Terms,"term.labels")) > 1) stop("If data are already trajectories, only a single-factor model is currently supported. (See Help file)")
+    X <- model.matrix(Terms)
+    Xs <- mod.mats(dat)
+    k <- length(Xs$Xs) - 1
+    k1<-traj.pts
     n1<-nrow(y)
-    k1<-ncol(y)/p1  
-    if (k1>2){
+    p1<-ncol(y)/k1  
+    if (p1>2){
       y.2d<-matrix(t(y),ncol=k1,byrow=TRUE)
       y.2d<-prcomp(y.2d)$x
-      y<-two.d.array(arrayspecs(y.2d,p1,k1))
+      y<-two.d.array(arrayspecs(y.2d,k1,p1))
     }        
-    traj.specs.obs<-arrayspecs(y,p1,k1) 
-    size.obs<-as.dist(trajsize(traj.specs.obs,n1,p1)) 
-    dir.obs<-trajorient(traj.specs.obs,n1,k1) 
-    diag(dir.obs)<-0; dir.obs<-as.dist(dir.obs)
-    shape.obs<-as.dist(trajshape(traj.specs.obs)) 
-    size.form<-as.formula(paste("size.obs ~", paste(all.terms,collapse="+")))    
-    shape.form<-as.formula(paste("shape.obs ~", paste(all.terms,collapse="+"))) 
-    dir.form<-as.formula(paste("dir.obs ~", paste(all.terms,collapse="+")))    
-    size.res<-adonis(size.form,permutations=iter)[[1]][1:6] 
-    shape.res<-adonis(shape.form,permutations=iter)[[1]][1:6]
-    dir.res<-adonis(dir.form,permutations=iter)[[1]][1:6]
-    y.plot<-matrix(t(two.d.array(traj.specs.obs)),ncol=k1,byrow=TRUE)
+    form.new <- as.formula(paste(c("~", form.in[[3]])))
+    traj.specs.obs<-arrayspecs(y,k1,p1) 
+    size.obs<-trajsize(traj.specs.obs,n1,k1) 
+    dir.obs<-trajorient(traj.specs.obs,n1,p1) 
+    diag(dir.obs)<-0
+    shape.obs<-trajshape(traj.specs.obs) 
+    size.tab<-Hat.anova.tab(size.obs, form.new)
+    shape.tab<-Hat.anova.tab(shape.obs, form.new)
+    dir.tab<-Hat.anova.tab(dir.obs, form.new)
+    size.SS.obs <- Hat.SS.model(Gower.center(size.obs), X)
+    shape.SS.obs <- Hat.SS.model(Gower.center(shape.obs), X)
+    dir.SS.obs <- Hat.SS.model(Gower.center(dir.obs), X)
+    anova.parts.obs <- anova.parts(form.in,Yalt="observed")
+    SS.obs <-anova.parts.obs$SS[1:k]
+    anova.tab <-anova.parts.obs$table  
+    Plm <- array(,c(k,1,iter+1))
+    Plm[,,1] <- SS.obs
+    PSize <- PShape <- POrient <- array(,c(k,k,iter+1))
+    PSize[,,1] <- size.SS.obs[1:k]
+    PShape[,,1] <- shape.SS.obs[1:k]
+    POrient[,,1] <- dir.SS.obs[1:k]
+      perm.index <- 1:nrow(y)
+      SSY <- SSE(lm(y~1))
+      Dy <- as.matrix(dist(y))
+      for(i in 1:iter){
+        pr <- sample(perm.index)
+        Plm[,,i+1] <- SSY - Hat.SSE(Gower.center(Dy[pr,pr]), X)
+        size.r<-size.obs[pr,pr]
+        dir.r <-dir.obs[pr,pr]
+        shape.r<-shape.obs[pr,pr]
+        PSize[,,i+1] <- Hat.SS.model(Gower.center(size.r), X)
+        PShape[,,i+1] <- Hat.SS.model(Gower.center(shape.r), X)
+        POrient[,,i+1] <- Hat.SS.model(Gower.center(dir.r), X)
+      }
+    
+    size.tab <- data.frame(cbind(size.tab, Z=c(Effect.size.matrix(PSize),NA,NA),P.value=c(Pval.matrix(PSize),NA,NA)))
+    shape.tab <- data.frame(cbind(shape.tab, Z=c(Effect.size.matrix(PShape),NA,NA),P.value=c(Pval.matrix(PShape),NA,NA)))
+    dir.tab <- data.frame(cbind(dir.tab, Z=c(Effect.size.matrix(POrient),NA,NA),P.value=c(Pval.matrix(POrient),NA,NA)))
+    
+    anova.tab <- data.frame(anova.tab, Z = c(Effect.size.matrix(Plm), NA, NA), P.value = c(Pval.matrix(Plm), NA, NA))
+    anova.title = "\nRandomized Residual Permutation Procedure used\n"
+    attr(anova.tab, "heading") <- paste("\nType I (Sequential) Sums of Squares and Cross-products\n",anova.title)
+    class(anova.tab) <- c("anova", class(anova.tab))
+    class(size.tab) <- c("anova", class(size.tab))
+    class(dir.tab) <- c("anova", class(dir.tab))
+    class(shape.tab) <- c("anova", class(shape.tab))
+    results <- list(MANOVA.location.covariation = anova.tab, 
+                    ANOVA.Size=size.tab,
+                    ANOVA.Dir = dir.tab,
+                    ANOVA.shape=shape.tab)
+    if(k1 == 2) print(results[-4]) else print(results)
+    y.plot<-matrix(t(two.d.array(traj.specs.obs)),ncol=p1,byrow=TRUE)
     trajplot(y.plot,traj.specs.obs)
-    if(p1<3){
-      return(list(MANOVA.location.covariation=lm.res,ANOVA.Size=size.res,ANOVA.Dir=dir.res))
-    }
-    if(p1>2){
-      return(list(MANOVA.location.covariation=lm.res,ANOVA.Size=size.res,ANOVA.Dir=dir.res,ANOVA.Shape=shape.res))
-    }
+
   }
 }

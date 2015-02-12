@@ -81,7 +81,13 @@ compare.evol.rates<-function(phy,A,gp,iter=999 ){
     C<-C[rownames(x),rownames(x)]
     a.obs<-colSums(solve(C))%*%x/sum(solve(C))  
     eigC <- eigen(C)
-    D.mat<-solve(eigC$vectors %*% diag(sqrt(eigC$values)) %*% t(eigC$vectors)) 
+    lambda <- zapsmall(eigC$values)
+    if(any(lambda == 0)){
+      warning("Singular phylogenetic covariance matrix. Proceed with caution")
+      lambda = lambda[lambda > 0]
+    }
+    eigC.vect = eigC$vectors[,1:(length(lambda))]
+    D.mat <- solve(eigC.vect%*% diag(sqrt(lambda)) %*% t(eigC.vect)) 
     dist.adj<-as.matrix(dist(rbind((D.mat%*%(x-(ones%*%a.obs))),0))) 
     vec.d2<-dist.adj[N+1,1:N]^2
     sigma.d<-tapply(vec.d2,gp,sum)/gpsz/p   

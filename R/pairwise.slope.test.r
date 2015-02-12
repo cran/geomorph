@@ -36,8 +36,7 @@
 #'   making it less so a post-hoc test and more so a simultaneous test of pairwise contrasts (see Collyer et al. 2014).
 #'   
 #' @param f1 A formula for the linear model from which groups are to be compared (e.g., y~x1*x2)
-#' @param covariate A data farme of covariate values (contunuous quantitative variable).  Must be a data frame
-#' to preserve variable name.  Otherwise "covariate" will be returned.
+#' @param f2 A right side formula for the covariate (e.g., ~ CS).
 #' @param iter Number of iterations for permutation test
 #' @param int.first A logical value to indicate if interactions of first main effects should precede subsequent main effects
 #' @param angle.type A value specifying whether differences between slopes should be represented by vector
@@ -48,7 +47,7 @@
 #' @author Michael Collyer
 #' @references Anderson MJ. and C.J.F. terBraak. 2003. Permutation tests for multi-factorial analysis of variance.
 #'    Journal of Statistical Computation and Simulation 73: 85-113.
-#' @references Collyer, M.L., D.J. Sekora, and D.C. Adams. 2014. A method for analysis of phenotypic change for phenotypes described 
+#' @references Collyer, M.L., D.J. Sekora, and D.C. Adams. 2015. A method for analysis of phenotypic change for phenotypes described 
 #' by high-dimensional data. Heredity. 113: doi:10.1038/hdy.2014.75.
 #' @return Function returns a list with the following components: 
 #'   \item{ANOVA.table}{An ANOVA table assessing the linear model}
@@ -65,39 +64,38 @@
 #' y<-two.d.array(Y.gpa$coords)
 #' 
 #' ## Pairwise slope vector correlations
-#' pairwise.slope.test(y~plethodon$site, covariate = data.frame(CS = Y.gpa$Csize), 
-#'         iter=49, angle.type="r")
+#' pairwise.slope.test(y~plethodon$site, ~ Y.gpa$Csize, iter=24, angle.type="r")
 #' 
 #' ## Pairwise angular difference between slopes
-#' pairwise.slope.test(y~plethodon$site, covariate = data.frame(CS = Y.gpa$Csize), 
-#'           iter=49, angle.type="rad")
+#' pairwise.slope.test(y~plethodon$site, ~ Y.gpa$Csize, iter=24, angle.type="rad")
 #' 
 #' ## Using RRPP
-#' pairwise.slope.test(y~plethodon$site, covariate = data.frame(CS = Y.gpa$Csize),
-#'           iter=49, angle.type="rad", RRPP=TRUE)
-pairwise.slope.test <- function (f1, covariate, iter = 999, int.first = FALSE, angle.type = c("r", "deg", "rad"), RRPP = FALSE){
-  form.in <- formula(f1)
+#' pairwise.slope.test(y~plethodon$site, ~Y.gpa$Csize, iter=24, angle.type="rad", RRPP=TRUE)
+pairwise.slope.test <- function (f1, f2, iter = 999, int.first = FALSE, angle.type = c("r", "deg", "rad"), RRPP = FALSE){
+  f1 <- formula(f1)
+  fac.mf <- model.frame(f1)
   angle.type = match.arg(angle.type)
   if(int.first == TRUE) ko = TRUE else ko = FALSE
-  Terms <- terms(form.in, keep.order = ko)
-  Y <- as.matrix(eval(form.in[[2]], parent.frame()))
+  Terms <- terms(f1, keep.order = ko)
+  Y <- as.matrix(fac.mf[1])
   if (length(dim(Y)) != 2) stop("Response matrix (shape) not a 2D array. Use 'two.d.array' first.")
   if (any(is.na(Y)) == T) stop("Response data matrix (shape) contains missing values. Estimate these first (see 'estimate.missing').")
   Xfacs <- model.matrix(Terms)
-  newfac <- single.factor(form.in, keep.order = ko)
+  newfac <- single.factor(f1, keep.order = ko)
   if(any(Xfacs != 1 & Xfacs != 0)) stop("Only factors allowed as independent variables in model formula. 
                                         \nMake sure the covariate is input separately.")
-  if(is.null(covariate)) stop("A covariate must be included, separate from the model formula")
+  if(is.null(f2)) stop("A covariate formula must be included, separate from the model formula")
   if(ncol(model.matrix(~newfac)) != ncol(Xfacs)) stop("Model formula must be for either a single factor or full-factorial model\n  e.g., Shape ~ Factor.A  -or-  Shape ~ Factor.A * Factor.B * ...")
   
-  Xcov <- data.frame(covariate, check.names = TRUE)
-  Xs <- mod.mats.w.cov(form.in, Xcov, keep.order=ko, interaction = TRUE)
+  cov.mf <- model.frame(as.formula(f2))
+  if(length(attr(terms(cov.mf),"term.labels")) > 1) stop("Pairwise comparisons of slopes can only be considered for a single covariate. \n Use advanced.procD.lm for multiple covariates or complex model designs.")
+  Xs <- mod.mats.w.cov(fac.mf, cov.mf, keep.order=ko, interaction = TRUE)
   k <- length(Xs$Xs) - 1
   X <- Xs$Xs[[k+1]]
-  anova.parts.obs <- anova.parts(form.in, X = Xs,Yalt = "observed", keep.order=ko)
+  anova.parts.obs <- anova.parts(f1, X = Xs,Yalt = "observed", keep.order=ko)
   anova.tab <-anova.parts.obs$table 
   SS.obs <- anova.parts.obs$SS[1:k]
-  Bslopes <- slopes(newfac, Xcov, Y)
+  Bslopes <- slopes(newfac, cov.mf, Y)
   slope.lengths <- sqrt(diag(Bslopes%*%t(Bslopes)))
   db <- as.matrix(dist(Bslopes))
   cb <- vec.ang.matrix(Bslopes, type = angle.type)
@@ -113,10 +111,10 @@ pairwise.slope.test <- function (f1, covariate, iter = 999, int.first = FALSE, a
   for(i in 1: iter){
     if(RRPP == TRUE) {
       SSr <- SS.random(Y, Xs, SS.obs, Yalt = "RRPP")
-      Bslopes.r <- slopes(newfac, Xcov, SSr$Y)
+      Bslopes.r <- slopes(newfac, cov.mf, SSr$Y)
     } else {
       SSr <- SS.random(Y, Xs, SS.obs, Yalt = "resample")
-      Bslopes.r <- slopes(newfac, Xcov, SSr$Y)
+      Bslopes.r <- slopes(newfac, cov.mf, SSr$Y)
     }
     P[,,i+1] <- SSr$SS
     P.dist[,,i+1] <- as.matrix(dist(Bslopes.r))	

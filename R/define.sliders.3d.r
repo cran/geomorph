@@ -1,4 +1,4 @@
-#' Choose points to "slide" along three-dimensional curves.
+#' Select points to "slide" along three-dimensional curves.
 #'
 #' An interactive function to define which digitized landmarks of an '*.nts' file
 #' will "slide" along three-dimensional (3D) curves.
@@ -14,7 +14,7 @@
 #' Choosing which landmarks will be sliders involves landmark selection using a mouse in the rgl plot window. 
 #' With a standard 3-button (PC) buildtemplate uses:
 #' \enumerate{
-#'  \item the RIGHT mouse button (primary) to choose points to be defined as sliders (click-drag a box around a vertex to select),
+#'  \item the RIGHT mouse button (primary) to choose points to be defined as sliders,
 #'  \item the LEFT mouse button (secondary) is used to rotate mesh, 
 #'  \item the mouse SCROLLER (third/middle) is used to zoom in and out.
 #' }
@@ -22,16 +22,16 @@
 #' specific single button mice, XQuartz must be configured: go to Preferences > Input > tick "Emulate three button mouse":
 #' \enumerate{
 #'  \item press button to rotate 3D mesh,
-#'  \item press button while pressing COMMAND key to select points to be digitized (click-drag a box around a vertex to select as landmark),
+#'  \item press button while pressing COMMAND key to select points to be defined as sliders,
 #'  \item press button while pressing OPTION key to adjust mesh perspective.
 #'  \item the mouse SCROLLER or trackpad two finger scroll is used to zoom in an out.
 #'  }
 #' 
 #' To define the sliders, for each sliding landmark along the curve in the format 'before-slider-after':
 #' \enumerate{
-#'  \item Click-drag to choose the first landmark between which semi-landmark will "slide",
-#'  \item Click-drag to choose sliding landmark,
-#'  \item Click-drag to choose the last landmark between which semi-landmark will "slide",
+#'  \item Click to choose the first landmark between which semi-landmark will "slide",
+#'  \item Click to choose sliding landmark,
+#'  \item Click to choose the last landmark between which semi-landmark will "slide",
 #' Screen will show lines connecting the three landmarks, and will highlight the sliding semilandmark in red. 
 #' }
 #' This procedure is overlapping, so for example a curve defined by a sequence of semilandmarks,
@@ -64,16 +64,16 @@ define.sliders.3d<-function(spec, nsliders,surfsliders=FALSE)    {
   }
   n <- dim(spec)[1]
   index <- as.numeric(rownames(spec))
-  clear3d();plot3d(spec,size=5,col="black",xlab="x",ylab="y",zlab="z",aspect=FALSE)
+  clear3d();ids <- plot3d(spec,size=5,col="black",xlab="x",ylab="y",zlab="z",aspect=FALSE)
   text3d(spec, texts=index,cex=1,adj=c(2,1))  
   curveslide<-NULL 
   for (i in 1:nsliders)      {
     selected<-NULL
     for (j in 1:3)      	{
-      f<-keep<-NULL
-      f<-select3d(button="right")
-      keep<-f(spec[,1],spec[,2],spec[,3])
-      selected.temp<-cbind(index[which(keep==TRUE)][1],spec[,1][which(keep==TRUE)][1],spec[,2][which(keep==TRUE)][1],spec[,3][which(keep==TRUE)][1])
+      keep<-NULL
+      keep <- selectpoints3d(ids["data"], value= FALSE, button = "right")[2]
+      points3d(spec[keep,1],spec[keep,2],spec[keep,3],size=10,color="red",add=TRUE)
+      selected.temp<-cbind(index[keep],spec[,1][keep],spec[,2][keep],spec[,3][keep])
       selected<-rbind(selected,selected.temp)
       if (j==2) {
         points3d(selected[2,2],selected[2,3],selected[2,4],size=10,color="red",add=TRUE) 

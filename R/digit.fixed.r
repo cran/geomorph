@@ -22,7 +22,7 @@
 #' 
 #' To digitize with a standard 3-button (PC):
 #' \enumerate{
-#'  \item the RIGHT mouse button (primary) to select points to be digitized (click-drag a box around a vertex to select as landmark),
+#'  \item the RIGHT mouse button (primary) to select points to be digitized,
 #'  \item the LEFT mouse button (secondary) is used to rotate mesh, 
 #'  \item the mouse SCROLLER (third/middle) is used to zoom in and out.
 #' }
@@ -30,7 +30,7 @@
 #' specific single button mice, XQuartz must be configured: go to Preferences > Input > tick "Emulate three button mouse":
 #' \enumerate{
 #'  \item press button to rotate 3D mesh,
-#'  \item press button while pressing COMMAND key to select points to be digitized (click-drag a box around a vertex to select as landmark),
+#'  \item press button while pressing COMMAND key to select vertex to be used as a landmark,
 #'  \item press button while pressing OPTION key to adjust mesh perspective.
 #'  \item the mouse SCROLLER or trackpad two finger scroll is used to zoom in an out.
 #'  }
@@ -69,18 +69,15 @@ digit.fixed <- function(spec, fixed, index=FALSE, ptsize = 1, center = TRUE)    
     if (center == TRUE){ specimen <- scale(spec, scale = FALSE) }
     if (center == FALSE){ specimen <- spec }
   } else { stop ("File is not matrix in form: vertices by xyz")} 
-  clear3d();plot3d(specimen[,1],specimen[,2],specimen[,3],size=ptsize,aspect=FALSE)
+  clear3d(); ids <- plot3d(specimen[,1],specimen[,2],specimen[,3],size=ptsize,aspect=FALSE)
   if (!is.null(mesh)) { shade3d(mesh, add=TRUE) }
   selected<-matrix(NA,nrow=fixed,ncol=3);fix<-NULL    
   for (i in 1:fixed)      {
-    f<-keep<-ans<-NULL
-    f<-select3d(button="right")
-    keep<-f(specimen)
-      if(anyNA(specimen[which(keep==TRUE)[1],])==TRUE){
-      cat(paste("No vertex selected, type n below"),"\n") } 
-    selected[i,]<-as.numeric(specimen[which(keep==TRUE)[1],])
-    fix<-c(fix,which(keep==TRUE)[1])   
-    points3d(selected[i,1],selected[i,2],selected[i,3],size=10,color="red",add=TRUE)
+    keep<-ans<-NULL
+    keep <- selectpoints3d(ids["data"], value= FALSE, button = "right")[2]
+    points3d(specimen[keep,1],specimen[keep,2],specimen[keep,3],size=10,color="red",add=TRUE)
+    selected[i,]<-as.numeric(specimen[keep,])
+    fix<-c(fix,keep)   
     cat(paste("Keep Landmark ",i,"(y/n)?"),"\n")
     ans<-readLines(n=1)
     if(ans=="y" & length(fix)!=fixed) {
@@ -94,19 +91,16 @@ digit.fixed <- function(spec, fixed, index=FALSE, ptsize = 1, center = TRUE)    
       selected[i,]<-NA
       fix<-fix[-i] 
       rgl.bringtotop(stay = FALSE)
-      clear3d();plot3d(specimen[,1],specimen[,2],specimen[,3],size=ptsize,aspect=FALSE)
+      clear3d();ids <- plot3d(specimen[,1],specimen[,2],specimen[,3],size=ptsize,aspect=FALSE)
       if (!is.null(mesh)) { shade3d(mesh, add=TRUE) }
       if(sum(1-is.na(selected))>0){
         points3d(selected[,1],selected[,2],selected[,3],size=10,color="red",add=TRUE)
       }      
-      f<-keep<-NULL
-      f<-select3d(button="right")
-      keep<-f(specimen)
-        if(anyNA(specimen[which(keep==TRUE)[1],])==TRUE){
-        text3d(0,0, texts = "No vertex selected, see console")} 
-      selected[i,]<-as.numeric(specimen[which(keep==TRUE)[1],])
-      fix<-c(fix,which(keep==TRUE)[1])   
-      points3d(selected[i,1],selected[i,2],selected[i,3],size=10,color="red",add=TRUE)
+      keep<-ans<-NULL
+      keep <- selectpoints3d(ids["data"], value= FALSE, button = "right")[2]
+      points3d(specimen[keep,1],specimen[keep,2],specimen[keep,3],size=10,color="red",add=TRUE)
+      selected[i,]<-as.numeric(specimen[keep,])
+      fix<-c(fix,keep)   
       cat(paste("Keep Landmark ",i,"(y/n)?"),"\n")
       ans<-readLines(n=1)
       if(ans=="y" & length(fix)!=fixed) {

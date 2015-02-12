@@ -39,7 +39,7 @@
 #' data(plethspecies)
 #' Y.gpa<-gpagen(plethspecies$land)    #GPA-alignment
 #' 
-#' phylo.pls(Y.gpa$coords[1:5,,],Y.gpa$coords[6:11,,],plethspecies$phy,iter=5)
+#' phylo.pls(Y.gpa$coords[1:5,,],Y.gpa$coords[6:11,,],plethspecies$phy,iter=99)
 
 phylo.pls <-function(A1, A2, phy, warpgrids=TRUE,iter=999, label=NULL,verbose=FALSE){ 
   if(any(is.na(A1))==T){
@@ -79,7 +79,11 @@ phylo.pls <-function(A1, A2, phy, warpgrids=TRUE,iter=999, label=NULL,verbose=FA
   C<-vcv.phylo(phy,anc.nodes=FALSE) 
   C<-C[rownames(y),rownames(y)] 
   x<-x[rownames(y),]  
-  invC<-solve(C) 
+  det.C<-det(C)
+  if(det.C>0){invC<-solve(C)}
+  if(det.C==0){svd.C<-svd(C)
+               Positive <- svd.C$d > max(1e-08 * svd.C$d[1L], 0)
+               invC<- svd.C$v[, Positive, drop = FALSE] %*% ((1/svd.C$d[Positive]) *t(svd.C$u[, Positive, drop = FALSE]))}
   one<-matrix(1,Nspec,1)  
   a<-t(t(one)%*%invC%*% data.all)*sum(sum(invC))^-1  
   R<- t(data.all-one%*%t(a))%*%invC%*%(data.all-one%*%t(a))*(Nspec-1)^-1 
@@ -87,8 +91,14 @@ phylo.pls <-function(A1, A2, phy, warpgrids=TRUE,iter=999, label=NULL,verbose=FA
   pls <- svd(R12) 
   U <- pls$u 
   V <- pls$v 
-  eigC<-eigen(C)
-  D.mat<-solve(eigC$vectors %*% diag(sqrt(eigC$values)) %*% t(eigC$vectors)) 
+  eigC <- eigen(C)
+  lambda <- zapsmall(eigC$values)
+  if(any(lambda == 0)){
+    warning("Singular phylogenetic covariance matrix. Proceed with caution")
+    lambda = lambda[lambda > 0]
+  }
+  eigC.vect = eigC$vectors[,1:(length(lambda))]
+  D.mat <- solve(eigC.vect%*% diag(sqrt(lambda)) %*% t(eigC.vect))
   Phy.X<-D.mat%*%( data.all-one%*%t(a)) 
   x.phy <- Phy.X[, c(1:dim(x)[2])] 
   y.phy <- Phy.X[, c((dim(x)[2] + 1):(dim(x)[2] +  dim(y)[2]))] 
@@ -117,21 +127,6 @@ phylo.pls <-function(A1, A2, phy, warpgrids=TRUE,iter=999, label=NULL,verbose=FA
   }
   pls.val[iter + 1] = pls.obs
   P.val <- P.val/(iter + 1) 
-  for(i in 1:iter){
-    y.r<-y[sample(nrow(y)),]  
-    XY.vcv.r<-cov(cbind(x,y.r))
-    S12.r<-XY.vcv.r[1:dim(x)[2],(dim(x)[2]+1):(dim(x)[2]+dim(y.r)[2])]; S21.r<-t(S12.r)
-    S11.r<-XY.vcv.r[1:dim(x)[2],1:dim(x)[2]]
-    S22.r<-XY.vcv.r[(dim(x)[2]+1):(dim(x)[2]+dim(y.r)[2]),(dim(x)[2]+1):(dim(x)[2]+dim(y.r)[2])]
-    pls.r<-svd(S12.r)
-    U.r<-pls.r$u; V.r<-pls.r$v
-    XScores.r<-x%*%U.r[,1]; YScores.r<-y.r%*%V.r[,1]
-    PLS.r<-cor(XScores.r,YScores.r)
-    pls.val[i]<-PLS.r
-    P.val<-ifelse(PLS.r>=pls.obs, P.val+1,P.val) 
-  }  
-  pls.val[iter+1]=pls.obs
-  P.val<-P.val/(iter+1)
   if (length(dim(A1))==2 && length(dim(A2))==2){
     plot(XScores[,1],YScores[,1],pch=21,bg="black",main="PLS Plot",xlab = "PLS1 Block 1",ylab = "PLS1 Block 2")
     if(length(label!=0)){text(XScores[,1],YScores[,1],label,adj=c(-.7,-.7))}

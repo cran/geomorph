@@ -8,7 +8,7 @@
 #' Choosing which landmarks will be deleted involves landmark selection using a mouse in the rgl plot window. 
 #' With a standard 3-button (PC) buildtemplate uses:
 #' \enumerate{
-#'  \item the RIGHT mouse button (primary) to choose points to be deleted (click-drag a box around landmark),
+#'  \item the RIGHT mouse button (primary) to choose points to be deleted,
 #'  \item the LEFT mouse button (secondary) is used to rotate mesh, 
 #'  \item the mouse SCROLLER (third/middle) is used to zoom in and out.
 #' }
@@ -16,7 +16,7 @@
 #' specific single button mice, XQuartz must be configured: go to Preferences > Input > tick "Emulate three button mouse":
 #' \enumerate{
 #'  \item press button to rotate 3D mesh,
-#'  \item press button while pressing COMMAND key to select points to be digitized (click-drag a box around a vertex to select as landmark),
+#'  \item press button while pressing COMMAND key to select points to be deleted,
 #'  \item press button while pressing OPTION key to adjust mesh perspective.
 #'  \item the mouse SCROLLER or trackpad two finger scroll is used to zoom in an out.
 #'  }
@@ -33,26 +33,26 @@ editTemplate<-function(template, fixed, n){
   if (is.null(dim(template))) stop ("File is not a matrix of 3D coordinates.")
   if (dim(template)[2]!=3) stop ("File is not a matrix of 3D coordinates.")
   spec.name<-deparse(substitute(template))
-  clear3d();plot3d(template[-(1:fixed[1]),],size=7,col="blue",aspect=FALSE)
-  points3d(template[(1:fixed),],size=10,color="red",add=TRUE)  
+  clear3d();ids <- plot3d(template,size=5,aspect=TRUE)
+  points3d(template[-(1:fixed[1]),],size=7,col="blue")
+  points3d(template[(1:fixed),],size=10,color="red")  
   cat("Remove Template Points","\n")
   selected2<-NULL
   for (i in 1:n)        {
     selected2.temp<-NULL
-    f<-NULL
     keep<-NULL
-    f<-select3d(button="right")
+    keep <- selectpoints3d(ids["data"], value= FALSE, button = "right")[2]
     cat( i, "of", n, "points have been removed" , "\n")
-    keep<-f(template[,1],template[,2],template[,3])
-    selected2.temp<-which(keep==TRUE)
+    selected2.temp<-keep
     selected2<-c(selected2,selected2.temp)
-    points3d(template[selected2.temp,][1],template[selected2.temp,][2],template[selected2.temp,][3],size=12,color="dark green",add=TRUE)
+    points3d(template[selected2.temp,][1],template[selected2.temp,][2],template[selected2.temp,][3],size=12,color="yellow",add=TRUE)
     points3d(template[-(1:fixed[1]),],size=7,col="blue",add=TRUE)
     points3d(template[(1:fixed),],size=10,color="red",add=TRUE)
   }  
   template<-cbind(template[-(selected2),][,1],template[-(selected2),][,2],template[-(selected2),][,3])
   write.table(template,file="template.txt",col.names=TRUE)
-  clear3d();plot3d(template[-(1:fixed[1]),],size=7,col="blue",aspect=FALSE)
-  points3d(template[(1:fixed),],size=10,color="red",add=TRUE)
+  clear3d();plot3d(template,size=5,aspect=TRUE)
+  points3d(template[-(1:fixed[1]),],size=7,col="blue")
+  points3d(template[(1:fixed),],size=10,color="red")  
   return(template)
 }

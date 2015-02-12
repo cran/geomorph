@@ -26,7 +26,7 @@
 #' 
 #' To digitize with a standard 3-button (PC):
 #' \enumerate{
-#'  \item the RIGHT mouse button (primary) to select points to be digitized (click-drag a box around a vertex to select as landmark),
+#'  \item the RIGHT mouse button (primary) to select points to be digitized,
 #'  \item the LEFT mouse button (secondary) is used to rotate mesh, 
 #'  \item the mouse SCROLLER (third/middle) is used to zoom in and out.
 #' }
@@ -34,7 +34,7 @@
 #' specific single button mice, XQuartz must be configured: go to Preferences > Input > tick "Emulate three button mouse":
 #' \enumerate{
 #'  \item press button to rotate 3D mesh,
-#'  \item press button while pressing COMMAND key to select points to be digitized (click-drag a box around a vertex to select as landmark),
+#'  \item press button while pressing COMMAND key to select vertex to be used as a landmark,
 #'  \item press button while pressing OPTION key to adjust mesh perspective.
 #'  \item the mouse SCROLLER or trackpad two finger scroll is used to zoom in an out.
 #'  }
