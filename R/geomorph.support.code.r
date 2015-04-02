@@ -2,7 +2,7 @@
 #' @docType package
 #' @aliases geomorph
 #' @title Geometric morphometric analyses for 2D/3D data
-#' @author Dean C. Adams, Michael Collyer, Erik Otarola-Castillo, & Emma Sherratt
+#' @author Dean C. Adams, Michael Collyer, & Emma Sherratt
 #'
 #' Functions in this package allow one to read, manipulate, and digitize landmark data; generate shape
 #'  variables via Procrustes analysis for points, curves and surface data, perform statistical analyses
@@ -348,7 +348,7 @@ trajplot<-function(Data,M){
 
 writeland.nts <- function(A, spec.name, comment=NULL){
   ntsfile=paste(spec.name,".nts",sep="")
-  file.create(file=ntsfile, overwrite = TRUE)
+  file.create(file=ntsfile)
   if(is.null(comment)){
     cat(paste('"',spec.name,sep=""),file= ntsfile,sep="\n",append=TRUE)
   }
@@ -430,24 +430,24 @@ RRP.submodels <- function(Xs, Y){
 }
 
 # Submodel design matrices for use in RRPP, etc.
-mod.mats <- function(mod.mf, keep.order=FALSE){
-    Terms <- terms(mod.mf, keep.order = keep.order)
+mod.mats <- function(f1, dat1, keep.order=FALSE){
+    Terms <- terms(f1, data=dat1, keep.order = keep.order)
     k <- length(attr(Terms, "term.labels"))
-    Y <- as.matrix(mod.mf[1])
+    n <- dim(dat1)[[1]]
     Xs <- as.list(array(0,k+1))
-    Xs[[1]] <- matrix(1,nrow(Y))
+    Xs[[1]] <- matrix(1,n)
     for(i in 1:k){
-        Xs[[i+1]] <- model.matrix(Terms[1:i], data = mod.mf)
+        Xs[[i+1]] <- model.matrix(Terms[1:i], data = dat1)
     }
     list(Xs=Xs, terms =  attr(Terms, "term.labels"))
 }
 
-mod.mats.w.cov <- function(fac.mf, cov.mf, keep.order =FALSE, interaction = FALSE){
-    fTerms <- terms(fac.mf, keep.order = keep.order)
-    cTerms <- terms(cov.mf, keep.order = keep.order)
+mod.mats.w.cov <- function(f1, f2, dat1, dat2, keep.order =FALSE, interaction = FALSE){
+    fTerms <- terms(f1, data = dat1, keep.order = keep.order)
+    cTerms <- terms(f2, data = dat2, keep.order = keep.order)
     all.terms <- c(attr(cTerms, "term.labels"), attr(fTerms, "term.labels"))
-    Y <- as.matrix(fac.mf[1])
-    if(interaction == FALSE) form.full <- as.formula(paste("Y ~", paste(all.terms,collapse="+")))
+    dat12 <- merge(dat1, dat2, by="row.names")
+    if(interaction == FALSE) form.full <- as.formula(paste("~", paste(all.terms,collapse="+")))
     if(interaction == TRUE) {
         cPart <- paste(attr(cTerms, "term.labels"),collapse="+")
         fPart <- paste(attr(fTerms, "term.labels"),collapse="+")
@@ -458,15 +458,14 @@ mod.mats.w.cov <- function(fac.mf, cov.mf, keep.order =FALSE, interaction = FALS
             }
         }
         iParts <- paste(iParts, collapse="+")
-        form.full <- as.formula(paste("Y ~", paste(cPart, fPart, iParts, sep="+")))
+        form.full <- as.formula(paste("~", paste(cPart, fPart, iParts, sep="+")))
     }
     Terms.full <- terms(form.full, keep.order = keep.order)
     k <- length(attr(Terms.full, "term.labels"))
+    n <- dim(dat12)[[1]]
     Xs <- as.list(array(,(k+1)))
-    Xs[[1]] <- matrix(1,nrow(Y))
-    for(i in 1:k){
-        Xs[[i+1]] <- model.matrix(Terms.full[1:i])
-    }
+    Xs[[1]] <- matrix(1,n)
+    for(i in 1:k) Xs[[i+1]] <- model.matrix(Terms.full[1:i], data=dat12, by="row.names")
     list(Xs=Xs, terms = attr(Terms.full, "term.labels"))
 }
 
@@ -532,12 +531,12 @@ SS.pgls.random <- function(Y, Xs, SS, Pcor, Yalt = c("resample", "RRPP")){ # lik
 
 anova.parts <- function(f1, X = NULL, Yalt = c("observed","resample", "RRPP"), keep.order = FALSE){
     form.in <- formula(f1)
+    Y <- eval(form.in[[2]], parent.frame())
     Yalt = match.arg(Yalt)
     Terms <- terms(form.in, keep.order = keep.order)
     mf <- model.frame(Terms)
-    Y <- as.matrix(mf[1])
     if(is.null(X)){
-        Xs <- mod.mats(mf, keep.order = keep.order)
+        Xs <- mod.mats(f1 = form.in, dat1 = mf, keep.order = keep.order)
     } else {Xs = X}
     anova.terms <- Xs$terms
     k <- length(Xs$Xs) - 1
@@ -585,7 +584,7 @@ anova.pgls.parts <- function(f1, X = NULL, Pcor, Yalt = c("observed","resample",
     mf <- model.frame(Terms)
     Y <- eval(form.in[[2]], parent.frame())
     if(is.null(X)){
-        Xs <- mod.mats(mf, keep.order = keep.order)
+        Xs <- mod.mats(f1=form.in, dat1=mf, keep.order = keep.order)
     } else {Xs = X}
     anova.terms <- Xs$terms
     k <- length(Xs$Xs) - 1

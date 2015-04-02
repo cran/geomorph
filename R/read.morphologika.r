@@ -6,7 +6,7 @@
 #'  landmark coordinates. Morphologika files are text files in one of the standard formats for 
 #'  geometric morphometrics (see O'Higgins and Jones 1998,2006). 
 #' 
-#'  If the headers "[labels]" and "[labelvalues]" are present, then a data matrix containing all 
+#'  If the headers "[labels]", "[labelvalues]" and "[groups]" are present, then a data matrix containing all 
 #'  individual specimen information is returned.
 #'  If the header "[wireframe]" is present, then a matrix of the landmark addresses for the wireframe is
 #'  returned (see \code{\link{plotRefToTarget}} option 'links')
@@ -42,9 +42,15 @@ read.morphologika<-function(file){
     tmp <- unlist(strsplit(mfile[grep("labels",mfile,ignore.case=T) + 1]," "))
     labvals <- unlist(strsplit(mfile[grep("labelvalues",mfile,ignore.case=T) + 1:n]," "))
     labvalmat <- matrix(labvals, ncol=length(tmp), byrow=T, dimnames=list(names,tmp)) }
+  if(length(grep("groups",mfile,ignore.case=T))>0) {
+    tmp <- matrix(unlist(strsplit(mfile[grep("groups",mfile,ignore.case=T) + 1]," ")), ncol=2, byrow=T)
+    gpval <- NULL
+    for(i in 1:nrow(tmp)){ gpval <- c(gpval, rep(tmp[i,1], tmp[i,2]))}
+    labvalmat <- cbind(labvalmat, groups=gpval) }
   if(length(grep("wireframe",mfile,ignore.case=T))>0) {
     strtwf <- grep("wireframe",mfile, ignore.case=T)
     endwf <-strtwf + grep("[",mfile[strtwf+1:length(mfile)], fixed=T)[1]
+      if(is.na(endwf)){ endwf <- length(mfile)}
     wiref <- matrix(as.numeric(unlist(strsplit(mfile[(strtwf+1):(endwf-1)]," "))),ncol=2, byrow=T) }  
   if(!is.null(wiref) && is.null(labvalmat)) return(list(coords = coords, wireframe = wiref)) 
   if(is.null(wiref) && !is.null(labvalmat)) return(list(coords = coords, labels = labvalmat)) 

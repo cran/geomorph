@@ -87,16 +87,17 @@
 #'
 #' trajectory.analysis(motionpaths$trajectories~motionpaths$groups,
 #' estimate.traj=FALSE, traj.pts=5,iter=15)
-trajectory.analysis<-function(f1,data=NULL,estimate.traj=TRUE,traj.pts=NULL,iter=99){
-  form.in<-formula(f1)
+trajectory.analysis<-function(f1,data=NULL,estimate.traj=TRUE,traj.pts=NULL,iter=999){
+  form.in <- formula(f1)
+  Y <- eval(form.in[[2]], parent.frame())
+  if(length(dim(Y)) == 3)  Y <- two.d.array(Y) else Y <- as.matrix(Y)
+  form.in <- as.formula(paste(c("Y",form.in[[3]]),collapse="~"))
   Terms<-terms(form.in)
   dat<-model.frame(form.in)
   y<-as.matrix(dat[1])
   ncol.x<-length(attr(Terms,"term.labels"))  
   all.terms<-attr(Terms,"term.labels")
   k <- length(all.terms)
-  if (length(dim(y))!=2){
-    stop("Response matrix (shape) not a 2D array. Use 'two.d.array' first.")  }
   if(any(is.na(y))==T){
     stop("Response data matrix (shape) contains missing values. Estimate these first(see 'estimate.missing').")  }
   
@@ -112,13 +113,13 @@ trajectory.analysis<-function(f1,data=NULL,estimate.traj=TRUE,traj.pts=NULL,iter
     k1<-length(levels(dat[,k]))
     anova.parts.obs <- anova.parts(form.in, Yalt = "observed", keep.order=TRUE)
     anova.tab <-anova.parts.obs$table  
-    Xs <- mod.mats(dat, keep.order=TRUE)
+    Xs <- mod.mats(form.in, dat, keep.order=TRUE)
     Plm <-array(, c(k, 1, iter+1))
     SS.obs <-anova.parts.obs$SS[1:k]
     Plm[,,1] <- SS.obs    
     fac12<-single.factor(form.in)
     lsmeans.obs <- ls.means(fac12, cov.mf=NULL, y)
-    traj.specs.obs<- aperm(array(t(lsmeans.obs), c(p,n1,k1)), c(2,1,3)) 
+    traj.specs.obs<- aperm(array(t(lsmeans.obs), c(p,k1,n1)), c(2,1,3)) 
     trajsize.obs<-trajsize(traj.specs.obs,n1,k1) 
     trajdir.obs<-trajorient(traj.specs.obs,n1,p); diag(trajdir.obs)<-0 
     trajshape.obs<-trajshape(traj.specs.obs) 
@@ -130,7 +131,7 @@ trajectory.analysis<-function(f1,data=NULL,estimate.traj=TRUE,traj.pts=NULL,iter
       SS.r <- SS.random(y, Xs, SS.obs, Yalt = "RRPP")
       Plm[,,i+1] <- SS.r$SS
       lsmeans.r <- ls.means(fac12, cov.mf=NULL, SS.r$Y)
-      traj.specs.r<- aperm(array(t(lsmeans.r), c(p,n1,k1)), c(2,1,3)) 
+      traj.specs.r<- aperm(array(t(lsmeans.r), c(p,k1,n1)), c(2,1,3)) 
       trajsize.r<-trajsize(traj.specs.r,n1,k1) 
       trajdir.r<-trajorient(traj.specs.r,n1,p); diag(trajdir.r)<-0 
       trajshape.r<-trajshape(traj.specs.r) 
@@ -145,7 +146,12 @@ trajectory.analysis<-function(f1,data=NULL,estimate.traj=TRUE,traj.pts=NULL,iter
     Z.lm <- Effect.size.matrix(Plm)
     Z.size <- Effect.size.matrix(PSize); diag(Z.size) <- 0
     Z.dir <- Effect.size.matrix(POrient); diag(Z.dir) <- 0
-    Z.shape <- Effect.size.matrix(PShape); diag(Z.shape) <- 0   
+    Z.shape <- Effect.size.matrix(PShape); diag(Z.shape) <- 0 
+    rownames(P.val.size) <- colnames(P.val.size) <- rownames(P.val.dir) <- colnames(P.val.dir) <- 
+      rownames(P.val.shape) <- colnames(P.val.shape) <- rownames(Z.size) <- colnames(Z.size) <-
+      rownames(Z.dir) <- colnames(Z.dir) <- rownames(Z.shape) <- colnames(Z.shape) <-
+      rownames(trajsize.obs) <- colnames(trajsize.obs) <- rownames(trajdir.obs) <- colnames(trajdir.obs) <-
+      rownames(trajshape.obs) <- colnames(trajshape.obs) <- levels(dat[,k-1])
     anova.tab <- data.frame(anova.tab, Z = c(Z.lm, NA, NA), P.value = c(P.val.lm, NA, NA))
     anova.title = "\nRandomized Residual Permutation Procedure used\n"
     attr(anova.tab, "heading") <- paste("\nType I (Sequential) Sums of Squares and Cross-products\n",anova.title)
@@ -154,8 +160,8 @@ trajectory.analysis<-function(f1,data=NULL,estimate.traj=TRUE,traj.pts=NULL,iter
          Size=list(Obs.dif=trajsize.obs,Z=Z.size,P = P.val.size),
          Direction=list(Obs.dif=trajdir.obs,Z=Z.dir,P = P.val.dir),
          Shape=list(Obs.dif=trajshape.obs,Z=Z.shape,P = P.val.shape))
-    if(k1 == 2) print(results[-4]) else print(results)
     trajplot(y,traj.specs.obs)
+    if(k1 == 2) return(results[-4]) else return(results)
   }
   
   if(estimate.traj==FALSE){
@@ -163,7 +169,7 @@ trajectory.analysis<-function(f1,data=NULL,estimate.traj=TRUE,traj.pts=NULL,iter
       stop("Number of points in the trajectory not specified.") }
     if(length(attr(Terms,"term.labels")) > 1) stop("If data are already trajectories, only a single-factor model is currently supported. (See Help file)")
     X <- model.matrix(Terms)
-    Xs <- mod.mats(dat)
+    Xs <- mod.mats(form.in,dat)
     k <- length(Xs$Xs) - 1
     k1<-traj.pts
     n1<-nrow(y)
@@ -223,9 +229,9 @@ trajectory.analysis<-function(f1,data=NULL,estimate.traj=TRUE,traj.pts=NULL,iter
                     ANOVA.Size=size.tab,
                     ANOVA.Dir = dir.tab,
                     ANOVA.shape=shape.tab)
-    if(k1 == 2) print(results[-4]) else print(results)
     y.plot<-matrix(t(two.d.array(traj.specs.obs)),ncol=p1,byrow=TRUE)
     trajplot(y.plot,traj.specs.obs)
-
+    if(k1 == 2) return(results[-4]) else return(results)
   }
+  results
 }

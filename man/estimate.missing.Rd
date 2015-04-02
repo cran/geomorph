@@ -2,7 +2,7 @@
 % Please edit documentation in R/estimate.missing.r
 \name{estimate.missing}
 \alias{estimate.missing}
-\title{Estimate locations of missing landmarks using the thin-plate spline}
+\title{Estimate locations of missing landmarks}
 \usage{
 estimate.missing(A, method = c("TPS", "Reg"))
 }
@@ -12,8 +12,8 @@ estimate.missing(A, method = c("TPS", "Reg"))
 \item{method}{Method for estimating missing landmark locations}
 }
 \value{
-Function returns a n x p matrix of coordinates for the target specimen that includes the original landmarks
-plus the estimated coordinates for the missing landmarks.
+Function returns an array (p x k x n) of the same dimensions as input A, including coordinates for the target specimens
+(the original landmarks plus the estimated coordinates for the missing landmarks). These data need to be Procrustes Superimposed prior to analysis (seesee \code{\link{gpagen}}).
 }
 \description{
 A function for estimating the locations of missing landmarks
