@@ -29,8 +29,7 @@
 #'   the regression is of the form: shape~size+groups (Note: to examine the interaction term use \code{\link{procD.lm}}).
 #'   Specimens from each group are plotted using distinct colors based on the order in which the groups are
 #'   found in the dataset, and using R's standard color palette: black, red, green, blue, cyan, magenta,
-#'   yellow, and gray. NOTE: to change the colors of the groups, simply substitute a vector of the desired colors for 
-#'   each specimen.
+#'   yellow, and gray. 
 #'
 #' @param f1 A formula (of the form shape ~ size); shape can be a matrix (n x [p1 x k]) or 3D array (p1 x k x n) containing 
 #' GPA-aligned coordinates for the specimens
@@ -40,8 +39,7 @@
 #'  should be displayed (note: if groups are provided no TPS grids are shown)
 #' @param iter Number of iterations for significance testing
 #' @param label An optional vector indicating labels for each specimen that are to be displayed
-#' @param mesh A mesh3d object to be warped to represent shape deformation of the directional and fluctuating components
-#' of asymmetry if {warpgrids= TRUE} (see \code{\link{warpRefMesh}}).
+#' @param mesh A mesh3d object to be warped to represent shape deformation of the minimum and maximum size if {warpgrids= TRUE} (see \code{\link{warpRefMesh}}).
 #' @param logsz A logical value indicating whether log(size) is used 
 #' @param RRPP A logical value to indicate if a randomized residual permutation procedure (RRPP) should be used for statistical tests
 #' @param verbose A logical value indicating whether the output is basic or verbose (see Value below)
@@ -275,9 +273,9 @@ plotAllometry<-function(f1, f2 = NULL, method=c("CAC","RegScore","PredLine"),war
   }
   
   if(verbose==TRUE){ 
-    if(method=="CAC") list(allom.score=CAC,resid.shape=RSC,logSize=log(Size),ProcDist.lm=anova.tab,pred.shape=Ahat)
-    if(method=="RegScore") list(allom.score=Reg.proj,logSize=log(Size),ProcDist.lm=anova.tab,pred.shape=Ahat)
-    if(method=="PredLine") list(allom.score=pred.val,logSize=log(Size),ProcDist.lm=anova.tab2,pred.shape=Ahat)
+    if(method=="CAC") return(list(allom.score=CAC,resid.shape=RSC,logSize=log(Size),ProcDist.lm=anova.tab,pred.shape=Ahat))
+    if(method=="RegScore") return(list(allom.score=Reg.proj,logSize=log(Size),ProcDist.lm=anova.tab,pred.shape=Ahat))
+    if(method=="PredLine") return(list(allom.score=pred.val,logSize=log(Size),ProcDist.lm=anova.tab2,pred.shape=Ahat))
   }
   if(verbose==FALSE) return(ProcDist.lm=anova.tab)
 }
