@@ -8,8 +8,11 @@
 #'  between species in morphospace after phylogenetic transformation (Adams 2014). From the data the rate of shape evolution
 #'  for each group is calculated, and a ratio of rates is obtained. If three or more groups of species are used, the ratio of 
 #'  the maximum to minimum rate is used as a test statistic (see Adams 2014). Significance testing 
-#'  is accomplished by phylogenetic simulation in which tips data are obtained under Brownian motion using a single 
-#'  evolutionary rate for all species on the phylogeny. If three or more groups of species are used, pairwise p-values are also returned. A histogram of evolutionary rate ratios obtained via phylogenetic simulation is presented, 
+#'  is accomplished by phylogenetic simulation in which tips data are obtained under Brownian motion using a common 
+#'  evolutionary rate pattern for all species on the phylogeny (i.e., a common evolutionary rate matrix). This procedure is
+#'  more general, and retains the desirable statistical properties of earlier methods, but for a wider array of data types.  
+#'  If three or more groups of species are used, pairwise p-values are also returned. A histogram of evolutionary rate ratios obtained 
+#'  via phylogenetic simulation is presented, 
 #'  with the observed value designated by an arrow in the plot. The function can be used to obtain a rate for the whole
 #'  dataset of species by using a dummy group factor assigning all species to one group.
 #'  
@@ -19,6 +22,7 @@
 #' @param phy A phylogenetic tree of {class phylo} - see \code{\link[ape]{read.tree}} in library ape
 #' @param A A matrix (n x [p x k]) or 3D array (p x k x n) containing GPA-aligned coordinates for a set of specimens
 #' @param gp A factor array designating group membership
+#' @param ShowPlot A logical value indicating whether or not the plot should be returned
 #' @param iter Number of iterations for significance testing
 #' @keywords analysis
 #' @author Dean Adams & Emma Sherratt
@@ -45,7 +49,7 @@
 #' #Calculate rates of size
 #' Csize <- matrix(Y.gpa$Csize, dimnames=list(names(Y.gpa$Csize))) # make matrix Csize with names
 #' compare.evol.rates(plethspecies$phy,Csize,gp=gp.end,iter=49)
-compare.evol.rates<-function(phy,A,gp,iter=999 ){
+compare.evol.rates<-function(phy,A,gp,ShowPlot=TRUE,iter=999 ){
   if (length(dim(A))==3){ 
       if(is.null(dimnames(A)[[3]])){
       stop("Data matrix does not include taxa names as dimnames for 3rd dimension.")  }
@@ -116,7 +120,10 @@ compare.evol.rates<-function(phy,A,gp,iter=999 ){
   }
   if (nlevels(gp) > 1) {
     sigmad.obs<-sigma.d(phy,x,ntaxa,gp) 
-    rate.mat<-diag(sigmad.obs$sigma.all,p)
+    ones<-array(1,N)
+    C<-vcv.phylo(phy); C<-C[rownames(x),rownames(x)]
+    a.obs<-colSums(solve(C))%*%x/sum(solve(C))  
+    rate.mat<-t(x-ones%*%a.obs)%*%solve(C)%*%(x-ones%*%a.obs)/N
     x.sim<-sim.char(phy,rate.mat,nsim=iter) 
     sig.sim<-1
     if (nlevels(gp) > 2) {
@@ -138,8 +145,11 @@ compare.evol.rates<-function(phy,A,gp,iter=999 ){
       gp.sig.sim[lower.tri(gp.sig.sim)]<-NA
     }
     rate.val[iter+1]=sigmad.obs$ratio
-    hist(rate.val,30,freq=TRUE,col="gray",xlab="SigmaD ratio")
-    arrows(sigmad.obs$ratio,50,sigmad.obs$ratio,5,length=0.1,lwd=2)
+    if(ShowPlot==TRUE){ 
+      hist(rate.val,30,freq=TRUE,col="gray",xlab="SigmaD ratio")
+      arrows(sigmad.obs$ratio,50,sigmad.obs$ratio,5,length=0.1,lwd=2)
+      
+    }
     if (nlevels(gp) > 2) {
       return(list(sigma.d = sigmad.obs$sigma.all, sigmad.all = sigmad.obs$sigma.d.all, 
                   sigmad.ratio = sigmad.obs$ratio, pvalue = sig.sim, pairwise.pvalue = gp.sig.sim))
