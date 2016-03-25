@@ -5,7 +5,7 @@
 #' The function estimates morphological disparity and performs pairwise comparisons to identify differences
 #' between groups. Morphological disparity is estimated as the Procrustes variance, overall or for groups, 
 #' using residuals of a linear model fit.  Procrustes variance is the same sum of the diagonal elements 
-#' of the group covariance matrix divided by the number of observations in the group (e.g., Zelditch et al. 2012).
+#' of the group sums of squares and cross-products matrix divided by the number of observations in the group (e.g., Zelditch et al. 2012).
 #' The function takes as input a formula to describe the linear model fit,
 #' plus a formulaic indication of groups (e.g., ~ groups).  It is assumed that the formula describes shape data that 
 #' have been GPA-aligned [e.g., \code{\link{gpagen}}], although the function can work with any multivariate data.
@@ -77,7 +77,7 @@ morphol.disparity <- function(f1, groups = NULL, iter = 999, seed = NULL, data =
   if(!is.null(groups) & class(groups) != "formula") stop("groups must be a formula; e.g., groups = ~ X")
   if(is.null(groups)) gps <- single.factor(pfit) else {
     data.types <- lapply(data, class)
-    keep = sapply(data.types, function(x) x != "array" & x != "phylo")
+    keep = sapply(data.types, function(x) x != "array" & x != "phylo" & x != "dist")
     dat2 <- as.data.frame(data[keep])
     gps <- model.frame(groups, data= dat2)
     if(ncol(gps) > 1) gps <- factor(apply(gps, 1,function(x) paste(x, collapse=":"))) else 

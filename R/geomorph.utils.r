@@ -14,8 +14,8 @@ print.gpagen <- function (x, ...) {
   cat(deparse(x$call), fill=TRUE, "\n\n")
   cat("\nGeneralized Procrustes Analysis\n")
   cat("with Partial Procrustes Superimposition\n\n")
-  cat(paste(x$p-x$nsliders, "fixed landmarks\n"))
-  cat(paste(x$nsliders, "semilandmarks (sliders)\n"))
+  cat(paste(x$p-x$nsliders-x$nsurf, "fixed landmarks\n"))
+  cat(paste(x$nsliders+x$nsurf, "semilandmarks (sliders)\n"))
   cat(paste(x$k,"-dimensional landmarks\n",sep=""))
   cat(paste(x$iter, "GPA iterations to converge\n"))
   if(!is.null(x$slide.method)) sm <- match.arg(x$slide.method, c("BE", "ProcD")) else
@@ -125,7 +125,6 @@ plot.QQ <- function(r){
 plot.procD.lm <- function(x, outliers=FALSE, ...){
   r <- x$residuals
   f <- x$fitted
-  if(!is.null(x$weights)) {r <- r*sqrt(x$weights); f <- f*sqrt(x$weights)}
   if(!is.null(x$Pcor)) {
     y <- x$Pcor%*%x$Y
     X <- x$Pcor%*%x$X
@@ -133,6 +132,7 @@ plot.procD.lm <- function(x, outliers=FALSE, ...){
     f <- fit$fitted.values
     r <- fit$residuals
   }
+  if(!is.null(x$weights)) {r <- r*sqrt(x$weights); f <- f*sqrt(x$weights)}
   pca.r <- prcomp(r)
   var.r <- round(pca.r$sdev^2/sum(pca.r$sdev^2)*100,2)
   plot(pca.r$x, pch=19, asp =1,
@@ -439,35 +439,44 @@ plotPLS <- function(p, label = NULL, warpgrids=TRUE){
   XScores <- p$XScores; YScores <- p$YScores
   if(is.matrix(XScores)) XScores <- XScores[,1]
   if(is.matrix(YScores)) YScores <- YScores[,1]
+  plsRaw <- pls(p$A1.matrix, p$A2.matrix, verbose=TRUE)
+  XScoresRaw <- plsRaw$XScores[,1]; YScoresRaw <- plsRaw$YScores[,1]
   pc <- prcomp(cbind(XScores, YScores))$x[,1]
   px <- predict(lm(XScores~pc))
   py <- predict(lm(YScores~pc))
   pxmax <- max(px); pxmin <- min(px)
   pymax <- max(py); pymin <- min(py)
+  pcRaw <- prcomp(cbind(XScoresRaw, YScoresRaw))$x[,1]
+  pxRaw <- predict(lm(XScoresRaw~pcRaw))
+  pyRaw <- predict(lm(YScoresRaw~pcRaw))
+  pxmaxRaw <- max(pxRaw); pxminRaw <- min(pxRaw)
+  pymaxRaw <- max(pyRaw); pyminRaw <- min(pyRaw)
   
   if (length(dim(A1)) == 3) {
     A1.ref <- mshape(A1)
-    A1.min <- arrayspecs(pxmin*p$left.pls.vectors[,1], 
+    A1.min <- arrayspecs(pxminRaw*p$left.pls.vectors[,1], 
                          nrow(A1.ref), ncol(A1.ref))[,,1]
-    A1.max <- arrayspecs(pxmax*p$left.pls.vectors[,1], 
+    A1.max <- arrayspecs(pxmaxRaw*p$left.pls.vectors[,1], 
                          nrow(A1.ref), ncol(A1.ref))[,,1]
     pls1.min <- A1.ref + A1.min
     pls1.max <- A1.ref + A1.max
   }
+  
   if (length(dim(A2)) == 3) {
     A2.ref <- mshape(A2)
-    A2.min <- arrayspecs(pymin*p$right.pls.vectors[,1], 
+    A2.min <- arrayspecs(pyminRaw*p$right.pls.vectors[,1], 
                          nrow(A2.ref), ncol(A2.ref))[,,1]
-    A2.max <- arrayspecs(pymax*p$right.pls.vectors[,1], 
+    A2.max <- arrayspecs(pymaxRaw*p$right.pls.vectors[,1], 
                          nrow(A2.ref), ncol(A2.ref))[,,1]
     pls2.min <- A2.ref + A2.min
     pls2.max <- A2.ref + A2.max
   }
+  
   if (length(dim(A1)) != 3 && length(dim(A2)) != 3) {
-    plot(XScores[, 1], YScores[, 1], pch = 21, bg = "black", 
+    plot(XScores, YScores, pch = 21, bg = "black", 
          main = "PLS Plot", xlab = "PLS1 Block 1", ylab = "PLS1 Block 2")
     if (length(label != 0)) {
-      text(XScores[, 1], YScores[, 1], label, adj = c(-0.7, -0.7))
+      text(XScores, YScores, label, adj = c(-0.7, -0.7))
     }
   }
   if (length(dim(A1)) == 3 || length(dim(A2)) == 3) {
@@ -482,8 +491,7 @@ plotPLS <- function(p, label = NULL, warpgrids=TRUE){
          xlab = "PLS1 Block 1", ylab = "PLS1 Block 2")
     abline(lm(py~px), col="red")
     if (length(label != 0)) {
-      text(XScores[, 1], YScores[, 1], label, adj = c(-0.7, 
-                                                      -0.7))    
+      text(XScores, YScores, label, adj = c(-0.7, -0.7))    
     }
     if (warpgrids == TRUE) {
       if (length(dim(A1)) == 3 && dim(A1)[2] == 2) {
@@ -503,12 +511,12 @@ plotPLS <- function(p, label = NULL, warpgrids=TRUE){
     par(mar = c(5.1, 4.1, 4.1, 2.1))
   }
   if (length(dim(A1)) == 3 && dim(A1)[2] == 3) {
-    plot(XScores[, 1], YScores[, 1], pch = 21, bg = "black", 
+    plot(XScores, YScores, pch = 21, bg = "black", 
          main = "PLS Plot", xlab = "PLS1 Block 1", ylab = "PLS1 Block 2")
     if (length(label != 0)) {
-      text(XScores[, 1], YScores[, 1], label, adj = c(-0.7, 
-                                                      -0.7))
+      text(XScores, YScores, label, adj = c(-0.7, -0.7))
     }
+    abline(lm(py~px), col="red")
     open3d()
     plot3d(pls1.min, type = "s", col = "gray", main = paste("PLS Block1 negative"), 
            size = 1.25, aspect = FALSE)
@@ -525,6 +533,7 @@ plotPLS <- function(p, label = NULL, warpgrids=TRUE){
            size = 1.25, aspect = FALSE)
   } 
 }
+
 
 #' Plot Function for geomorph
 #' 
@@ -698,7 +707,7 @@ plot.CR <- function(x, ...){
   CR.val <- x$random.CR
   CR.obs <- x$CR
   p <- x$P.value
-  ndec <- nchar(p)-2
+  ndec <- nchar(x$permutations)
   CR.obs <- round(CR.obs, ndec)
   main.txt <- paste("Observed CR =",CR.obs,";", "P-value =", p)
   hist(CR.val,30,freq=TRUE,col="gray",xlab="CR Coefficient",xlim=c(0,max(c(2,CR.val))),
@@ -748,7 +757,7 @@ plot.CR.phylo <- function(x, ...){
   CR.val <- x$random.CR
   CR.obs <- x$CR
   p <- x$P.value
-  ndec <- nchar(p)-2
+  ndec <- nchar(x$permutations)
   CR.obs <- round(CR.obs, ndec)
   main.txt <- paste("Observed CR =",CR.obs,";", "P-value =", p)
   hist(CR.val,30,freq=TRUE,col="gray",xlab="CR Coefficient",xlim=c(0,max(c(2,CR.val))),

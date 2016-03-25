@@ -133,6 +133,15 @@
 #' plot(plethAllometry, method = "PredLine")
 #' plot(plethAllometry, method = "RegScore")
 #' 
+#' ## Obtaining size-adjusted residuals (and allometry-free shapes)
+#' plethAnova <- procD.lm(plethAllometry$formula,
+#'      data = plethAllometry$data, iter = 499, RRPP=TRUE) 
+#' summary(plethAnova) # same ANOVA Table
+#' shape.resid <- arrayspecs(plethAnova$residuals,
+#'    p=dim(Y.gpa$coords)[1], k=dim(Y.gpa$coords)[2]) # size-adjusted residuals
+#' adj.shape <- shape.resid + array(Y.gpa$consensus, dim(shape.resid)) # allometry-free shapes
+#' plotTangentSpace(adj.shape) # PCA of allometry-free shape
+#' 
 #' # Group Allometries
 #' plethAllometry <- procD.allometry(coords~Csize, ~species*site, 
 #' logsz = TRUE, data=gdf, iter=499, RRPP=TRUE)
@@ -164,7 +173,7 @@ procD.allometry<- function(f1, f2 = NULL, f3 = NULL, logsz = TRUE,
   if(!is.null(f2) || !is.null(f3)){
     if(!is.null(data)) {
       data.types <- lapply(data, class)
-      keep = sapply(data.types, function(x) x != "array" & x != "phylo")
+      keep = sapply(data.types, function(x) x != "array" & x != "phylo" & x != "dist")
       dat2 <- as.data.frame(data[keep])
       } else dat2 <- NULL
       
@@ -265,7 +274,7 @@ procD.allometry<- function(f1, f2 = NULL, f3 = NULL, logsz = TRUE,
   # Plot set-up
   yhat <- fitf$wFitted[[length(fitf$wFitted)]]
   B <- fitf$wCoefficients[[length(fitf$wCoefficients)]]
-  y.cent <- fitf$wResiduals[[length(fitf$wResiduals)]]
+  y.cent <- fitf$wResiduals[[1]]
   if(logsz) sz <- log(size) else sz = size
   a<-(t(y.cent)%*%sz)%*%(1/(t(sz)%*%sz)); a<-a%*%(1/sqrt(t(a)%*%a))
   CAC<-y.cent%*%a  
