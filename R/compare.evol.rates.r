@@ -26,10 +26,12 @@
 #'  \subsection{Notes for geomorph 3.0}{ 
 #' Compared to older versions of geomorph, the order of input variables has changed, so that it is consistent with other functions
 #' in the program.  Additionally, for 3 or more groups, the pairwise p-values are found in the output object.}
+#' @param A A 3D array (p x k x n) containing GPA-aligned coordinates for all specimens, or a matrix (n x variables)
 #' @param phy A phylogenetic tree of {class phylo} - see \code{\link[ape]{read.tree}} in library ape
-#' @param A A matrix (n x [p x k]) or 3D array (p x k x n) containing GPA-aligned coordinates for a set of specimens
 #' @param gp A factor array designating group membership
 #' @param iter Number of iterations for significance testing
+#' @param print.progress A logical value to indicate whether a progress bar should be printed to the screen.  
+#' This is helpful for long-running analyses.
 #' @keywords analysis
 #' @author Dean Adams & Emma Sherratt
 #' @export
@@ -54,7 +56,7 @@
 #' ER<-compare.evol.rates(A=Y.gpa$coords, phy=plethspecies$phy,gp=gp.end,iter=999)
 #' summary(ER)
 #' plot(ER)
-compare.evol.rates<-function(A,phy,gp,iter=999 ){
+compare.evol.rates<-function(A,phy,gp,iter=999,print.progress=TRUE ){
   gp<-as.factor(gp)
   if (length(dim(A))==3){ 
       if(is.null(dimnames(A)[[3]])){
@@ -72,8 +74,8 @@ compare.evol.rates<-function(A,phy,gp,iter=999 ){
     stop("Data matrix contains missing values. Estimate these first (see 'estimate.missing').")  }
   if (is.null(names(gp))){
     stop("Factor contains no names. Use names() to assign specimen names to group factor.")}
-  if (class(phy) != "phylo") 
-    stop("tree must be of class 'phylo.'")
+  if (!inherits(phy, "phylo")){
+    stop("tree must be of class 'phylo.'")}
   ntaxa<-length(phy$tip.label)
   N<-nrow(x)  
   if(N!=dim(x)[1]){
@@ -91,21 +93,39 @@ compare.evol.rates<-function(A,phy,gp,iter=999 ){
   diag(rate.mat)<-sigma.obs$sigma.d.all
   rate.mat<-matrix(nearPD(rate.mat,corr=FALSE)$mat,nrow=ncol(rate.mat),ncol=ncol(rate.mat))
   x.sim<-sim.char(phy=phy,par=rate.mat,nsim=iter,model="BM") 
-  sigma.rand <- sapply(1:(iter), function(j) sigma.d(as.matrix(x.sim[,,j]),invC,D.mat,gp))
-  random.sigma<-c(sigma.obs$sigma.d.ratio,as.vector(unlist(sigma.rand[1,])))
-  if(nlevels(gp)>1){
+  ones <- matrix(1,N,N); I <- diag(1,N)
+  Xadj <- I -crossprod(ones,invC)/sum(invC) 
+  Ptrans <- D.mat%*%Xadj
+  g<-factor(as.numeric(gp))
+  ngps<-nlevels(g)
+  gps.combo <- combn(ngps, 2)
+  if(nlevels(gp) > 1){
+    if(print.progress){
+      pb <- txtProgressBar(min = 0, max = iter, initial = 0, style=3) 
+      sigma.rand <- sapply(1:iter, function(j) {
+        setTxtProgressBar(pb,j)
+        fast.sigma.d(as.matrix(x.sim[,,j]),Ptrans,g, ngps, gps.combo, N,p )
+      })
+      close(pb)
+    } else sigma.rand <- sapply(1:(iter), 
+                function(j) fast.sigma.d(as.matrix(x.sim[,,j]),Ptrans,g, ngps, gps.combo,N,p))
+    if(nlevels(gp) == 2) 
+      sigma.rand <- random.sigma <- c(sigma.obs$sigma.d.gp.ratio, sigma.rand) else {
+        sigma.rand <- cbind(as.vector(sigma.obs$sigma.d.gp.ratio), sigma.rand)
+        random.sigma<- sapply(1:(iter+1), function(j) {x <- sigma.rand[,j]; max(x)/min(x)})
+      }
     p.val <- pval(random.sigma)
-    p.val.mat<-NULL
+    if(nlevels(gp) > 2) {
+      p.val.mat <- dist(sigma.obs$sigma.d.gp)
+      p.val.mat[1:length(p.val.mat)] <- apply(sigma.rand, 1, pval)
+    } else p.val.mat <- p.val
     if(nlevels(gp)==2) p.val.mat<-p.val
     if(nlevels(gp)>2){
-      ratio.vals<-matrix(NA,nrow=(iter+1),ncol=length(unlist(sigma.obs[4])))
-      ratio.vals[1,]<-as.vector(sigma.obs$sigma.d.gp.ratio)
-      for(i in 1:iter) ratio.vals[i+1,]<-as.vector(unlist(sigma.rand[4,][[i]]))
+      ratio.vals<-sigma.rand
       tmp.p.val.mat <- sapply(1:ncol(ratio.vals), function(j){ pval(ratio.vals[,j])})
-      p.val.mat<-dist(matrix(0,length(tmp.p.val.mat)))
-      for(i in 1:length(p.val.mat)) p.val.mat[[i]] <- tmp.p.val.mat[i]
-    }    
+    }
   }
+  
   if(nlevels(gp)==1){ 
     out <- list(sigma.d.all = sigma.obs$sigma.d.all,
                 Ngroups = nlevels(gp))

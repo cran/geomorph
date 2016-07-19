@@ -35,6 +35,8 @@
 #' If left NULL (the default), the exact same P-values will be found for repeated runs of the analysis (with the same number of iterations).
 #' If seed = "random", a random seed will be used, and P-values will vary.  One can also specify an integer for specific seed values,
 #' which might be of interest for advanced users.
+#' @param print.progress A logical value to indicate whether a progress bar should be printed to the screen.  
+#' This is helpful for long-running analyses.
 #' @export
 #' @keywords analysis
 #' @author Dean Adams
@@ -51,6 +53,7 @@
 #'   (for 2 modules only).}
 #'    \item{YScores}{Values of right (y) block projected onto singular vectors
 #'   (for 2 modules only).}
+#'    \item{svd}{The singular value decomposition of the cross-covariances (for 2 modules only).}
 #'    \item{A1}{Input values for the left block (for 2 modules only).}
 #'    \item{A2}{Input values for the right block (for 2 modules only).}
 #'    \item{A1.matrix}{Left block (matrix) found from A1 (for 2 modules only).}
@@ -72,10 +75,10 @@
 #' summary(IT) # Test summary
 #' plot(IT) # PLS plot
 #' 
-phylo.integration <-function(A, A2=NULL, phy, partition.gp=NULL,iter=999, seed=NULL){ 
+phylo.integration <-function(A, A2=NULL, phy, partition.gp=NULL,iter=999, seed=NULL, print.progress=TRUE){ 
   if(any(is.na(A))==T){
     stop("Data matrix 1 contains missing values. Estimate these first(see 'estimate.missing').")  } 
-  if (!is.phylo(phy))
+  if (!inherits(phy, "phylo"))
     stop("phy must be of class 'phylo.'") 
   if(!is.null(seed) && seed=="random") seed = sample(1:iter, 1)
   if(!is.null(partition.gp)){
@@ -135,16 +138,23 @@ phylo.integration <-function(A, A2=NULL, phy, partition.gp=NULL,iter=999, seed=N
   phy.parts<-phylo.mat(x,phy)
   invC<-phy.parts$invC; D.mat<-phy.parts$D.mat
 #Analysis  
+  one<-matrix(1,nrow(x)); I = diag(1,nrow(x),) 
+  Ptrans<-D.mat%*%(I-one%*%crossprod(one,invC)/sum(invC))
   if(ngps==2){
-    pls.obs <- pls.phylo(x, y, invC,D.mat,verbose=TRUE)
-    pls.rand <- apply.pls.phylo(x, y,invC,D.mat, iter=iter, seed=seed)
+    pls.obs <- pls.phylo(x, y, Ptrans,verbose=TRUE)
+    x <- Ptrans%*%x
+    y <- Ptrans%*%y
+    if(print.progress) pls.rand <- apply.pls(x, y,  iter=iter, seed=seed) else
+      pls.rand <- .apply.pls(x, y, iter=iter, seed=seed)
     p.val <- pval(pls.rand)
     XScores <- pls.obs$XScores
     YScores <- pls.obs$YScores
   }
   if(ngps>2){
-    pls.obs <- plsmulti.phylo(x, gps, invC,D.mat)  
-    pls.rand <- apply.plsmulti.phylo(x, gps, invC,D.mat, iter=iter, seed=seed)
+    pls.obs <- plsmulti.phylo(x, gps, Ptrans)  
+    x <- Ptrans%*%x
+    if(print.progress) pls.rand <- apply.plsmulti(x, gps, iter=iter, seed=seed) else
+      pls.rand <- .apply.plsmulti(x, gps,iter=iter, seed=seed)
     p.val <- pval(pls.rand)
   } 
   ####OUTPUT
@@ -156,6 +166,7 @@ phylo.integration <-function(A, A2=NULL, phy, partition.gp=NULL,iter=999, seed=N
                 random.r = pls.rand, 
                 XScores = pls.obs$XScores,
                 YScores = pls.obs$YScores,
+                svd = pls.obs$pls.svd,
                 A1 = A.new, A2 = A2.new,
                 A1.matrix = x, A2.matrix =y,
                 permutations = iter+1, call=match.call(),

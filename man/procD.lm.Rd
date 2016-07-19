@@ -5,7 +5,7 @@
 \title{Procrustes ANOVA/regression for shape data}
 \usage{
 procD.lm(f1, iter = 999, seed = NULL, RRPP = TRUE, int.first = FALSE,
-  data = NULL, ...)
+  data = NULL, print.progress = TRUE, ...)
 }
 \arguments{
 \item{f1}{A formula for the linear model (e.g., y~x1+x2)}
@@ -23,7 +23,10 @@ which might be of interest for advanced users.}
 
 \item{data}{A data frame for the function environment, see \code{\link{geomorph.data.frame}}}
 
-\item{...}{Arguments passed on to procD.fit (typically associated with the lm function)}
+\item{print.progress}{A logical value to indicate whether a progress bar should be printed to the screen.
+This is helpful for long-running analyses.}
+
+\item{...}{Arguments passed on to procD.fit (typically associated with the lm function).}
 }
 \value{
 An object of class "procD.lm" is a list containing the following
@@ -40,6 +43,7 @@ NULL is returned.}
 \item{Terms}{The results of the \code{\link{terms}} function applied to the model matrix}
 \item{term.labels}{The terms used in constructing the aov.table.}
 \item{SS}{The sums of squares for each term, model residuals, and the total.}
+\item{SS}{The type of sums of squares.  One of type I or type III.}
 \item{df}{The degrees of freedom for each SS.}
 \item{R2}{The coefficient of determination for each model term.}
 \item{F}{The F values for each model term.}
