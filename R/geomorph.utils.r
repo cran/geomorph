@@ -483,6 +483,8 @@ plot.pls <- function(x, label = NULL, warpgrids=TRUE, shapes=FALSE, ...){
   XScores <- x$XScores; YScores <- x$YScores
   if(is.matrix(XScores)) XScores <- XScores[,1]
   if(is.matrix(YScores)) YScores <- YScores[,1]
+  Xmin <- min(XScores); Xmax <- max(XScores)
+  Ymin <- min(YScores); Ymax <- max(YScores)
   plsRaw <- pls(x$A1.matrix, x$A2.matrix, verbose=TRUE)
   XScoresRaw <- plsRaw$XScores[,1]; YScoresRaw <- plsRaw$YScores[,1]
   pc <- prcomp(cbind(XScores, YScores))$x[,1]
@@ -493,27 +495,21 @@ plot.pls <- function(x, label = NULL, warpgrids=TRUE, shapes=FALSE, ...){
   pcRaw <- prcomp(cbind(XScoresRaw, YScoresRaw))$x[,1]
   pxRaw <- predict(lm(XScoresRaw~pcRaw))
   pyRaw <- predict(lm(YScoresRaw~pcRaw))
-  pxmaxRaw <- max(pxRaw); pxminRaw <- min(pxRaw)
-  pymaxRaw <- max(pyRaw); pyminRaw <- min(pyRaw)
   
   if (length(dim(A1)) == 3) {
     A1.ref <- mshape(A1)
-    A1.min <- arrayspecs(pxminRaw*x$left.pls.vectors[,1], 
-                         nrow(A1.ref), ncol(A1.ref))[,,1]
-    A1.max <- arrayspecs(pxmaxRaw*x$left.pls.vectors[,1], 
-                         nrow(A1.ref), ncol(A1.ref))[,,1]
-    pls1.min <- A1.ref + A1.min
-    pls1.max <- A1.ref + A1.max
+    preds <- shape.predictor(A1, x=XScores, method="LS", 
+                             Intercept=TRUE, pred1 = Xmin, pred2 = Xmax)
+    pls1.min <- preds$pred1
+    pls1.max <- preds$pred2
   }
   
   if (length(dim(A2)) == 3) {
     A2.ref <- mshape(A2)
-    A2.min <- arrayspecs(pyminRaw*x$right.pls.vectors[,1], 
-                         nrow(A2.ref), ncol(A2.ref))[,,1]
-    A2.max <- arrayspecs(pymaxRaw*x$right.pls.vectors[,1], 
-                         nrow(A2.ref), ncol(A2.ref))[,,1]
-    pls2.min <- A2.ref + A2.min
-    pls2.max <- A2.ref + A2.max
+    preds <- shape.predictor(A2, x=YScores, method="LS", 
+                             Intercept=TRUE, pred1 = Ymin, pred2 = Ymax)
+    pls2.min <- preds$pred1
+    pls2.max <- preds$pred2
   }
   if (length(dim(A1)) != 3 && length(dim(A2)) != 3) {
     plot(XScores, YScores, pch = 21, bg = "black", 
@@ -1027,14 +1023,14 @@ summary.trajectory.analysis <- function(object,
 trajplot.w.int<-function(Data, M, TM, groups, group.cols = NULL, 
 pattern = c("white", "gray", "black"), pt.scale = 1, ...){ # TM = trajectories from means
   n <- length(TM); tp<-dim(TM[[1]])[1]; p<-dim(TM[[1]])[2]
-  if(length(pattern) != 3) stop("Point sequence color pattern must conatin three values")
+  if(length(pattern) != 3) stop("Point sequence color pattern must contain three values")
   pmax <- max(Data[,1]); pmin <- min(Data[,1])
   plot(Data[,1:2],type="n",
        xlim = c(2*pmin, pmax),
        xlab="PC I", ylab="PC II",
        main="Two Dimensional View  of Phenotypic Trajectories",asp=1)
   
-  if(is.null(group.cols)) gp.cols <- 1:n else gp.cols <- group.cols
+  if(is.null(group.cols)) gp.cols <- unique(as.numeric(groups)) else gp.cols <- group.cols
   if(length(gp.cols) != nlevels(groups)) 
       stop("group.cols is not logical with respect to group levels") 
   
@@ -1059,7 +1055,7 @@ pattern = c("white", "gray", "black"), pt.scale = 1, ...){ # TM = trajectories f
 trajplot.by.groups<-function(Data, TM, groups, group.cols = NULL, 
             pattern = c("white", "gray", "black"), pt.scale = 1, ...) {
   n <- length(TM); tp <- nrow(TM[[1]]); p <- ncol(TM[[1]])
-  if(length(pattern) != 3) stop("Point sequence color pattern must conatin three values")
+  if(length(pattern) != 3) stop("Point sequence color pattern must contain three values")
   Data2 <- t(matrix(matrix(t(Data)),p,))
   pmax <- max(Data[,1]); pmin <- min(Data2[,1])
   plot(Data2[,1:2], type="n",
@@ -1099,7 +1095,7 @@ trajplot.by.groups<-function(Data, TM, groups, group.cols = NULL,
 #' @param x plot object
 #' @param group.cols An optional vector of colors for group levels
 #' @param pt.seq.pattern The sequence of colors for starting, middle, and end points of 
-#' trajectories, respectivly.  E.g., c("green", "gray", "red") for gray points
+#' trajectories, respectively.  E.g., c("green", "gray", "red") for gray points
 #' but initial points with green color and end points with red color.
 #' @param pt.scale An optional value to magnify or reduce points (1 = no change)
 #' @param ... other arguments passed to plot
@@ -1145,3 +1141,33 @@ summary.plotTangentSpace <- function (object, ...) {
   print.plotTangentSpace(object, ...)
 }
 
+# comapre.pls
+
+#' Print/Summary Function for geomorph
+#' 
+#' @param x print/summary object
+#' @param ... other arguments passed to print/summary
+#' @export
+#' @author Michael Collyer
+#' @keywords utilities
+print.compare.pls <- function(x,...){
+  z <- x$sample.z
+  z.pw <- x$pairwise.z
+  p <- x$pairwise.P
+  cat("\nEffect sizes\n\n")
+  print(z)
+  cat("\nEffect sizes for pairwise differences in PLS effect size\n\n")
+  print(z.pw)
+  cat("\nP-values\n\n")
+  print(p)
+  invisible(x)
+}
+
+#' Print/Summary Function for geomorph
+#' 
+#' @param object print/summary object
+#' @param ... other arguments passed to print/summary
+#' @export
+#' @author Michael Collyer
+#' @keywords utilities
+summary.compare.pls <- function(object, ...) print.compare.pls(object,...)

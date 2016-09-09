@@ -2,7 +2,7 @@
 #' @docType package
 #' @aliases geomorph
 #' @title Geometric morphometric analyses for 2D/3D data
-#' @author Dean C. Adams, Michael Collyer, & Emma Sherratt
+#' @author Dean Adams, Michael Collyer, Antigoni Kaliontzopoulou, & Emma Sherratt
 #' 
 #' @description Functions in this package allow one to read, manipulate, and digitize landmark data; generate shape
 #'  variables via Procrustes analysis for points, curves and surface data, perform statistical analyses
@@ -145,6 +145,32 @@ NULL
 #' @references Levis, N.A, M.L. Schooler, J.R. Johnson, and M.L. Collyer. 2016. The effects of terrestrial and aquatic herbicides on 
 #' larval salamander morphology and swim speed. Biological Journal of the Linnean Society.  Accepted.
 NULL
+
+#' Estimate mean shape for a set of aligned specimens 
+#'
+#' Estimate the mean shape for a set of aligned specimens
+#'
+#' The function estimates the average landmark coordinates for a set of aligned specimens. It is assumed 
+#' that the landmarks have previously been aligned using Generalized Procrustes Analysis (GPA) 
+#'  [e.g., with \code{\link{gpagen}}]. This function is described in Claude (2008).
+#'
+#' @param A Either a list (length n, each p x k), an array (p x k x n), or a matrix (pk X n) containing GPA-aligned coordinates for a set of specimens
+#' @keywords utilities
+#' @export
+#' @author Julien Claude 
+#' @references Claude, J. 2008. Morphometrics with R. Springer, New York.
+#' @examples
+#' data(plethodon) 
+#' Y.gpa<-gpagen(plethodon$land)    #GPA-alignment   
+#'
+#' mshape(Y.gpa$coords)   #mean (consensus) configuration
+mshape<-function(A){
+  if(is.array(A)) res <- apply(A,c(1,2),mean)
+  if(is.list(A)) res <- Reduce("+", A)/length(A)
+  if(is.matrix(A)) res <- colMeans(A)
+  if(!is.array(A) && !is.list(A) && !is.matrix(A)) stop("There are not multiple configurations from which to obtain a mean.")
+  return(res)
+}	
 
 #####----------------------------------------------------------------------------------------------------
 
@@ -918,13 +944,13 @@ procD.fit <- function(f1, keep.order=FALSE, pca=TRUE, data=NULL,
       Y <- eval(form.in[[2]], parent.frame())
       dat <- model.frame(form.in[-2])
     }
-    
+    dat <- droplevels(dat)
     if(class(Y) == "dist") Y <- pcoa(Y) else
       if(length(dim(Y)) == 3)  Y <- two.d.array(Y) else 
         Y <- as.matrix(Y)
-      weights <- NULL
-      contrasts <- NULL
-      offset <- NULL
+    weights <- NULL
+    contrasts <- NULL
+    offset <- NULL
   }
   n <- nrow(Y)
   if(ncol(Y) > n & pca==TRUE){
@@ -1007,7 +1033,7 @@ procD.fit <- function(f1, keep.order=FALSE, pca=TRUE, data=NULL,
   term.labels <- attr(Terms, "term.labels")
   if(length(term.labels) > 0) mf.out <- model.frame(Terms, data= mf) else
     mf.out <- data.frame(Int = rep(1,n))
-  mf.out <- data.frame(Y=Y, mf.out)
+  mf.out <- droplevels(data.frame(Y=Y, mf.out))
   out <- list(Y=Y, wY=wY, X=X, Xs=Xs, wX=wX, wXs=wXs,
               QRs = QRs, wQRs=wQRs, fitted=fitted, wFitted=wFitted,
               residuals = residuals, wResiduals=wResiduals,
@@ -1102,6 +1128,9 @@ SS.iter = function(pfit,iter, seed = NULL, Yalt="RRPP", SS.type= NULL){
     Ur <- lapply(pfit$wQRs[1:(k-1)], function(x) qr.Q(x))
     Uf <- lapply(pfit$wQRs[2:k], function(x) qr.Q(x))
   }
+  q <- qr(Xf)$rank
+  if(q/n > 0.4) Pr <- Map(function(uf,ur) tcrossprod(uf) - tcrossprod(ur), Uf, Ur) else
+    Pr <- NULL
   ind = perm.index(n,iter, seed=seed)
   SS <- NULL
   pb <- txtProgressBar(min = 0, max = ceiling(iter/100), initial = 0, style=3) 
@@ -1122,9 +1151,14 @@ SS.iter = function(pfit,iter, seed = NULL, Yalt="RRPP", SS.type= NULL){
           Yr = Map(function(x) Map(function(y) (y[x,])*sqrt(w), lapply(1:(k-1),function(.) Y)),ind.j)
         }
       }
-    SS.temp <- lapply(1:length(j), function(j){ 
-      mapply(function(ur,uf,y) sum((fastFit(uf,y,n,p) - fastFit(ur,y,n,p))^2), 
-             Ur, Uf,Yr[[j]])})
+    if(!is.null(Pr)) {
+      SS.temp <- lapply(1:length(j), function(j){ 
+        mapply(function(p,y) sum((p%*%y)^2), 
+               Pr,Yr[[j]])})
+    } else
+      SS.temp <- lapply(1:length(j), function(j){ 
+        mapply(function(ur,uf,y) sum((fastFit(uf,y,n,p) - fastFit(ur,y,n,p))^2), 
+               Ur, Uf,Yr[[j]])})
     SS <- c(SS, SS.temp)
     jj <- jj-length(j)
     if(jj > 100) kk <- 1:100 else kk <- 1:jj
@@ -1157,6 +1191,122 @@ SS.iter = function(pfit,iter, seed = NULL, Yalt="RRPP", SS.type= NULL){
     Ur <- lapply(pfit$wQRs[1:(k-1)], function(x) qr.Q(x))
     Uf <- lapply(pfit$wQRs[2:k], function(x) qr.Q(x))
   }
+  q <- qr(Xf)$rank
+  if(q/n > 0.4) Pr <- Map(function(uf,ur) tcrossprod(uf) - tcrossprod(ur), Uf, Ur) else
+    Pr <- NULL
+  ind = perm.index(n,iter, seed=seed)
+  SS <- NULL
+  jj <- iter+1
+  if(jj > 100) j <- 1:100 else j <- 1:jj
+  while(jj > 0){
+    ind.j <- ind[j]
+    if(Yalt=="RRPP") {
+      if(sum(w)==n) {
+        Yr = Map(function(x) (Map(function(y,e) e[x,]+y, Yh[1:(k-1)], E[1:(k-1)])),ind.j)
+      } else {
+        Yr = Map(function(x) (Map(function(y,e) (e[x,]+y)*sqrt(w), Yh[1:(k-1)], E[1:(k-1)])),ind.j) 
+      }} else {
+        if(sum(w)==n) {
+          Yr = Map(function(x) Map(function(y) y[x,], lapply(1:(k-1),function(.) Y)),ind.j)
+        } else {
+          Yr = Map(function(x) Map(function(y) (y[x,])*sqrt(w), lapply(1:(k-1),function(.) Y)),ind.j)
+        }
+      }
+    
+    if(!is.null(Pr)) {
+      SS.temp <- lapply(1:length(j), function(j){ 
+        mapply(function(p,y) sum((p%*%y)^2), 
+               Pr,Yr[[j]])})
+    } else
+      SS.temp <- lapply(1:length(j), function(j){ 
+        mapply(function(ur,uf,y) sum((fastFit(uf,y,n,p) - fastFit(ur,y,n,p))^2), 
+               Ur, Uf,Yr[[j]])})
+    SS <- c(SS, SS.temp)
+    jj <- jj-length(j)
+    if(jj > 100) kk <- 1:100 else kk <- 1:jj
+    j <- j[length(j)] +kk
+  }
+  simplify2array(SS)
+}
+
+# SS.iter.bilat.symmetry
+# calculates SS in random iterations of a resmapling procedure
+# used in nearly all 'procD.lm' functions, unless pgls in used
+SS.iter.bilat.symmetry = function(pfit,iter, seed = NULL, Yalt="RRPP", SS.type= NULL){
+  Y <- as.matrix(pfit$Y)
+  Xf <- as.matrix(pfit$X)
+  k <- length(pfit$Xs)
+  n <- dim(Y)[1]; p <- dim(Y)[2]
+  Yh <- pfit$fitted
+  E <- pfit$residuals
+  w<- pfit$weights
+  if(is.null(SS.type)) SS.type <- "I"
+  if(is.na(match(SS.type, c("I","III")))) SS.type <- "I"
+  if(SS.type == "III") {
+    Ur <- lapply(pfit$wQRs[1:(k-1)], function(x) qr.Q(x))
+    Uf <- qr.Q(qr(Xf))
+    Uf <- lapply(1:(k-1), function(.) Uf)
+  } else {
+    Ur <- lapply(pfit$wQRs[1:(k-1)], function(x) qr.Q(x))
+    Uf <- lapply(pfit$wQRs[2:k], function(x) qr.Q(x))
+  }
+  Pr <- Map(function(uf,ur) tcrossprod(uf) - tcrossprod(ur), Uf, Ur)
+  ind = perm.index(n,iter, seed=seed)
+  SS <- NULL
+  pb <- txtProgressBar(min = 0, max = ceiling(iter/100), initial = 0, style=3) 
+  jj <- iter+1
+  step <- 1
+  if(jj > 100) j <- 1:100 else j <- 1:jj
+  while(jj > 0){
+    ind.j <- ind[j]
+    if(Yalt=="RRPP") {
+      if(sum(w)==n) {
+        Yr = Map(function(x) (Map(function(y,e) e[x,]+y, Yh[1:(k-1)], E[1:(k-1)])),ind.j)
+      } else {
+        Yr = Map(function(x) (Map(function(y,e) (e[x,]+y)*sqrt(w), Yh[1:(k-1)], E[1:(k-1)])),ind.j) 
+      }} else {
+        if(sum(w)==n) {
+          Yr = Map(function(x) Map(function(y) y[x,], lapply(1:(k-1),function(.) Y)),ind.j)
+        } else {
+          Yr = Map(function(x) Map(function(y) (y[x,])*sqrt(w), lapply(1:(k-1),function(.) Y)),ind.j)
+        }
+      }
+    SS.temp <- lapply(1:length(j), function(j){ 
+      mapply(function(p,y) sum((p%*%y)^2), 
+             Pr,Yr[[j]])})
+    SS <- c(SS, SS.temp)
+    jj <- jj-length(j)
+    if(jj > 100) kk <- 1:100 else kk <- 1:jj
+    j <- j[length(j)] +kk
+    setTxtProgressBar(pb,step)
+    step <- step+1
+  }
+  close(pb)
+  simplify2array(SS)
+}
+
+# .SS.iter.bilat.symmetry
+# same as SS.iter, but without progress bar option
+# used in nearly all 'procD.lm' functions, unless pgls in used
+.SS.iter.bilat.symmetry = function(pfit,iter, seed = NULL, Yalt="RRPP", SS.type=NULL){
+  Y <- as.matrix(pfit$Y)
+  Xf <- as.matrix(pfit$X)
+  k <- length(pfit$Xs)
+  n <- dim(Y)[1]; p <- dim(Y)[2]
+  Yh <- pfit$fitted
+  E <- pfit$residuals
+  w<- pfit$weights
+  if(is.null(SS.type)) SS.type <- "I"
+  if(is.na(match(SS.type, c("I","III")))) SS.type <- "I"
+  if(SS.type == "III") {
+    Ur <- lapply(pfit$wQRs[1:(k-1)], function(x) qr.Q(x))
+    Uf <- qr.Q(qr(Xf))
+    Uf <- lapply(1:(k-1), function(.) Uf)
+  } else {
+    Ur <- lapply(pfit$wQRs[1:(k-1)], function(x) qr.Q(x))
+    Uf <- lapply(pfit$wQRs[2:k], function(x) qr.Q(x))
+  }
+  Pr <- Map(function(uf,ur) tcrossprod(uf) - tcrossprod(ur), Uf, Ur)
   ind = perm.index(n,iter, seed=seed)
   SS <- NULL
   jj <- iter+1
@@ -1177,8 +1327,8 @@ SS.iter = function(pfit,iter, seed = NULL, Yalt="RRPP", SS.type= NULL){
       }
     
     SS.temp <- lapply(1:length(j), function(j){ 
-      mapply(function(ur,uf,y) sum((fastFit(uf,y,n,p) - fastFit(ur,y,n,p))^2), 
-             Ur, Uf,Yr[[j]])})
+      mapply(function(p,y) sum((p%*%y)^2), 
+             Pr,Yr[[j]])})
     SS <- c(SS, SS.temp)
     jj <- jj-length(j)
     if(jj > 100) kk <- 1:100 else kk <- 1:jj
@@ -1198,16 +1348,19 @@ Fpgls.iter = function(pfit,Pcor,iter, seed=NULL, Yalt="RRPP"){
   E <- pfit$residuals
   w<- pfit$weights
   wQRs <- pfit$wQRs
-  dfE <- sapply(1:k, function(j) wQRs[[j]]$rank)
-  df <- dfE[-1] - dfE[1:(k-1)]
+  q <- sapply(1:k, function(j) wQRs[[j]]$rank)
+  df <- q[-1] - q[1:(k-1)]
+  q <- q[length(q)]
   Pcor <- Pcor[rownames(Y),rownames(Y)]
   PwXs <- lapply(pfit$wXs, function(x) crossprod(Pcor,as.matrix(x)))
   Xr <- lapply(PwXs[1:(k-1)], function(x) as.matrix(x))
   Xf <- lapply(PwXs[2:k], function(x) as.matrix(x))
   Ur <- lapply(Xr, function(x) qr.Q(qr(x)))
   Uf <- lapply(Xf, function(x) qr.Q(qr(x)))
-  Ptransr <- lapply(Ur, function(x) tcrossprod(x)%*%Pcor)
-  Ptransf <- lapply(Uf, function(x) tcrossprod(x)%*%Pcor)
+  if(p > n) Ptransr <- lapply(Ur, function(x) tcrossprod(x)%*%Pcor) else
+    Ptransr <- lapply(Ur, function(x) x%*%crossprod(x,Pcor)) 
+  if(p > n) Ptransf <- lapply(Uf, function(x) tcrossprod(x)%*%Pcor) else
+    Ptransf <- lapply(Uf, function(x) x%*%crossprod(x,Pcor)) 
   Ptrans <- Map(function(r,f) f-r, Ptransr, Ptransf)
   ind = perm.index(n,iter, seed=seed)
   SS <- SSEs <-Fs <- NULL
@@ -1232,7 +1385,7 @@ Fpgls.iter = function(pfit,Pcor,iter, seed=NULL, Yalt="RRPP"){
     SS.temp <- lapply(1:length(j), function(j){ 
       mapply(function(p,y) sum((p%*%y)^2), Ptrans,Yr[[j]])})
     SSEs.temp <- Map(function(y) sum((Pcor%*%y[[k-1]]-Ptransf[[k-1]]%*%y[[k-1]])^2), Yr)
-    Fs.temp <- Map(function(s1,s2) (s1/df)/(s2/(n-k)), SS.temp, SSEs.temp)
+    Fs.temp <- Map(function(s1,s2) (s1/df)/(s2/(n-q)), SS.temp, SSEs.temp)
     SS <- c(SS,SS.temp)
     SSEs <- c(SSEs,SSEs.temp)
     Fs <- c(Fs,Fs.temp)
@@ -1257,16 +1410,19 @@ Fpgls.iter = function(pfit,Pcor,iter, seed=NULL, Yalt="RRPP"){
   E <- pfit$residuals
   w<- pfit$weights
   wQRs <- pfit$wQRs
-  dfE <- sapply(1:k, function(j) wQRs[[j]]$rank)
-  df <- dfE[-1] - dfE[1:(k-1)]
+  q <- sapply(1:k, function(j) wQRs[[j]]$rank)
+  df <- q[-1] - q[1:(k-1)]
+  q <- q[length(q)]
   Pcor <- Pcor[rownames(Y),rownames(Y)]
   PwXs <- lapply(pfit$wXs, function(x) crossprod(Pcor,as.matrix(x)))
   Xr <- lapply(PwXs[1:(k-1)], function(x) as.matrix(x))
   Xf <- lapply(PwXs[2:k], function(x) as.matrix(x))
   Ur <- lapply(Xr, function(x) qr.Q(qr(x)))
   Uf <- lapply(Xf, function(x) qr.Q(qr(x)))
-  Ptransr <- lapply(Ur, function(x) tcrossprod(x)%*%Pcor)
-  Ptransf <- lapply(Uf, function(x) tcrossprod(x)%*%Pcor)
+  if(p > n) Ptransr <- lapply(Ur, function(x) tcrossprod(x)%*%Pcor) else
+    Ptransr <- lapply(Ur, function(x) x%*%crossprod(x,Pcor)) 
+  if(p > n) Ptransf <- lapply(Uf, function(x) tcrossprod(x)%*%Pcor) else
+    Ptransf <- lapply(Uf, function(x) x%*%crossprod(x,Pcor)) 
   Ptrans <- Map(function(r,f) f-r, Ptransr, Ptransf)
   ind = perm.index(n,iter, seed=seed)
   SS <- SSEs <-Fs <- NULL
@@ -1289,7 +1445,7 @@ Fpgls.iter = function(pfit,Pcor,iter, seed=NULL, Yalt="RRPP"){
     SS.temp <- lapply(1:length(j), function(j){ 
       mapply(function(p,y) sum((p%*%y)^2), Ptrans,Yr[[j]])})
     SSEs.temp <- Map(function(y) sum(fastLM(Uf[[k-1]],Pcor%*%y[[k-1]])$residuals^2), Yr)
-    Fs.temp <- Map(function(s1,s2) (s1/df)/(s2/(n-k)), SS.temp, SSEs.temp)
+    Fs.temp <- Map(function(s1,s2) (s1/df)/(s2/(n-q)), SS.temp, SSEs.temp)
     SS <- c(SS,SS.temp)
     SSEs <- c(SSEs,SSEs.temp)
     Fs <- c(Fs,Fs.temp)
@@ -1453,6 +1609,43 @@ Effect.size.matrix <- function(M, center=F){
 # single.factor
 # converts factorial designs to single-factor variables
 # advanced.procD.lm
+
+# helpers for single.factor
+leveler <- function(x){ # x = data.frame of 2 columns
+  a <-levels(x[,1])
+  b <- levels(x[,2])
+  na <- length(a); nb <- length(b)
+  res <- NULL
+  for(i in 1:na){
+    ab <- c(a[i],b)
+    res <- c(res, combn(ab, 2, simplify=FALSE)[1:nb])
+  }
+  res <- lapply(res, paste, collapse=":")
+  simplify2array(res)
+}
+
+multileveler <- function(x){ # x = data.frame of 2 or more columns
+  if(NCOL(x) == 0) y <- levels(x)
+  if(NCOL(x) == 1) y <- levels(x[,1])
+  if(NCOL(x) == 2) y <- leveler(x)
+  if(NCOL(x) > 2){
+    a <- leveler(x[,1:2])
+    for(i in 3:NCOL(x)){
+      b <- levels(x[,i])
+      na <- length(a); nb <- length(b)
+      res <- NULL
+      for(i in 1:na){
+        ab <- c(a[i],b)
+        res <- c(res, combn(ab, 2, simplify=FALSE)[1:nb])
+      }
+      res <- lapply(res, paste, collapse=":")
+      a <- simplify2array(res)
+    }
+    y <- a
+  }
+  return(y)
+}
+
 single.factor <- function(pfit) {# pfit = Procrustes fit
   Terms <- pfit$Terms
   dat <- pfit$data
@@ -1461,7 +1654,8 @@ single.factor <- function(pfit) {# pfit = Procrustes fit
   facs <- as.data.frame(facs)
   if(ncol(facs) > 1) fac <- factor(apply(facs, 1,function(x) paste(x, collapse=":"))) else 
     fac <- as.factor(unlist(facs))
-  fac
+  faclevels <- multileveler(facs)
+  factor(fac, levels=faclevels)
 }
 
 # cov.extract
@@ -1704,9 +1898,12 @@ pls <- function(x,y, RV=FALSE, verbose = FALSE){
 quick.pls <- function(x,y) {# no RV; no verbose output
   # assume parameters already found and assume x and y are centered
   S12 <- crossprod(x,y)/(dim(x)[1] - 1)
-  pls <- La.svd(S12, 1, 1)
-  U<-pls$u; V <- as.vector(pls$vt)
-  cor(x%*%U,y%*%V)
+  if(length(S12) == 1) res <- cor(x,y) else {
+    pls <- La.svd(S12, 1, 1)
+    U<-pls$u; V <- as.vector(pls$vt)
+    res <- cor(x%*%U,y%*%V)
+  }
+  res
 }
 
 # apply.pls 
@@ -2545,6 +2742,18 @@ is.geomorph.data.frame <- function(x) class(x) == "geomorph.data.frame"
 
 #####-----------------------------------------------------------------------------------
 
+### geomorph-specific S3 for internal use (copies of base functions)
+
+droplevels.geomorph.data.frame <- function (x, except = NULL, ...) {
+  ix <- vapply(x, is.factor, NA)
+  if (!is.null(except)) 
+    ix[except] <- FALSE
+  x[ix] <- lapply(x[ix], factor)
+  x
+}
+
+#####-----------------------------------------------------------------------------------
+
 ### retained from old geomorph support code
 ### need to update and merge, or replace with new functions
 
@@ -2556,28 +2765,6 @@ scan.to.ref<-function(scandata,specland,refland){  	#DCA
 refscan.to.spec<-function(refscan,refland,specland){ 	#DCA
   unwarp.scan<-tps2d3d(refscan,refland,specland)
   unwarp.scan}
-
-
-#' Estimate mean shape for a set of aligned specimens
-#'
-#' Estimate the mean shape for a set of aligned specimens
-#'
-#' The function estimates the average landmark coordinates for a set of aligned specimens. It is assumed 
-#' that the landmarks have previously been aligned using Generalized Procrustes Analysis (GPA) 
-#'  [e.g., with \code{\link{gpagen}}]. This function is described in Claude (2008).
-#'
-#' @param A An array (p x k x n) containing GPA-aligned coordinates for a set of specimens
-#' @keywords utilities
-#' @export
-#' @author Julien Claude 
-#' @references Claude, J. 2008. Morphometrics with R. Springer, New York.
-#' @examples
-#' data(plethodon) 
-#' Y.gpa<-gpagen(plethodon$land)    #GPA-alignment   
-#'
-#' mshape(Y.gpa$coords)   #mean (consensus) configuration
-mshape<-function(A){apply(A,c(1,2),mean)}	
-
 
 # Write .nts file for output of digitize2d(), buildtemplate() digit.fixed() and digitsurface()
 # A is an nx2 or nx3 matrix of the output coordinates. To be used internally only.

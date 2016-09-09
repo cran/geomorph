@@ -74,6 +74,7 @@
 #' MD$Procrustes.var # just the Procrustes variances
 morphol.disparity <- function(f1, groups = NULL, iter = 999, seed = NULL, 
                               data = NULL, print.progress = TRUE, ...){
+  if(!is.null(data)) data <- droplevels(data)
   pfit <- procD.fit(f1, data=data)
   if(!is.null(groups) & class(groups) != "formula") stop("groups must be a formula; e.g., groups = ~ X")
   if(is.null(groups)) gps <- single.factor(pfit) else {
@@ -93,8 +94,9 @@ morphol.disparity <- function(f1, groups = NULL, iter = 999, seed = NULL,
     })
   names(pv) <- levels(gps)
   if(length(gps) == 0) {
-    warning("No factor in formula from which to define groups.")
-    out = (noquote(paste("Procrustes variance =",round(pv, 8))))
+    cat("No factor in formula from which to define groups.\n")
+    cat("Procrustes variance:\n")
+    out <- as.numeric(pv)
   } else{
     if(print.progress){
       ind <- perm.index(nrow(R),iter, seed=seed)
