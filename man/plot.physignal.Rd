@@ -7,7 +7,7 @@
 \method{plot}{physignal}(x, ...)
 }
 \arguments{
-\item{x}{plot object}
+\item{x}{plot object (from \code{\link{physignal}})}
 
 \item{...}{other arguments passed to plot}
 }
@@ -19,4 +19,3 @@ Michael Collyer
 }
 \keyword{utilities}
 \keyword{visualization}
-

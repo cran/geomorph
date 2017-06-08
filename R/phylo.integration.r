@@ -14,9 +14,10 @@
 #' utilized as the test statistic. The observed value is statistically assessed using permutation, where data for 
 #' one partition are permuted relative to the other partitions. Note that this permutation is performed on phylogenetically-
 #' transformed data, so that the probability of phylogenetic association of A vs. B is similar to that of B vs. A: 
-#' i.e., prob(A,B|phy)~prob(B,A|phy).  
+#' i.e., prob(A,B|phy)~prob(B,A|phy); thus, shuffling the correct exchangeable units under the null 
+#' hypothesis of no integration (Adams and Collyer 2017). 
 #' 
-#'   Input for the analysis can take one of two forms. First, one can input a single dataset (as a matrix or 3D array, along with 
+#'  Input for the analysis can take one of two forms. First, one can input a single dataset (as a matrix or 3D array, along with 
 #'  a vector describing which variables correspond to which partitions (for the case of a 3D array, which landmarks belong to which 
 #'  partitions is specified). Alternatively, when evaluating the integration between two structures or partitions, two datasets may be provided.
 #'
@@ -26,6 +27,24 @@
 #'  include warpgrids, respectively.  Warpgrids can only be included for 3D arrays of Procrustes residuals. The plot is a plot of PLS scores from 
 #'  Block1 versus Block2 performed for the first set of PLS axes. 
 #'  
+#' \subsection{Similarity to \code{\link{two.b.pls}} and \code{\link{compare.pls}} }{ 
+#' Note that \code{phylo.integration} performed on two matrices or arrays returns the same results as a phylogentic varion of
+#'  \code{\link{two.b.pls}}.  It might be of interest with 3+ modules to perform separate phylogenetic integration tests
+#' between all pairwise comaprisons of modules.  This can be done, test by test, and the levels of integration can be compared with
+#' \code{\link{compare.pls}}.  Such results are different than using the average amount of integration, as performed by \code{phylo.integration}
+#' when more than two modules are input.
+#' }
+#'  
+#'  \subsection{Notes for geomorph 3.0.4 and subsequent versions}{ 
+#'  Compared to previous versions of geomorph, users might notice differences in effect sizes.  Previous versions used z-scores calculated with 
+#'  expected values of statistics from null hypotheses (sensu Collyer et al. 2015); however Adams and Collyer (2016) showed that expected values 
+#'  for some statistics can vary with sample size and variable number, and recommended finding the expected value, empirically, as the mean from the set 
+#'  of random outcomes.  Geomorph 3.0.4 and subsequent versions now center z-scores on their empirically estimated expected values and where appropriate, 
+#'  log-transform values to assure statistics are normally distributed.  This can result in negative effect sizes, when statistics are smaller than 
+#'  expected compared to the avergae random outcome.  For ANOVA-based functions, the option to choose among different statistics to measure effect size 
+#'  is now a function argument.
+#' }
+#' 
 #' @param A A 2D array (n x [p1 x k1]) or 3D array (p1 x k1 x n) containing landmark coordinates for the first block
 #' @param A2 An optional 2D array (n x [p2 x k2]) or 3D array (p2 x k2 x n) containing landmark coordinates for the second block 
 #' @param phy A phylogenetic tree of {class phylo} - see \code{\link[ape]{read.tree}} in library ape
@@ -63,6 +82,12 @@
 #' @references  Adams, D.C. and R. Felice. 2014. Assessing phylogenetic morphological 
 #' integration and trait covariation in morphometric data using evolutionary covariance 
 #' matrices. PLOS ONE. 9(4):e94335.
+#' @references Collyer, M.L., D.J. Sekora, and D.C. Adams. 2015. A method for analysis of phenotypic change for phenotypes described 
+#' by high-dimensional data. Heredity. 115:357-365.
+#' @references Adams, D.C. and M.L. Collyer. 2016.  On the comparison of the strength of morphological integration across morphometric 
+#' datasets. Evolution. 70:2623-2631.
+#' @references Adams, D.C. and M.L. Collyer. 2017. Multivariate comparative methods: evaluations, comparisons, and
+#' recommendations. Systematic Biology. In press.
 #' @seealso \code{\link{integration.test}}, \code{\link{modularity.test}}, \code{\link{phylo.pls}}, and 
 #' \code{\link{two.b.pls}}
 #' @examples
@@ -142,20 +167,31 @@ phylo.integration <-function(A, A2=NULL, phy, partition.gp=NULL,iter=999, seed=N
   Ptrans<-D.mat%*%(I-one%*%crossprod(one,invC)/sum(invC))
   if(ngps==2){
     pls.obs <- pls.phylo(x, y, Ptrans,verbose=TRUE)
+    if(NCOL(x) > NROW(x)){
+      pcax <- prcomp(x)
+      d <- which(zapsmall(pcax$sdev) > 0)
+      x <- pcax$x[,d]
+    }
+    if(NCOL(y) > NROW(y)){
+      pcay <- prcomp(y)
+      d <- which(zapsmall(pcay$sdev) > 0)
+      y <- pcay$x[,d]
+    }
     x <- Ptrans%*%x
     y <- Ptrans%*%y
     if(print.progress) pls.rand <- apply.pls(x, y,  iter=iter, seed=seed) else
       pls.rand <- .apply.pls(x, y, iter=iter, seed=seed)
-    p.val <- pval(pls.rand)
+    p.val <- pval(abs(pls.rand))
     XScores <- pls.obs$XScores
     YScores <- pls.obs$YScores
   }
   if(ngps>2){
     pls.obs <- plsmulti.phylo(x, gps, Ptrans)  
+    
     x <- Ptrans%*%x
     if(print.progress) pls.rand <- apply.plsmulti(x, gps, iter=iter, seed=seed) else
       pls.rand <- .apply.plsmulti(x, gps,iter=iter, seed=seed)
-    p.val <- pval(pls.rand)
+    p.val <- pval(abs(pls.rand))
   } 
   ####OUTPUT
   if(ngps > 2) r.pls.mat <- pls.obs$r.pls.mat else r.pls.mat <- NULL
@@ -174,6 +210,7 @@ phylo.integration <-function(A, A2=NULL, phy, partition.gp=NULL,iter=999, seed=N
   }
   if(ngps>2){
     out <- list(r.pls = pls.obs$r.pls, r.pls.mat = r.pls.mat, P.value = p.val,
+                random.r = pls.rand, 
                 permutations = iter+1, call=match.call(),
                 method = "PLS")
   }

@@ -14,7 +14,7 @@
 #'  NOTE: previous versions of plotTangentSpace had option 'verbose' to return the PC scores and PC shapes. 
 #'  From version 3.0.2 this is automatic when assigned to an object.
 #'
-#' @param A An array (p x k x n) containing landmark coordinates for a set of aligned specimens 
+#' @param A A 3D array (p x k x n) containing landmark coordinates for a set of aligned specimens 
 #' @param warpgrids A logical value indicating whether deformation grids for shapes along X-axis should be displayed
 #' @param mesh A mesh3d object to be warped to represent shape deformation along X-axis (when {warpgrids=TRUE})
 #' as described in \code{\link{plotRefToTarget}}.
@@ -24,6 +24,9 @@
 #' (or if TRUE, numerical addresses are given)
 #' @param groups An optional factor vector specifying group identity for each specimen (see example)
 #' @param legend A logical value for whether to add a legend to the plot (only when groups are assigned).
+#' @param ... Arguments passed on to \code{\link{prcomp}}.  By default, \code{\link{plotTangentSpace}}
+#' will attempt to remove redundant axes (eigen values effectively 0).  To override this, adjust the 
+#' argument, tol, from \code{\link{prcomp}}.
 #' @return If user assigns function to object, returned is a list of the following components:
 #' \item{pc.summary}{A table summarizing the percent variation explained by each pc axis, equivalent to summary of \code{\link{prcomp}}.}
 #' \item{pc.scores}{The set of principal component scores for all specimens.}
@@ -38,7 +41,7 @@
 #' data(plethodon) 
 #' Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
 #' 
-#' gp <- as.factor(paste(plethodon$species, plethodon$site)) # group must be a factor
+#' gp <- interaction(plethodon$species, plethodon$site) # group must be a factor
 #' plotTangentSpace(Y.gpa$coords, groups = gp) 
 #' 
 #' ## To save and use output
@@ -58,17 +61,31 @@
 #'          predict(lm(two.d.array(Y.gpa$coords)~1)),12,2))
 
 plotTangentSpace<-function (A, axis1 = 1, axis2 = 2, warpgrids = TRUE, mesh = NULL, label = NULL, 
-                            groups=NULL, legend=FALSE){
+                            groups=NULL, legend=FALSE, ...){
   if (length(dim(A)) != 3) {
     stop("Data matrix not a 3D array (see 'arrayspecs').") }
   if(any(is.na(A))==T){
     stop("Data matrix contains missing values. Estimate these first (see 'estimate.missing').") }
+  dots <- list(...)
+  retx <- dots$retx
+  if(is.null(retx)) retx <- TRUE
+  scale. <- dots$scale.
+  if(is.null(scale.)) scale. <- FALSE
+  center <- dots$center
+  if(is.null(center)) center <- TRUE
+  tol <- dots$tol
   k <- dim(A)[2]
   p <- dim(A)[1]
   n <- dim(A)[3]
   ref <- mshape(A)
   x <- two.d.array(A)
-  pc.res <- prcomp(x)
+  if(is.null(tol)){
+    d <- prcomp(x)$sdev^2
+    cd <-cumsum(d)/sum(d)
+    cd <- length(which(cd < 1)) 
+    tol <- max(c(d[cd]/d[1],0.005))
+  }
+  pc.res <- prcomp(x, center = center, scale. = scale., retx = retx, tol = tol)
   pcdata <- pc.res$x
   if (warpgrids == FALSE) {
     if(legend==TRUE){ layout(t(matrix(c(1, 1, 2, 1, 1, 1, 1, 1, 1), 3,3))) }

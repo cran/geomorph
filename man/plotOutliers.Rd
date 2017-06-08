@@ -7,7 +7,7 @@
 plotOutliers(A, groups = NULL)
 }
 \arguments{
-\item{A}{An array (p x k x n) containing GPA-aligned coordinates for a set of specimens}
+\item{A}{A 3D array (p x k x n) containing GPA-aligned coordinates for a set of specimens}
 
 \item{groups}{An optional factor defining groups}
 }
@@ -39,9 +39,6 @@ plotRefToTarget(mshape(Y$coords), Y$coords[,,out[1]], method="vector", label=TRU
 plotRefToTarget(mshape(Y$coords), Y$coords[,,out[2]], method="vector", label=TRUE)
 
 }
-\author{
-Emma Sherratt
-}
 \seealso{
 \code{\link{gpagen}}
 
@@ -49,5 +46,7 @@ Emma Sherratt
 
 \code{\link{plotAllSpecimens}}
 }
+\author{
+Emma Sherratt
+}
 \keyword{utilities}
-

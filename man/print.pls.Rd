@@ -7,7 +7,7 @@
 \method{print}{pls}(x, ...)
 }
 \arguments{
-\item{x}{print/summary object}
+\item{x}{print/summary object (from \code{\link{phylo.integration}} or \code{\link{two.b.pls}})}
 
 \item{...}{other arguments passed to print/summary}
 }
@@ -18,4 +18,3 @@ Print/Summary Function for geomorph
 Michael Collyer
 }
 \keyword{utilities}
-

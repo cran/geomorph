@@ -9,7 +9,7 @@
 #'  designates the two landmarks to be connected by that link. The function will plot either two- or 
 #'  three-dimensional data (e.g. see \code{\link{define.links}}).
 #'
-#' @param A An array (p x k x n) containing GPA-aligned coordinates for a set of specimens
+#' @param A A 3D array (p x k x n) containing GPA-aligned coordinates for a set of specimens
 #' @param mean A logical value indicating whether the mean shape should be included in the plot
 #' @param links An optional matrix defining for links between landmarks (only if mean=TRUE)
 #' @param label A logical value indicating whether landmark numbers will be plotted (only if mean=TRUE)
@@ -28,14 +28,12 @@ plotAllSpecimens<-function(A,mean=TRUE,links=NULL,label=FALSE,plot.param = list(
   if(any(is.na(A))==T){
     stop("Data matrix contains missing values. Estimate these first (see 'estimate.missing').")  }
   k<-dim(A)[2]
-  if(mean==TRUE){
-    mn<-mshape(A)
-  }
+  if(mean==TRUE){ mn<-mshape(A) }
   
   p.p <- plot.param
   if(is.null(p.p$pt.bg)) p.p$pt.bg="gray" ; if(is.null(p.p$pt.cex)) p.p$pt.cex=1 ; 
   if(is.null(p.p$mean.bg)) p.p$mean.bg="black" ; if(is.null(p.p$mean.cex)) p.p$mean.cex=2
-  if(is.null(p.p$link.col)) p.p$l.col="black" ; if(is.null(p.p$link.lwd)) p.p$link.lwd=2
+  if(is.null(p.p$link.col)) p.p$link.col="black" ; if(is.null(p.p$link.lwd)) p.p$link.lwd=2
   if(is.null(p.p$link.lty)) p.p$link.lty=1 ; if(is.null(p.p$txt.adj)) p.p$txt.adj=c(-.1,-.1)
   if(is.null(p.p$txt.col)) p.p$txt.col="black" ; if(is.null(p.p$txt.cex)) p.p$txt.cex=0.8
   if(is.null(p.p$txt.pos)) p.p$txt.pos=1

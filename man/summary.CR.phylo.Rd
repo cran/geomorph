@@ -7,7 +7,7 @@
 \method{summary}{CR.phylo}(object, ...)
 }
 \arguments{
-\item{object}{print/summary object}
+\item{object}{print/summary object (from \code{\link{phylo.modularity}})}
 
 \item{...}{other arguments passed to print/summary}
 }
@@ -18,4 +18,3 @@ Print/Summary Function for geomorph
 Dean Adams
 }
 \keyword{utilities}
-

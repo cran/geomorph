@@ -7,7 +7,7 @@
 \method{summary}{procD.lm}(object, ...)
 }
 \arguments{
-\item{object}{print/summary object}
+\item{object}{print/summary object (from \code{\link{procD.lm}})}
 
 \item{...}{other arguments passed to print/summary}
 }
@@ -18,4 +18,3 @@ Print/Summary Function for geomorph
 Michael Collyer
 }
 \keyword{utilities}
-

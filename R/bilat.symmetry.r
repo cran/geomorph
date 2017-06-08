@@ -11,7 +11,7 @@
 #'  about a midline (e.g., right and left sides of human faces). Details on general approaches for the study of symmetry in geometric 
 #'  morphometrics may be found in: Mardia et al. 2000; Klingenberg et al. 2002. 
 #'  
-#'  As input, the function receives either an array (p x k x n) containing raw landmarks (requiring 
+#'  As input, the function receives either A 3D array (p x k x n) containing raw landmarks (requiring 
 #'  GPA to be performed) or a gpagen object (if GPA has been previously performed). If one wishes 
 #'  to incorporate semilandmarks, GPA should be performed first using gpagen. Otherwise, 
 #'  bilat.symmetry can perform the initial GPA, assuming all landmarks are fixed. For 
@@ -51,7 +51,7 @@
 #'  
 #'  The generic functions, \code{\link{print}}, \code{\link{summary}}, and \code{\link{plot}} all work with \code{\link{bilat.symmetry}}.
 #'
-#' @param A Either an array (p x k x n) containing raw landmarks (requiring GPA to be performed) or a gpagen object (if GPA has been previously performed).  If one 
+#' @param A Either A 3D array (p x k x n) containing raw landmarks (requiring GPA to be performed) or a gpagen object (if GPA has been previously performed).  If one 
 #' wishes to incorporate semilandmarks, GPA should be performed first using \code{\link{gpagen}}.  Otherwise, bilat.symmetry can perform the initial GPA, assuming all landmarks
 #' are fixed.  For "object.sym = FALSE, landmarks should be of dimension (p x k x 2n), as each specimen is represented by both left and right configurations.
 #' @param ind A vector containing labels for each individual. For matching symmetry, the matched pairs receive the same 
@@ -201,11 +201,11 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
   if(!is.null(seed) && seed=="random") seed = sample(1:iter, 1)
   if(print.progress) cat("\nShape Analysis\n")
   if(print.progress) {
-    if(RRPP == TRUE) PSh <- SS.iter.bilat.symmetry(pfitSh,Yalt="RRPP", iter=iter, seed=seed) else 
-      PSh <- .SS.iter.bilat.symmetry(pfitSh, Yalt="resample", iter=iter, seed=seed)
+    if(RRPP == TRUE) PSh <- SS.iter(pfitSh,Yalt="RRPP", iter=iter, seed=seed) else 
+      PSh <- .SS.iter(pfitSh, Yalt="resample", iter=iter, seed=seed)
   } else {
-    if(RRPP == TRUE) PSh <- .SS.iter.bilat.symmetry(pfitSh,Yalt="RRPP", iter=iter, seed=seed) else 
-      PSh <- .SS.iter.bilat.symmetry(pfitSh, Yalt="resample", iter=iter, seed=seed)
+    if(RRPP == TRUE) PSh <- .SS.iter(pfitSh,Yalt="RRPP", iter=iter, seed=seed) else 
+      PSh <- .SS.iter(pfitSh, Yalt="resample", iter=iter, seed=seed)
   }
   anova.parts.Sh <- anova.parts.symmetry(pfitSh, PSh, object.sym)
   anovaSh <-anova.parts.Sh$anova.table 
@@ -231,7 +231,7 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
       if(RRPP == TRUE) PSz <- .SS.iter(pfitSz,Yalt="RRPP", iter=iter, seed=seed) else 
         PSz <- .SS.iter(pfitSz, Yalt="resample", iter=iter, seed=seed)
     }
-    anova.parts.Sz <- anova.parts.symmetry(pfitSz, PSz,object.sym)
+    anova.parts.Sz <- anova.parts.symmetry(pfitSz, PSz, object.sym)
     anovaSz <-anova.parts.Sz$anova.table 
     Sz.random.Fs <-anova.parts.Sz$random.Fs
     if(is.matrix(Sz.random.Fs))

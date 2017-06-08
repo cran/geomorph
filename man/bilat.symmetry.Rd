@@ -9,7 +9,7 @@ bilat.symmetry(A, ind = NULL, side = NULL, replicate = NULL,
   seed = NULL, RRPP = TRUE, print.progress = TRUE)
 }
 \arguments{
-\item{A}{Either an array (p x k x n) containing raw landmarks (requiring GPA to be performed) or a gpagen object (if GPA has been previously performed).  If one 
+\item{A}{Either A 3D array (p x k x n) containing raw landmarks (requiring GPA to be performed) or a gpagen object (if GPA has been previously performed).  If one 
 wishes to incorporate semilandmarks, GPA should be performed first using \code{\link{gpagen}}.  Otherwise, bilat.symmetry can perform the initial GPA, assuming all landmarks
 are fixed.  For "object.sym = FALSE, landmarks should be of dimension (p x k x 2n), as each specimen is represented by both left and right configurations.}
 
@@ -68,7 +68,7 @@ The function quantifies components of shape variation for a set of specimens as 
  about a midline (e.g., right and left sides of human faces). Details on general approaches for the study of symmetry in geometric 
  morphometrics may be found in: Mardia et al. 2000; Klingenberg et al. 2002. 
  
- As input, the function receives either an array (p x k x n) containing raw landmarks (requiring 
+ As input, the function receives either A 3D array (p x k x n) containing raw landmarks (requiring 
  GPA to be performed) or a gpagen object (if GPA has been previously performed). If one wishes 
  to incorporate semilandmarks, GPA should be performed first using gpagen. Otherwise, 
  bilat.symmetry can perform the initial GPA, assuming all landmarks are fixed. For 
@@ -144,9 +144,6 @@ summary(scallop.sym)
 # NOTE one can also: plot(scallop.sym, warpgrids = TRUE, mesh = NULL)
 # NOTE one can also: scallop.sym$data.type # recall the symmetry type
 }
-\author{
-Dean Adams, Emma Sherratt, and Michael Collyer
-}
 \references{
 Klingenberg, C.P. and G.S. McIntyre. 1998. Quantitative genetics of geometric shape in the mouse mandible. Evolution. 55:2342-2352.
 
@@ -155,5 +152,7 @@ Mardia, K.V., F.L. Bookstein, and I.J. Moreton. 2000. Statistical assessment of 
 Klingenberg, C.P., M. Barluenga, and A. Meyer. 2002. Shape analysis of symmetric structures: quantifying variation among
 individuals and asymmetry. Evolution. 56:1909-1920.
 }
+\author{
+Dean Adams, Emma Sherratt, and Michael Collyer
+}
 \keyword{analysis}
-

@@ -4,21 +4,26 @@
 \alias{two.d.array}
 \title{Convert (p x k x n) data array into 2D data matrix}
 \usage{
-two.d.array(A)
+two.d.array(A, sep = ".")
 }
 \arguments{
-\item{A}{An array (p x k x n) containing landmark coordinates for a set of specimens}
+\item{A}{A 3D array (p x k x n) containing landmark coordinates for a set of specimens}
+
+\item{sep}{An optional argument for variable labeling, combining landmark labels (e.g., 1, 2, 3, ...)
+and partial dimension labels (e.g., "x", "y", and "z"), much like the \code{\link{paste}} function.  
+The default is sep = ".", but this can be changed to any separator.  
+One should make sure to match separators with \code{\link{arrayspecs}} if switching between matrices and arrays.}
 }
 \value{
 Function returns a two-dimensional matrix of dimension (n x [p x k]), where rows 
   represent specimens and columns represent variables.
 }
 \description{
-Convert a three-dimensional array of landmark coordinates into a 2-dimensional matrix
+Convert a three-dimensional array of landmark coordinates into a two-dimensional matrix
 }
 \details{
-This function converts a (p x k x n) array of landmark coordinates into a 2-dimensional 
- matrix. The latter format of the shape data is useful for performing subsequent statistical 
+This function converts a (p x k x n) array of landmark coordinates into a two-dimensional 
+ matrix (n x [p x k]). The latter format of the shape data is useful for performing subsequent statistical 
  analyses in R (e.g., PCA, MANOVA, PLS, etc.). Row labels are preserved if included in 
  the original array.
 }
@@ -28,8 +33,10 @@ plethodon$land    #original data in the form of 3D array
 
 two.d.array(plethodon$land)   # Convert to a 2D data matrix
 }
+\seealso{
+\code{\link{arrayspecs}}
+}
 \author{
 Dean Adams and Emma Sherratt
 }
 \keyword{utilities}
-

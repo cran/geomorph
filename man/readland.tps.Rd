@@ -5,7 +5,7 @@
 \title{Read landmark data from tps file}
 \usage{
 readland.tps(file, specID = c("None", "ID", "imageID"), readcurves = FALSE,
-  warnmsg = T)
+  warnmsg = TRUE)
 }
 \arguments{
 \item{file}{A *.tps file containing two- or three-dimensional landmark data}
@@ -50,12 +50,11 @@ When readcurves = FALSE, only the landmark data are returned.
 NOTE: At present, all other information that can be contained in tps files (comments, variables, radii, etc.)
   is ignored.
 }
-\author{
-Dean Adams & Emma Sherratt
-}
 \references{
 Rohlf, F. J. 2010. tpsRelw: Relative warps analysis. Version 1.49. Department of Ecology 
   and Evolution, State University of New York at Stony Brook, Stony Brook, NY.
 }
+\author{
+Dean Adams & Emma Sherratt
+}
 \keyword{IO}
-
