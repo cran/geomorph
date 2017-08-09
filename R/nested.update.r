@@ -18,7 +18,7 @@
 #' for all effects to be consistent with the type of distribution used.  If either Cohen's f-squared values or F values 
 #' were originally chosen, the same distributions are used in the update; if SS values were originally chosen, the 
 #' distribution is changed to Cohen's f-squared to calculate Z-scores. This change assures consistency in effect size 
-#' estimation, as the effectthat is updated cannot have an effect size based on SS.
+#' estimation, as the effect that is updated cannot have an effect size based on SS.
 #' 
 #' It is important that the formula is input correctly. It can be input as one of the following four styles:
 #' 
@@ -41,7 +41,7 @@
 #' formulae above is recommended for best results.
 #' 
 #' Effect sizes (Z scores) are based on either the distribution of random F values or a distribution of
-#' Cohen's f-squared values, calculated in every pemutation.  An attempt will be made to preserve the effect size
+#' Cohen's f-squared values, calculated in every permutation.  An attempt will be made to preserve the effect size
 #' type used in the previous \code{\link{procD.lm}} or \code{\link{procD.pgls}} analysis.  However, an analysis
 #' performed in \code{\link{procD.lm}} using effect size calculated from random SS values will be updated
 #' to use random Cohen's f-squared values for all effects, to avoid having effect sizes measured from different
@@ -57,12 +57,12 @@
 #' by high-dimensional data. Heredity. 115:357-365.
 #' @examples
 #' 
-#'data(larvalTails)
-#'Y.gpa <- gpagen(larvalTails$landmarks)
-#'gdf <- geomorph.data.frame(Y.gpa, Treatment = larvalTails$Treatment, Family = larvalTails$Family)
+#'data(larvalMorph)
+#'Y.gpa <- gpagen(larvalMorph$tailcoords)
+#'gdf <- geomorph.data.frame(Y.gpa, Treatment = larvalMorph$treatment, Family = larvalMorph$family)
 #'
 #'# Model with fixed and nested effects
-#'tailANOVA <- procD.lm(coords ~ Treatment/Family, iter=99, RRPP=TRUE, data=gdf)
+#'tailANOVA <- procD.lm(coords ~ Treatment/Family, iter = 99, RRPP=TRUE, data=gdf)
 #'summary(tailANOVA)
 #'
 #'# Update for nested effects

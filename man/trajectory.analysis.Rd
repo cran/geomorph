@@ -75,7 +75,7 @@ The function quantifies phenotypic shape change trajectories from a set of speci
  in attributes of the trajectories via permutation. A shape change trajectory is defined by a sequence 
  of shapes in tangent space. These trajectories can be quantified for various attributes (their size, orientation, 
  and shape), and comparisons of these attribute enable the statistical comparison of shape change 
- trajectories (see Collyer and Adams 2013; Collyer and Adams 2007; Adams and Collyer 2007; Adams and Collyer 2009).
+ trajectories (see Collyer and Adams 2013; Collyer and Adams 2007; Adams and Collyer 2007; Adams and Collyer 2009; Collyer and Adams 2013).
 
 Data input is specified by a two formulae (e.g., Y ~ X), where 'Y' specifies the response variables (trajectory data), 
  and 'X' contains one or more independent variables (discrete or continuous). The response matrix 'Y' can be either in the form of a two-dimensional data 
@@ -137,7 +137,7 @@ by providing pairwise statistics and P-values.
  for some statistics can vary with sample size and variable number, and recommended finding the expected value, empirically, as the mean from the set 
  of random outcomes.  Geomorph 3.0.4 and subsequent versions now center z-scores on their empirically estimated expected values and where appropriate, 
  log-transform values to assure statistics are normally distributed.  This can result in negative effect sizes, when statistics are smaller than 
- expected compared to the avergae random outcome.  For ANOVA-based functions, the option to choose among different statistics to measure effect size 
+ expected compared to the average random outcome.  For ANOVA-based functions, the option to choose among different statistics to measure effect size 
  is now a function argument.
 }
 }
@@ -208,6 +208,9 @@ Adams, D. C., and M. L. Collyer. 2009. A general framework for the analysis of p
 
 Collyer, M. L., and D. C. Adams. 2007. Analysis of two-state multivariate phenotypic change 
   in ecological studies. Ecology 88:683-692.
+
+Collyer, M. L., and D. C. Adams. 2013. Phenotypic trajectory analysis: comparison of shape change patterns 
+in evolution and ecology. Hystrix 24: 75-83.
 
 Collyer, M.L., D.J. Sekora, and D.C. Adams. 2015. A method for analysis of phenotypic change for phenotypes described 
 by high-dimensional data. Heredity. 115:357-365.

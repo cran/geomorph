@@ -70,35 +70,35 @@ This function can be used with an object of class "procD.lm" or "advanced.procD.
 This is specially useful for analyses performed with  \code{\link{procD.pgls}}.  In this case, residuals obtained from PGLS estimation
 of coefficients, rather than OLS estimation, will be used in the analysis.  Thus, one can account for phylogeny when comparing
 morphological disparity among groups.  However, one should be aware that this approach only adjusts expected values because of phylogeny
-and does not assert a null hypothesis of equal variances based on phylogenetic relatedness.  (For example, specials means can be adjusted
+and does not assert a null hypothesis of equal variances based on phylogenetic relatedness.  (For example, species means can be adjusted
 because of phylogenetic relatedness, but the null hypothesis of equal variances is conditioned on the estimation of means.)
 }
 \examples{
 data(plethodon)
-Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
+Y.gpa<-gpagen(plethodon$land,print.progress = FALSE)    #GPA-alignment
 gdf <- geomorph.data.frame(Y.gpa, species = plethodon$species, site = plethodon$site)
 
 # Morphological disparity for entire data set
-morphol.disparity(coords ~ 1, groups= NULL, data = gdf, iter=999)
+morphol.disparity(coords ~ 1, groups= NULL, data = gdf, iter=499)
 
 # Morphological disparity for entire data set, accounting for allometry
-morphol.disparity(coords ~ Csize, groups= NULL, data = gdf, iter=999)
+morphol.disparity(coords ~ Csize, groups= NULL, data = gdf, iter=499)
 
 # Morphological disparity without covariates, using overall mean
-morphol.disparity(coords ~ 1, groups= ~ species*site, data = gdf, iter=999)
+morphol.disparity(coords ~ 1, groups= ~ species*site, data = gdf, iter=499)
 
 # Morphological disparity without covariates, using group means
-morphol.disparity(coords ~ species*site, groups= ~species*site, data = gdf, iter=999)
+morphol.disparity(coords ~ species*site, groups= ~species*site, data = gdf, iter=499)
 
 # Morphological disparity of different groups than those described by the linear model
-morphol.disparity(coords ~ Csize + species*site, groups= ~ species, data = gdf, iter=999)
+morphol.disparity(coords ~ Csize + species*site, groups= ~ species, data = gdf, iter=499)
 
 # Extracting components
-MD <- morphol.disparity(coords ~ Csize + species*site, groups= ~ species, data = gdf, iter=999)
+MD <- morphol.disparity(coords ~ Csize + species*site, groups= ~ species, data = gdf, iter=499)
 MD$Procrustes.var # just the Procrustes variances
 
 
-### Morphol.disparity can be used with procD.lm or advanced.procd.lm class objects
+### Morphol.disparity can be used with procD.lm or advanced.procD.lm class objects
 
 data(plethspecies)
 Y.gpa<-gpagen(plethspecies$land)    #GPA-alignment

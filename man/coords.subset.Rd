@@ -16,7 +16,7 @@ Subset (split) landmark coordinates via a grouping factor
 }
 \details{
 This function splits a set of landmark coordinates into subsets, as described by a factor.  The 
-results is a list of separate sets of landmarks.
+result is a list of separate sets of landmarks.
 }
 \examples{
 data(pupfish) 
@@ -24,7 +24,8 @@ group <- factor(paste(pupfish$Pop, pupfish$Sex))
 levels(group)
 new.coords <- coords.subset(A = pupfish$coords, group = group)
 names(new.coords) # see the list levels
-# access any element by:
+# group shape means
+lapply(new.coords, mshape)
 
 }
 \author{

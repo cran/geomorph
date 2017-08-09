@@ -42,7 +42,7 @@
 #'  for some statistics can vary with sample size and variable number, and recommended finding the expected value, empirically, as the mean from the set 
 #'  of random outcomes.  Geomorph 3.0.4 and subsequent versions now center z-scores on their empirically estimated expected values and where appropriate, 
 #'  log-transform values to assure statistics are normally distributed.  This can result in negative effect sizes, when statistics are smaller than 
-#'  expected compared to the avergae random outcome.  For ANOVA-based functions, the option to choose among different statistics to measure effect size 
+#'  expected compared to the average random outcome.  For ANOVA-based functions, the option to choose among different statistics to measure effect size 
 #'  is now a function argument.
 #' }
 #' 
@@ -77,7 +77,7 @@
 #'   \item{permutations}{The number of random permutations used in the resampling procedure.}
 #'   \item{call}{The match call.}
 #'   
-#' @seealso \code{\link{integration.test}}, \code{\link{modularity.test}}, \code{\link{phylo.pls}},  
+#' @seealso \code{\link{integration.test}}, \code{\link{modularity.test}}, 
 #' \code{\link{phylo.integration}}, and \code{\link{compare.pls}}
 #' @references  Rohlf, F.J., and M. Corti. 2000. The use of partial least-squares to study covariation in shape. 
 #' Systematic Biology 49: 740-753.

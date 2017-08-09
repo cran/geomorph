@@ -77,7 +77,7 @@
 #' \item{shape.anova}{An analysis of variance table for the shape data.}
 #' \item{size.anova}{An analysis of variance table for the shape data (when object.sym=FALSE).}
 #' \item{symm.shape}{The symmetric component of shape variation.}
-#' \item{asym.shape}{The asymmetric component of shape variation.}
+#' \item{asymm.shape}{The asymmetric component of shape variation.}
 #' \item{DA.component}{The directional asymmetry component, found as the mean shape for each side.}
 #' \item{FA.component}{The fluctuating asymmetry component for each specimen, found as the specimen-specific side deviation adjusted for the mean
 #'  directional asymmetry in the dataset.}
@@ -199,7 +199,7 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
   pfitSh <- procD.fit(form.shape, data = dat.shape, keep.order = TRUE)
   kSh <- length(pfitSh$term.labels)
   if(!is.null(seed) && seed=="random") seed = sample(1:iter, 1)
-  if(print.progress) cat("\nShape Analysis\n")
+  if(print.progress) cat("\nShape Analysis")
   if(print.progress) {
     if(RRPP == TRUE) PSh <- SS.iter(pfitSh,Yalt="RRPP", iter=iter, seed=seed) else 
       PSh <- .SS.iter(pfitSh, Yalt="resample", iter=iter, seed=seed)
@@ -223,7 +223,7 @@ bilat.symmetry<-function(A,ind=NULL,side=NULL,replicate=NULL,object.sym=FALSE,la
       dat.size <- geomorph.data.frame(size = size, ind = ind, side = side)
     }
     pfitSz=procD.fit(form.size, data=dat.size, keep.order=TRUE)
-    if(print.progress) cat("\nSize Analysis\n")
+    if(print.progress) cat("\nSize Analysis")
     if(print.progress) {
       if(RRPP == TRUE) PSz <- SS.iter(pfitSz,Yalt="RRPP", iter=iter, seed=seed) else 
         PSz <- SS.iter(pfitSz, Yalt="resample", iter=iter, seed=seed)
