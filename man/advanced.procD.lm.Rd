@@ -5,7 +5,8 @@
 \title{Procrustes ANOVA and pairwise tests for shape data, using complex linear models}
 \usage{
 advanced.procD.lm(f1, f2, groups = NULL, slope = NULL, angle.type = c("r",
-  "deg", "rad"), phy = NULL, pc.shape = FALSE, iter = 999, seed = NULL,
+  "deg", "rad"), phy = NULL, Cov = NULL, pc.shape = FALSE,
+  effect.type = c("F", "SS", "Rsq"), iter = 999, seed = NULL,
   print.progress = TRUE, data = NULL, ...)
 }
 \arguments{
@@ -25,10 +26,20 @@ slopes are compared.  Group slopes can differ in their magnitude and direction o
 \item{angle.type}{A value specifying whether directional differences between slopes should be represented by vector
 correlations (r), radians (rad) or degrees (deg).}
 
-\item{phy}{A phylogenetic tree of {class phylo} - see \code{\link[ape]{read.tree}} in library ape (optional)}
+\item{phy}{A phylogenetic tree of {class phylo} - see \code{\link[ape]{read.tree}} in library ape (optional).}
+
+\item{Cov}{A covariance matrix to guide GLS computations.  If both a phylogenetic tree and covariance matrix
+are provided, a Brownian motion covariance matrix will not be calculated, based on the phylogeny (it will be ignored).  
+Currently this function cannot handle multiple covariance matrices.}
 
 \item{pc.shape}{An argument for whether analysis should be performed on the principal component scores of shape.  This is a useful
-option if the data are high-dimensional (many more variables than observations) but will not affect results}
+option if the data are high-dimensional (many more variables than observations) but will not affect results.}
+
+\item{effect.type}{An optional argument for which distribution of statistics should be used for calculating effect sizes (
+and P-values).  The default is "F" for the distribution of random F-statistics, but "SS" and "Rsq" are also
+possible, for the distributions of random SS between models or R-squared values, respectively.  One should not choose "SS" if a PGLS model is considered.
+P-values should be similar in most cases, regardless of statistic chosen, as the rank correlations between statistics are either perfect (SS and Rsq for OLS) 
+or generally large.}
 
 \item{iter}{Number of iterations for significance testing}
 
@@ -84,16 +95,16 @@ The SS calculated is the same as the sum of squared Procrustes distances among s
   Procrustes ANOVA, often used in morphometrics applications is equivalent
   to distance-based anova designs (Anderson 2001). Unlike \code{\link{procD.lm}}, this function is strictly for comparison
   of two nested models. (Use of \code{\link{procD.lm}} will be more suitable in most cases.)
-  Effect-sizes (Z-scores) are computed as standard deviates of the F or pairwise statistic sampling
-  distributions generated, which might be more intuitive for P-values than F-values (see Collyer et al. 2015).
+  Effect-sizes (Z-scores) are computed as standard deviates of the statistic chosen for ANOVA (see arguments) or for
+  pairwise statistic sampling distributions generated, which might be more intuitive for P-values than F-values (see Collyer et al. 2015).
   For ANOVA Z-scores, a log-transformation is performed first, to assure a normally distributed sampling distribution.
   
-  Pairwise tests have two flavors: 1) tests for differencs in group means (based on vector length between
+  Pairwise tests have two flavors: 1) tests for differences in group means (based on vector length between
   means for pairwise comparisons) and 2) tests for angular differences in slopes between groups.  These tests are 
   similar in concept to trajectory analysis (Adams and Collyer 2007; Collyer and Adams 2007; Adams and Collyer 2009;
-  Collyer and Adams 2013), in that pairwise statistics are either vector lengths or angluar differences between vectors.  
+  Collyer and Adams 2013), in that pairwise statistics are either vector lengths or angular differences between vectors.  
   These tests are different than trajectory analysis (see\code{\link{trajectory.analysis}}), however, because a factorial model
-  is not explicitly needed to contrast vectors between point factor levels nested within group factor levels.  For angluar differences 
+  is not explicitly needed to contrast vectors between point factor levels nested within group factor levels.  For angular differences 
   between factor-covariate slopes, either the angle or the vector correlation can be tested.  It should be understood
   that a vector correlation of 1 (parallel vectors), not 0, is the null hypothesis, meaning slopes are the same.
 
@@ -114,7 +125,7 @@ Pairwise tests are only performed if formulae are provided to compute such resul
  is now a function argument.
 
 An optional argument for including a phylogenetic tree of {class phylo} is included in this function.  ANOVA performed on separate PGLS models is analogous
- to a likelihood ratio test between models (Adams and Collyer 2017).  Pairwise tests can also be performed after PGLS estimation of coefficients but users
+ to a likelihood ratio test between models (Adams and Collyer 2018).  Pairwise tests can also be performed after PGLS estimation of coefficients but users
  should be aware that no formal research on the statistical properties (type I error rates and statistical power) of pairwise statistics with PGLS has yet
  been performed.  Using PGLS and analysis of pairwise statistics, therefore, assumes some risk.
 }
@@ -139,7 +150,7 @@ summary(PW.means.test, formula = TRUE)
 # accounting for a common allometry
 PW.ls.means.test <- advanced.procD.lm(f1= coords ~ Csize + site*species,
 f2= ~ log(Csize) + site + species,
-groups = ~ site*species, slope = ~log(Csize), iter = 99, data = gdf)
+groups = ~ site*species, iter = 99, data = gdf)
 summary(PW.ls.means.test, formula = TRUE)
 
 # Example of a test of homogeneity of slopes, plus pairwise slopes comparisons
@@ -162,6 +173,18 @@ plot(aov.pleth)
 
 # Extracting objects from results
 aov.pleth$slopes # extract the slope vectors
+
+# GLS Examples (same as procD.gpls example)
+data(plethspecies)
+Y.gpa<-gpagen(plethspecies$land)    
+gdf <- geomorph.data.frame(Y.gpa, tree = plethspecies$phy)
+procD.pgls(coords ~ Csize, phy = tree, data = gdf, iter = 999)
+
+advanced.procD.lm(coords ~ Csize, ~1, phy = gdf$tree, data = gdf, iter = 999)
+
+# Could also do this with ape function
+# phyCov <- vcv.phylo(plethspecies$phy)
+# advanced.procD.lm(coords ~ Csize, ~1, Cov = phyCov, data = gdf, iter = 999) 
 }
 \references{
 Adams, D.C., and M.L. Collyer. 2007. The analysis of character divergence along environmental 
@@ -173,8 +196,8 @@ Adams, D.C., and M.L. Collyer. 2009. A general framework for the analysis of phe
 Adams, D.C. and M.L. Collyer. 2016.  On the comparison of the strength of morphological integration across morphometric
 datasets. Evolution. 70:2623-2631.
 
-Adams, D.C. and M.L. Collyer. 2017. Multivariate comparative methods: evaluations, comparisons, and
-recommendations. Systematic Biology. In press.
+Adams, D.C. and M.L. Collyer. 2018. Multivariate phylogenetic comparative methods: evaluations, comparisons, and
+recommendations. Systematic Biology. 67:14-31.
 
 Collyer, M.L., and D.C. Adams. 2007. Analysis of two-state multivariate phenotypic change 
 in ecological studies. Ecology 88:683-692.

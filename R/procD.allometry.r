@@ -53,6 +53,7 @@
 #'   Examples for more flexible approaches to modeling allometry using \code{\link{procD.lm}} are provided below.
 #' }
 #' 
+#' 
 #'  \subsection{Notes for geomorph 3.0.5 and subsequent versions}{ 
 #'  Previous versions of \code{procD.allometry} had an argument, f3, for providing additional covariates.  Complex
 #'  models can now be analyzed with \code{\link{procD.lm}}, which has similar plotting capabilities as \code{procD.allometry}.
@@ -79,7 +80,7 @@
 #' \itemize{
 #' \item{method = ("CAC, "RegScore, "PredLine").  Choose the desired plot method.}
 #' \item{warpgrids: default = TRUE.  Logical value to indicate whether warpgrids should be plotted.} 
-#' (Only workds with 3D array data)
+#' (Only works with 3D array data)
 #' \item{label: can be logical to label points (1:n) - e.g., label = TRUE - or a vector indicating
 #' text to use as labels.}
 #' \item{mesh: A mesh3d object to be warped to represent shape deformation of the minimum and maximum size 
@@ -201,7 +202,7 @@
 #' 
 #' # Using procD.lm to call procD.allometry (in case more results are desired)
 #' plethANOVA <- procD.lm(plethAllometry$formula, 
-#' data = plethAllometry$data, iter = 249, RRPP=TRUE)
+#' data = plethAllometry$data, iter = 149, RRPP=TRUE)
 #' summary(plethANOVA) # Same ANOVA
 #' 
 #' # procD.allometry is a wrapper function for procD.lm.  The same analyses
@@ -260,7 +261,7 @@ procD.allometry<- function(f1, f2 = NULL, logsz = TRUE,
   names(dat)[is.na(nmmatch)] <- "size"
   if(!is.null(seed) && seed=="random") seed = sample(1:iter, 1)
   size <- dat$size
-  if(any(size <= 0)) stop("Size cannot be negative if using log-transformation")
+  if(any(size <= 0)) stop("Size values cannot be negative")
   if(logsz) form1 <- Y ~ log(size) else 
     form1 <- Y ~ size
   
@@ -366,7 +367,7 @@ procD.allometry<- function(f1, f2 = NULL, logsz = TRUE,
   if(is.null(f2)) gps <- NULL
   out <- list(HOS.test = HOS, aov.table = anovafull$aov.table, call = match.call(),
               alpha = alpha, perm.method = perm.method, permutations=iter+1,
-              formula = formfull, data=dat,
+              formula = formfull, data=dat, effect.type = effect.type,
               random.SS = anovafull$random.SS, random.F = anovafull$random.F,
               random.cohenf = anovafull$random.cohenf,
               CAC = CAC, RSC = RSC, Reg.proj = Reg.proj,

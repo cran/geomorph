@@ -154,7 +154,7 @@ plots of allometry curves.  In geomorph 3.0, the \code{\link{plot}} function is 
 \itemize{
 \item{method = ("CAC, "RegScore, "PredLine").  Choose the desired plot method.}
 \item{warpgrids: default = TRUE.  Logical value to indicate whether warpgrids should be plotted.} 
-(Only workds with 3D array data)
+(Only works with 3D array data)
 \item{label: can be logical to label points (1:n) - e.g., label = TRUE - or a vector indicating
 text to use as labels.}
 \item{mesh: A mesh3d object to be warped to represent shape deformation of the minimum and maximum size 
@@ -206,7 +206,7 @@ plot(plethAllometry, method = "PredLine")
 
 # Using procD.lm to call procD.allometry (in case more results are desired)
 plethANOVA <- procD.lm(plethAllometry$formula, 
-data = plethAllometry$data, iter = 249, RRPP=TRUE)
+data = plethAllometry$data, iter = 149, RRPP=TRUE)
 summary(plethANOVA) # Same ANOVA
 
 # procD.allometry is a wrapper function for procD.lm.  The same analyses
