@@ -1,12 +1,12 @@
 #' Procrustes ANOVA/regression, specifically for shape-size covariation (allometry)
 #'
 #' Function performs Procrustes ANOVA with permutation procedures to facilitate visualization of size-shape patterns (allometry);
-#' i.e., patterns of shape covariation with size for a set of Procrustes-aligned coordinates.  Results for plotting allometric
+#' i.e., patterns of shape covariation with size for a set of Procrustes shape variables.  Results for plotting allometric
 #' patterns based on several approaches in the literature are available.
 #'
 #' The function quantifies the relative amount of shape variation attributable to covariation with organism size (allometry)
 #' plus (potentially) another grouping factor in a linear model, so as to provide initial visualizations of patterns of shape allometry. 
-#' Data input is specified by formulae (e.g., Y ~ X), where 'Y' specifies the response variables (shape data), 
+#' Data input is specified by formulae (e.g., Y ~ X), where 'Y' specifies the response variables (Procrustes shape variables), 
 #' and 'X' contains A SINGLE independent continuous variable representing size. The response matrix 'Y' can be 
 #' either in the form of a two-dimensional data matrix of dimension (n x [p x k]), or a 3D array (p x n x k).  It is assumed that  
 #' -if the data are based on landmark coordinates - the landmarks have previously been aligned using Generalized Procrustes Analysis (GPA) 
@@ -180,14 +180,14 @@
 #' gdf <- geomorph.data.frame(Y.gpa, site = plethodon$site, 
 #' species = plethodon$species) 
 #' plethAllometry <- procD.allometry(coords~Csize, f2 = NULL, f3=NULL, 
-#' logsz = TRUE, data=gdf, iter=149)
+#' logsz = TRUE, data=gdf, iter=149, print.progress = FALSE)
 #' summary(plethAllometry)
 #' plot(plethAllometry, method = "PredLine")
 #' plot(plethAllometry, method = "RegScore")
 #' 
 #' ## Obtaining size-adjusted residuals (and allometry-free shapes)
 #' plethAnova <- procD.lm(plethAllometry$formula,
-#'      data = plethAllometry$data, iter = 99, RRPP=TRUE) 
+#'      data = plethAllometry$data, iter = 99, RRPP=TRUE, print.progress = FALSE) 
 #' summary(plethAnova) # same ANOVA Table
 #' shape.resid <- arrayspecs(plethAnova$residuals,
 #'    p=dim(Y.gpa$coords)[1], k=dim(Y.gpa$coords)[2]) # allometry-adjusted residuals
@@ -196,13 +196,13 @@
 #' 
 #' # Group Allometries
 #' plethAllometry <- procD.allometry(coords~Csize, ~species * site, 
-#' logsz = TRUE, data=gdf, iter=99, RRPP=TRUE)
+#' logsz = TRUE, data=gdf, iter=99, RRPP=TRUE, print.progress = FALSE)
 #' summary(plethAllometry)
 #' plot(plethAllometry, method = "PredLine")
 #' 
 #' # Using procD.lm to call procD.allometry (in case more results are desired)
 #' plethANOVA <- procD.lm(plethAllometry$formula, 
-#' data = plethAllometry$data, iter = 149, RRPP=TRUE)
+#' data = plethAllometry$data, iter = 149, RRPP=TRUE, print.progress = FALSE)
 #' summary(plethANOVA) # Same ANOVA
 #' 
 #' # procD.allometry is a wrapper function for procD.lm.  The same analyses
@@ -218,12 +218,13 @@
 #' 
 #' # procD.allometry approach
 #' tailAllometry <- procD.allometry(coords ~ Csize, ~ Treatment,
-#' logsz = TRUE, alpha = 0.05, data = gdf, iter = 149)
+#' logsz = TRUE, alpha = 0.05, data = gdf, iter = 149, print.progress = FALSE)
 #' summary(tailAllometry) # HOS test suggests parallel allometries, but not unambiguous
 #' plot(tailAllometry, method = "PredLine")
 #' 
 #' # procD.lm approach, including interaction
-#' tailAllometry2 <- procD.lm(coords ~ log(Csize) * Treatment, data = gdf, iter = 149)
+#' tailAllometry2 <- procD.lm(coords ~ log(Csize) * Treatment, data = gdf, iter = 149, 
+#'      print.progress = FALSE)
 #' plot(tailAllometry2, type = "regression", 
 #' predictor = log(gdf$Csize), 
 #' reg.type = "PredLine", 
@@ -233,7 +234,7 @@
 #' 
 #' # including nested family effects, but still plotting by treatment
 #' tailAllometry3 <- procD.lm(coords ~ log(Csize) * Treatment + 
-#' Treatment/Family, data = gdf, iter = 149)
+#' Treatment/Family, data = gdf, iter = 149, print.progress = FALSE)
 #' tailAllometry3 <- nested.update(tailAllometry3, ~ Treatment/Family)
 #' summary(tailAllometry3)
 #' plot(tailAllometry3, type = "regression", 
@@ -307,7 +308,7 @@ procD.allometry<- function(f1, f2 = NULL, logsz = TRUE,
     cat("\nHomogeneity of Slopes Test\n")
     HOS <- advanced.procD.lm(form4, form5, data=datHOS, iter=iter, seed=seed, 
                              print.progress = print.progress)$anova.table
-    rownames(HOS) = c("Common Allometry", "Group Allometries")
+    rownames(HOS) = c("Common Allometry", "Group Allometries","Total")
     hos.pval <- HOS[2,7]
     if(hos.pval > alpha){ 
       if(logsz) rhs.formfull <- paste(c("log(size)", attr(g.Terms, "term.labels")),  collapse="+") else
