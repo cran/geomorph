@@ -1,4 +1,4 @@
-#' Estimate locations of missing landmarks 
+#' Estimate locations of missing landmarks
 #'
 #' A function for estimating the locations of missing landmarks 
 #' 
@@ -27,12 +27,14 @@
 #' landmark coordinates is to proceed with subsequent analyses EXCLUDING
 #' specimens with missing values. 
 #' 
-#' @param A An array (p x k x n) containing landmark coordinates for a set of specimens
+#' @param A An array (p x k x n) containing landmark coordinates for a set of specimens or a geomorphShapes object
 #' @param method Method for estimating missing landmark locations
 #' @author Dean Adams
 #' @keywords utilities
 #' @return Function returns an array (p x k x n) of the same dimensions as input A, including coordinates for the target specimens 
-#' (the original landmarks plus the estimated coordinates for the missing landmarks). These data need to be Procrustes Superimposed prior to analysis (see \code{\link{gpagen}}).
+#' (the original landmarks plus the estimated coordinates for the missing landmarks).
+#' If the input is a geomorphShapes object, this is returned with the original and estimated coordinates in $landmarks
+#' In both cases, these data need to be Procrustes Superimposed prior to analysis, including sliding of semilandmarks (see \code{\link{gpagen}}).
 #' @export
 #' @references Claude, J. 2008. Morphometrics with R. Springer, New York.
 #' @references  Bookstein, F. L., K. Schafer, H. Prossinger, H. Seidler, M. Fieder, G. Stringer, G. W. Weber, 

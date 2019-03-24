@@ -3,7 +3,7 @@
 #' Function quantifies the degree of modularity between two or more hypothesized modules of Procrustes shape variables
 #'  in a phylogenetic context and compares this to patterns found by randomly assigning landmarks into subsets
 #'
-#' The function quantifies the degree of phylogenetic modularity in two or more hypothesized modules of shape data as 
+#' The function quantifies the degree of phylogenetic modularity in two or more hypothesized modules of Procrustes shape variables as 
 #' defined by landmark coordinates, under a Brownian motion model of evolution. The degree of modularity 
 #' is characterized by the covariance ratio covariance ratio (CR: see Adams 2016). The phylogenetic version of the approach 
 #' procedure utilizes the evolutionary covariance matrix among traits found under a Brownian
@@ -36,7 +36,6 @@
 #' @export
 #' @keywords analysis
 #' @author Dean Adams
-#' @seealso  \code{\link[ape]{vcv.phylo}} (used in some internal computations)
 #' @return Objects of class "CR" from modularity.test return a list of the following:
 #'    \item{CR}{Covariance ratio: The estimate of the observed modular signal.}
 #'    \item{CInterval}{The bootstrapped 95 percent confidence intervals of the CR, if CI = TRUE.}
@@ -49,7 +48,7 @@
 #'    \item{call}{The match call.}
 #'    
 #' @references Adams, D.C. 2016.Evaluating modularity in morphometric data: Challenges with the RV coefficient and a 
-#' new test measure. Methods in Ecology and Evolution. (Accepted). 
+#' new test measure. Methods in Ecology and Evolution. 7:565-572.
 #' @references  Adams, D.C. and R. Felice. 2014. Assessing phylogenetic morphological 
 #' integration and trait covariation in morphometric data using evolutionary covariance 
 #' matrices. PLOS ONE. 9(4):e94335.
@@ -97,7 +96,8 @@ phylo.modularity<-function(A,partition.gp,phy, CI=FALSE, iter=999, seed=NULL, pr
     p.val <- 1-pval(CR.rand)  #b/c smaller values more significant
     if (p.val==0){p.val<-1/(iter+1)}
     if(CI=="TRUE"){
-      CR.boot<- boot.CR(x, gps, k,iter=iter, seed=seed)
+#      CR.boot<- boot.CR(x, gps, k,iter=iter, seed=seed)
+      CR.boot<- boot.phylo.CR(x, invC, gps, k,iter=iter, seed=seed)
       CR.CI<-quantile(CR.boot, c(.025, .975)) 
     }
     if(CI=="FALSE"){
@@ -147,10 +147,12 @@ phylo.modularity<-function(A,partition.gp,phy, CI=FALSE, iter=999, seed=NULL, pr
       CR.rand <- apply.phylo.CR(x, invC, gps, k, iter=iter, seed=seed)
     } else CR.rand <- .apply.phylo.CR(x, invC, gps, k, iter=iter, seed=seed)
     CR.rand[1] <- CR.obs <- avgCR
-    if(ngps > 2) CR.mat <- CR(x,gps)$CR.mat else CR.mat <- NULL
+#    if(ngps > 2) CR.mat <- CR(x,gps)$CR.mat else CR.mat <- NULL
+    if(ngps > 2) CR.mat <- CR.phylo(x,invC,gps)$CR.mat else CR.mat <- NULL
     p.val <- pval(1/CR.rand)  #b/c smaller values more significant
     if(CI=="TRUE"){
-      CR.boot<- boot.CR(x, gps, k,iter=iter, seed=seed)
+#      CR.boot<- boot.CR(x, gps, k,iter=iter, seed=seed)
+      CR.boot<- boot.phylo.CR(x, invC, gps, k,iter=iter, seed=seed)
       CR.CI<-quantile(CR.boot, c(.025, .975)) 
     }
     if(CI=="FALSE"){

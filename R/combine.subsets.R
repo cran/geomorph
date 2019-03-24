@@ -15,7 +15,7 @@
 #' especially if curves or surface sliding semilandmarks are used, as different arguments cannot be passed onto
 #' onto separate GPAs via this function).
 #' 
-#' The procedure of Davis et al. (2016) is analogous to the "separate subsets" method of Adams (1999)
+#' The procedure of Davis et al. (2016) is an extension of the "separate subsets" method of Adams (1999)
 #' for articulated structures.
 #' 
 #' @param ... Class gpagen objects, Procrustes shape variables from class gpagen objects, or original landmarks.  
@@ -156,7 +156,11 @@ combine.subsets <- function(..., gpa = TRUE, CS.sets = NULL){
 	CS.tot <- as.matrix(simplify2array(all.CS))
 	CS.part <- CS.tot/rowSums(CS.tot)
 	coords.part <- lapply(1:g, function(j){
-	  all.coords[[j]]*CS.part[,j]
+	  ac <- all.coords[[j]]
+	  sc <- CS.part[,j]
+	  cp <- array(NA, dim(ac))
+	  for(i in 1:n) cp[,,i] <- ac[,,i]*sc[i]
+	  cp
 	})
 	new.coords <- array(0, c(sum(p),k,n))
 	if(g > 1) {
