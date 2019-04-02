@@ -104,21 +104,23 @@ picknplot.shape <- function(x, ...){
 
   if(!inherits(x, "plot.pls")) {
     type <- "PC"
-    if(is.null(x$GM$A)) A1 <- x$GM$fitted + x$GM$residuals else
+    if(is.null(x$GM$A)) A1 <- x$GM$fitted else
       A1 <- x$GM$A
     if(is.null(A1)) stop("No shape data provided\n", call. = FALSE)
     A2 <- NULL
     
-    if(!is.null(x$CAC)) {
-      if(identical(x$plot.args$y, x$CAC)) {
-        A1 <- A1 + x$GM$residuals
-        type <- "regression2"
+    if(!is.null(x$PredLine)) {
+      if(!is.null(x$CAC)) {
+        if(identical(x$plot.args$y, x$CAC)) {
+          A1 <- A1 + x$GM$residuals
+          type <- "regression2"
+        }
       }
       if(identical(x$plot.args$y, x$PredLine) || identical(x$plot.args$y, x$RegScore))
         type <- "regression2"
       if(length(dim(A1)) != 3) stop("No shape data provided\n", call. = FALSE)
     }
-    
+   
   } else {
     type <- "PLS"
     A1 <- x$A1
@@ -153,7 +155,7 @@ picknplot.shape <- function(x, ...){
 
   
     if(type == "PC") {
-      X <- x$PC.points
+      X <- as.matrix(cbind(x$plot.args$x, x$plot.args$y))
       picked.shapes[[p]] <- shape.predictor(A1, X, 
                                        pred1 = picked.pts[[p]])$pred1 
     }

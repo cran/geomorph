@@ -1,11 +1,11 @@
-d26966fc8080de96d17685cce7f1bca6 *DESCRIPTION
+e250b6c9ea0613a163d1a64ae30f3cf1 *DESCRIPTION
 0f584385dc42e71f23ae251c8bcada07 *NAMESPACE
-ad1198560c6922c3dbe96b40f3f804f1 *NEWS
+31e464bd04a0ba1ce06f404d40d1960e *NEWS
 92239d51a080ccd3fc3a9f7ef67d1b8c *R/arrayspecs.r
 c7cbd9c9a2de38757e9ed8245eedcb12 *R/bilat.symmetry.r
 f291ed28156a2d7c9a73a6846944cbeb *R/build.template.r
 a4000545c9b02a4e399438951cc3cc5f *R/combine.subsets.R
-e36bcdbfc5b6a31e00b02e24f921c414 *R/compare.evol.rates.r
+bbeac77f9ca6094ea8283e64ecc2ef2a *R/compare.evol.rates.r
 d07ba05e9c4ba71ee07b20df5b7e0de9 *R/compare.multi.evol.rates.r
 89186a1d747e88be123b6e34456cd9ba *R/compare.pls.r
 5e4b285ed0e6499f26af9d913d0c48e4 *R/coords.subset.r
@@ -18,12 +18,12 @@ a38ff2f2af270bf26299b1569cc734fc *R/digit.curves.r
 58ac3c6102b455136e748471fb62df29 *R/digitize2d.r
 ea70d8797d372e6b7043722cce194e7a *R/digitsurface.r
 2a875f90a59b86dead7b3b1094559556 *R/editTemplate.r
-26c330a8b236e2ceedc6b4502ac69b4c *R/estimate.missing.r
+c38531b2e37e698a0ae0ea5a7062bcd8 *R/estimate.missing.r
 aac6a4f8a759473e8c37048e5c8e3d91 *R/findMeanSpec.r
-028a6b3f1571324628c6747b73d1f6b7 *R/fixed.angle.r
+edd9262112c0002e3be81df22872f89f *R/fixed.angle.r
 d4da6eba1dc1a56c0b1ad94c0839c825 *R/geomorph.data.frame.r
-8643b711d0c4c7a8c6a45b12919ef2b1 *R/geomorph.support.code.r
-33d066c0dc14e6a797266e267c418595 *R/geomorph.utils.r
+ea20a00f96e165462444d3b4180582fe *R/geomorph.support.code.r
+cf112098256133e55688523099c22eab *R/geomorph.utils.r
 48ad1d05fbe54c70769453fd53a74d47 *R/globalIntegration.r
 85f132fe6dad77cc29c77ef6517a119e *R/gm.prcomp.R
 bf0750e2582fc2c3b5454ad48b7f3cbb *R/gpagen.r
@@ -35,7 +35,7 @@ a0316d5ff3326e7cebb6aee734b4254a *R/integration.test.r
 59ec619cc2005ae0d5b26fa1369971b8 *R/phylo.integration.r
 df8568fcede2ca442c9fb6be6da0401c *R/phylo.modularity.r
 7df0299e9451c078698951a35e90aef9 *R/physignal.r
-9841d5efa08b7110ebe3c0e85e875081 *R/picknplot.shape.r
+bec62a0f9ec0c3e55b162338e4d977f9 *R/picknplot.shape.r
 c1cead3306cb3d7b1bd3ed5d99fc89af *R/plotAllSpecimens.r
 2302f21d0af2a0e44038ff696b306e9e *R/plotAllometry.r
 9f51066884f71bfc06335604055beead *R/plotGMPhyloMorphoSpace.r
@@ -43,7 +43,7 @@ aab74b98af1c98726fe373d9759ccdbd *R/plotOutliers.r
 a2dcc839c82368a3f476cb8985b19b88 *R/plotRefToTarget.r
 eb6f16f6c9aec444f2b91e74373d6ee5 *R/plotTangentSpace.r
 3a6faf4779152e188422fa4f673cb175 *R/plotspec.r
-9b848f48d2f64ae03a39df00d10c953c *R/procD.lm.r
+6110a1ea4131ccf4ec01fc72d57b2f27 *R/procD.lm.r
 342033e7ff051fcb644a36658c8e212f *R/procD.pgls.r
 df3f4cc6406dc0c737ee2ff08c2a0e3d *R/read.morphologika.r
 ad570247a565a6e0d2468639b3c7245f *R/read.ply.r
@@ -75,7 +75,7 @@ d8e8360c03c03fe45d2100e9c05d4a89 *data/plethodon.rda
 f926ce8a00d113b94bd7a08b69b5bfc3 *inst/CITATION
 f7b8934672d67a406800ae872c785c7f *inst/doc/geomorph.assistance.R
 2db8bd28eaf7a1004c858a11c2b42465 *inst/doc/geomorph.assistance.Rmd
-7d1c10a586bdb206385118c4b04134f2 *inst/doc/geomorph.assistance.html
+9ff2155cbf255dd9fca8b6c2b550f1cc *inst/doc/geomorph.assistance.html
 b0288b9f285d4e4664aef6e576fa6db4 *man/advanced.procD.lm.Rd
 5a8e62b1b33e226fb4e4d5ed92630fe7 *man/arrayspecs.Rd
 f167b2b15c4a274b9d9df1d1029aad85 *man/bilat.symmetry.Rd
@@ -126,7 +126,7 @@ d92329d637882c046cba870a4cee4386 *man/plot.gm.prcomp.Rd
 3bc59c4db0a98b796000c1e0f726deb5 *man/plot.gpagen.Rd
 32f8a2cf1f71b0332583a602faaaa77e *man/plot.mshape.Rd
 2e2bd4c739c5b071a2acc39472f91b09 *man/plot.physignal.Rd
-7ed6e6f1bc9e9d09a9a61e59611ada9a *man/plot.pls.Rd
+45b20f1e858ea8448cd7032e4ff5f88e *man/plot.pls.Rd
 01bc71a70482f434ec9e2035576fe781 *man/plot.procD.lm.Rd
 594e35d98d0b946c0435400cfcbc0f08 *man/plotAllSpecimens.Rd
 050bd7e77024fbd1f44193ce5e163c5a *man/plotAllometry.Rd
@@ -151,7 +151,7 @@ abfcefdb3af11790e378368261c6cddc *man/print.gpagen.Rd
 aa9104be734ce6ed986a76ae3a1b8dda *man/print.pls.Rd
 1c020ff2d475e36230387f1a5505cdbd *man/print.procD.lm.Rd
 85a11034b23e98d51cc6133561efe505 *man/procD.allometry.Rd
-2ad4c871c691d5e91ce8e9b7a1d87bb2 *man/procD.lm.Rd
+48ce9701116c7b781d458d255a3797db *man/procD.lm.Rd
 33939446979e6e62215967e83f715bd1 *man/procD.pgls.Rd
 72b91c59988d64411b7538795533db3b *man/pupfish.Rd
 a9e642b1b58f83a93ab678d6be98df1c *man/ratland.Rd
