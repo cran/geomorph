@@ -278,9 +278,22 @@ procD.lm <- function(f1, iter = 999, seed=NULL, RRPP = TRUE,
                      effect.type = c("SS", "MS", "Rsq", "F", "cohen"),
                      int.first = FALSE,  Cov = NULL, data=NULL, print.progress = TRUE, ...){
   
-  data <- try(eval(data, parent.frame()), silent = TRUE)
-  if(inherits(data, "try-error")) data <- NULL 
-
+  if(is.null(data)) {
+    vars <- rownames(attr(terms(f1), "factors"))
+    if(!is.null(vars)) {
+      data <- list()
+      data <- data[vars]
+      names(data) <- vars
+      for(i in 1:length(vars)) {
+        f <- as.formula(paste("~", vars[i]))
+        temp <- try(eval(f[[2]]), silent = TRUE)
+        if(inherits(temp, "try-error")) stop("Cannot find data in global environment.\n",
+                                             call. = FALSE) else
+                                               data[[i]] <- temp
+      }
+    }
+  }
+  
   if(inherits(f1, "formula")){
     Y <- try(eval(f1[[2]], envir = data , enclos = parent.frame()), silent = TRUE)
     if(inherits(Y, "try-error"))
@@ -299,10 +312,10 @@ procD.lm <- function(f1, iter = 999, seed=NULL, RRPP = TRUE,
     data$Y <- Y
     
   } else {
-      f <- f1
-      GM <- FALSE
-    }
-
+    f <- f1
+    GM <- FALSE
+  }
+  
   out <- lm.rrpp(f, data = data, 
                  seed = seed, RRPP = RRPP,
                  SS.type = SS.type, 
@@ -324,16 +337,18 @@ procD.lm <- function(f1, iter = 999, seed=NULL, RRPP = TRUE,
     if(kk > 1) out$GM$coefficients <- arrayspecs(out$LM$coefficients, p, k) else {
       out$GM$coefficients <- array(matrix(out$LM$coefficients, p, k, byrow = TRUE), c(p,k,1))
     }
-   
-    if(out$LM$gls) {
-      out$gls.fitted <- out$LM$gls.fitted
+  }
+  
+  if(out$LM$gls) {
+    out$gls.fitted <- out$LM$gls.fitted
+    out$gls.residuals <- out$LM$gls.residuals
+    out$gls.coefficients <- out$LM$gls.coefficients
+    out$gls.mean <- out$LM$gls.mean
+    out$gls.centroid <- out$LM$gls.centroid
+    if(GM) {
       out$GM$gls.fitted <- arrayspecs(out$LM$gls.fitted, p, k)
-      out$gls.residuals <- out$LM$gls.residuals
       out$GM$gls.residuals <- arrayspecs(out$LM$gls.residuals, p, k)
-      out$gls.coefficients <- out$LM$gls.coefficients
-      out$gls.mean <- out$LM$gls.mean
       out$GM$gls.mean <- matrix(out$LM$gls.mean, out$GM$p, out$GM$k, byrow = TRUE)
-      out$gls.centroid <- out$LM$gls.centroid
       out$GM$gls.centroid <- matrix(out$LM$gls.centroid, out$GM$p, out$GM$k, byrow = TRUE)
       if(kk > 1) out$GM$gls.coefficients <- arrayspecs(out$LM$gls.coefficients, p, k) else {
         out$GM$coefficients <- array(matrix(out$LM$gls.coefficients, p, k, byrow = TRUE), c(p,k,1))

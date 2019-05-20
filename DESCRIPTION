@@ -1,8 +1,8 @@
 Package: geomorph
-Date: 2019-04-02
+Date: 2019-05-20
 Type: Package
 Title: Geometric Morphometric Analyses of 2D/3D Landmark Data
-Version: 3.1.1
+Version: 3.1.2
 Author: Dean Adams, Michael Collyer, Antigoni Kaliontzopoulou
 Maintainer: Dean Adams <dcadams@iastate.edu>
 Depends: RRPP, rgl, R(>= 3.1.0)
@@ -12,9 +12,9 @@ Description: Read, manipulate, and digitize landmark data, generate shape
     shape analyses, and provide graphical depictions of shapes and patterns of
     shape variation.
 License: GPL (>= 2)
-Packaged: 2019-04-02 18:37:41 UTC; dcadams
+Packaged: 2019-05-20 17:33:55 UTC; dcadams
 Repository: CRAN
-Date/Publication: 2019-04-02 19:20:02 UTC
+Date/Publication: 2019-05-20 18:50:13 UTC
 RoxygenNote: 6.1.1
 Encoding: UTF-8
 LazyData: true

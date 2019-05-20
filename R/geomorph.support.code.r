@@ -1466,13 +1466,11 @@ phylo.mat<-function(x,phy){
   C<-C[rownames(x),rownames(x)]
   invC <-fast.solve(C)
   eigC <- eigen(C)
-  lambda <- zapsmall(eigC$values)
+  lambda <- zapsmall(abs(Re(eigC$values)))
   if(any(lambda == 0)){
     warning("Singular phylogenetic covariance matrix. Proceed with caution")
-    lambda = lambda[lambda > 0]
   }
-  eigC.vect = eigC$vectors[,1:(length(lambda))]
-  D.mat <- fast.solve(eigC.vect%*% diag(sqrt(lambda)) %*% t(eigC.vect))
+  D.mat <- fast.solve(eigC$vectors%*% diag(sqrt(abs(eigC$values))) %*% t(eigC$vectors))
   rownames(D.mat) <- colnames(D.mat) <- colnames(C)
   rownames(invC) <- colnames(invC) <- colnames(C)
   list(invC = invC, D.mat = D.mat,C = C)
@@ -1861,6 +1859,7 @@ GMfromShapes1 <- function(Shapes, nCurvePts, continuous.curve = NULL, scaled = T
   anchors <- lapply(1:curve.n, function(j){
     cv <- curves[[1]][[j]]
     lm <- fixedLM[[1]]
+    if(!is.matrix(lm)) lm <- matrix(lm, nrow = 1)
     ends <- rbind(cv[1,], cv[nrow(cv),])
     a <- which(apply(lm, 1,function(x) identical(x, ends[1,])))
     b <- which(apply(lm, 1,function(x) identical(x, ends[2,])))
@@ -2112,28 +2111,6 @@ readland.tps2 <- function (file, specID = c("None", "ID", "imageID"))
   return(list(coords = coords,scale=imscale)  )
 }
 
-# Function for retrieving pieces for PCA weighting from a VCV (not from phylo)
-# Follows phylo.mat
-
-cov.mat <- function(x, COV) {
-  if(is.null(dimnames(COV))){
-    warning("COV matrix does not include dimnames. Assuming same order of observations as x")
-  } else {
-    C <- C[rownames(x),rownames(x)]
-  }
-  invC <- fast.solve(C)
-  eigC <- eigen(C)
-  lambda <- zapsmall(eigC$values)
-  if(any(lambda == 0)){
-    warning("Singular covariance matrix. Proceed with caution")
-    lambda = lambda[lambda > 0]
-  }
-  eigC.vect <- eigC$vectors[,1:(length(lambda))]
-  D.mat <- fast.solve(eigC.vect%*% diag(sqrt(lambda)) %*% t(eigC.vect))
-  rownames(D.mat) <- colnames(D.mat) <- colnames(C)
-  rownames(invC) <- colnames(invC) <- colnames(C)
-  list(invC = invC, D.mat = D.mat, C = C)
-}
 
 ### All functions below perform in a constrained way the same as functions in ape and geiger:
 ### -----------------------------------------------------------------------------------------
