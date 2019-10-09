@@ -4,10 +4,12 @@
 \alias{compare.pls}
 \title{Comparisons of Effect Sizes from Partial Least Squares}
 \usage{
-compare.pls(...)
+compare.pls(..., two.tailed = TRUE)
 }
 \arguments{
 \item{...}{saved analyses of class pls}
+
+\item{two.tailed}{A logical value to indicate whether a two-tailed test (typical and default) should be performed.}
 }
 \value{
 An object of class compare.pls, returns a list of the following
@@ -60,7 +62,8 @@ To use this function, simply perform \code{\link{two.b.pls}}, \code{\link{integr
  tail.coords.gp <- coords.subset(tail.coords, group)
  head.coords.gp <- coords.subset(head.coords, group)
 
- integ.tests <- Map(function(x,y) integration.test(x, y, iter=499), head.coords.gp, tail.coords.gp)
+ integ.tests <- Map(function(x,y) integration.test(x, y, iter=499, print.progress = FALSE), 
+ head.coords.gp, tail.coords.gp)
 # the map function performs the integration test on each 3D array in the lists provided
 
  integ.tests$Marsh.F
