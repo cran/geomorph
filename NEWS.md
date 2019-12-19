@@ -1,3 +1,15 @@
+# CHANGES IN GEOMORPH 3.2.0 (Minor Release)
+
+### New Features
+* Effect sizes provided in the output of `compare.evol.rates`, `compare.multi.evol.rates`,`integration.test`,
+`modularity.test`, `phylo.integration`, `phylo.modularity`, `physignal`, `two.b.pls`
+
+### OTHER CHANGES
+* Adjustment in 'class' statements to be compliant with new handling of objects in R 4.0
+
+### BUG FIXES
+* Adjusted calculations of pairwise effect size in compare.pls and compare.CR to mirror publication equations
+
 # CHANGES IN GEOMORPH VERSION 3.1.3 (Patch Release)
 
 ### NEW FEATURES
