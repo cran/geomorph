@@ -4,7 +4,16 @@
 \alias{plotspec}
 \title{Plot 3D specimen, fixed landmarks and surface semilandmarks}
 \usage{
-plotspec(spec, digitspec, fixed = NULL, ptsize = 1, centered = FALSE, ...)
+plotspec(
+  spec,
+  digitspec,
+  fixed = NULL,
+  fixed.pt.col = "red",
+  fixed.pt.size = 10,
+  mesh.ptsize = 1,
+  centered = FALSE,
+  ...
+)
 }
 \arguments{
 \item{spec}{An object of class shape3d/mesh3d, or matrix of 3D vertex coordinates.}
@@ -13,12 +22,17 @@ plotspec(spec, digitspec, fixed = NULL, ptsize = 1, centered = FALSE, ...)
 
 \item{fixed}{Numeric The number of fixed template landmarks (listed first in {digitspec})}
 
-\item{ptsize}{Numeric Size to plot the mesh points (vertices), e.g. 0.1 for dense meshes, 3 for sparse meshes}
+\item{fixed.pt.col}{The color for plotting fixed template landmarks (if any)}
+
+\item{fixed.pt.size}{The size for plotting fixed template landmarks (if any)}
+
+\item{mesh.ptsize}{Numeric Size to plot the mesh points (vertices), e.g. 0.1 for dense meshes, 3 for sparse meshes}
 
 \item{centered}{Logical Whether the data matrix is in the surface mesh coordinate system ({centered=FALSE}) or
 if the data were collected after the mesh was centered ({centered=TRUE})- see details.}
 
-\item{...}{additional parameters which will be passed to \code{\link{plot3d}}.}
+\item{...}{additional parameters which will be passed to rgl-plot3d or 
+rgl-points3d.}
 }
 \description{
 A function to plot three-dimensional (3D) specimen along with its landmarks.
@@ -31,21 +45,29 @@ For visualization purposes, 3D coordinate data collected using \code{\link{digit
 Therefore use this function with {centered=TRUE}. Data collected outside geomorph should be read using
 {centered=FALSE}. The function assumes the fixed landmarks are listed at the beginning of
 the coordinate matrix ({digitspec}).
+
+This function is a wrapper for several functions in the \code{\link{rgl-package}} package.  
+Although there is some allowance for arguments to be passed to \code{\link{rgl-package}} functions,
+some override of rgl-plot3d arguments is required.  Errors that result from trying
+to pass rgl-plot3d or rgl-points3d arguments should inspire the user
+to find solutions with \code{\link{rgl-package}} core functions.
 }
 \examples{
-# data(scallopPLY)
-# ply <- scallopPLY$ply
-# digitdat <- scallopPLY$coords
-# plotspec(spec=ply,digitspec=digitdat,fixed=16, centered =TRUE)
+
+data(scallopPLY)
+ply <- scallopPLY$ply
+digitdat <- scallopPLY$coords
+plotspec(spec = ply, digitspec = digitdat, fixed = 16, centered = TRUE, fixed.pt.col = "red", 
+fixed.pt.size = 15, col = "blue", size = 5)
 }
 \seealso{
 \code{\link{warpRefMesh}}
 
 \code{\link{read.ply}}
 
-\code{\link[rgl]{rgl-package}} (used in 3D plotting)
+\code{\link{rgl-package}} (used in 3D plotting)
 }
 \author{
-Erik Otarola-Castillo & Emma Sherratt
+Erik Otarola-Castillo, Emma Sherratt, Antigoni Kaliontzopoulou, & Michael Collyer
 }
 \keyword{visualization}
