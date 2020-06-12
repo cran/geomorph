@@ -1,6 +1,6 @@
 Package: geomorph
 Title: Geometric Morphometric Analyses of 2D/3D Landmark Data
-Version: 3.3.0
+Version: 3.3.1
 Authors@R: c(
     person("Dean", "Adams", , "dcadams@iastate.edu", c("aut", "cre")),
     person("Michael", "Collyer", , role = "aut"),
@@ -20,10 +20,10 @@ Imports: graphics, grDevices, stats, utils, jpeg, ape
 Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2020-06-03 15:57:59 UTC; dcadams
+Packaged: 2020-06-12 19:54:19 UTC; dcadams
 Author: Dean Adams [aut, cre],
   Michael Collyer [aut],
   Antigoni Kaliontzopoulou [aut]
 Maintainer: Dean Adams <dcadams@iastate.edu>
 Repository: CRAN
-Date/Publication: 2020-06-03 17:30:05 UTC
+Date/Publication: 2020-06-12 23:50:07 UTC
