@@ -101,8 +101,9 @@
 #' \item{symm.shape}{The symmetric component of shape variation.}
 #' \item{asymm.shape}{The asymmetric component of shape variation.}
 #' \item{DA.component}{The directional asymmetry component, found as the mean shape for each side.}
-#' \item{FA.component}{The fluctuating asymmetry component for each specimen, found as 
-#' the specimen-specific side deviation adjusted for the mean directional asymmetry in the dataset.}
+#' \item{FA.component}{The fluctuating asymmetry component for each specimen, 
+#' found as the specimen specific side deviation adjusted for the mean 
+#' directional asymmetry in the dataset.}
 #' \item{data.type}{A value indicating whether the analysis was performed as Object or Matching 
 #' symmetry.}
 #' \item{permutations}{The number of random permutations used.}
@@ -125,10 +126,13 @@
 #' #Example of matching symmetry
 #'
 #' data(mosquito)
-#' gdf <- geomorph.data.frame(wingshape = mosquito$wingshape, ind=mosquito$ind, side=mosquito$side,
+#' gdf <- geomorph.data.frame(wingshape = mosquito$wingshape, 
+#' ind=mosquito$ind, 
+#' side=mosquito$side,
 #' replicate=mosquito$replicate)
 #' mosquito.sym <- bilat.symmetry(A = wingshape, ind = ind, side = side,
-#' replicate = replicate, object.sym = FALSE, RRPP = TRUE, iter = 149, data = gdf)
+#' replicate = replicate, object.sym = FALSE, RRPP = TRUE, iter = 149, 
+#' data = gdf)
 #' summary(mosquito.sym)
 #' plot(mosquito.sym, warpgrids = TRUE)
 #' mosquito.sym$shape.anova # extract just the anova table on shape
@@ -136,23 +140,29 @@
 #' # Previous example, performing GPA first
 #' Y.gpa <- gpagen(mosquito$wingshape)
 #' mosquito.sym2 <- bilat.symmetry(A = Y.gpa, ind = ind, side = side,
-#' replicate = replicate, object.sym = FALSE, RRPP = TRUE, iter = 149, data = gdf)
+#' replicate = replicate, object.sym = FALSE, RRPP = TRUE, iter = 149, 
+#' data = gdf)
 #' summary(mosquito.sym2)
 #' summary(mosquito.sym) # same results
 #'
 #' #Example of object symmetry
 #'
 #' data(lizards)
-#' gdf <- geomorph.data.frame(shape = lizards$coords, ind = lizards$ind, replicate = lizards$rep)
-#' liz.sym <- bilat.symmetry(A = shape, ind = ind, rep = rep, object.sym = TRUE, 
+#' gdf <- geomorph.data.frame(shape = lizards$coords, 
+#' ind = lizards$ind, 
+#' replicate = lizards$rep)
+#' liz.sym <- bilat.symmetry(A = shape, ind = ind, rep = rep, 
+#' object.sym = TRUE, 
 #' land.pairs = lizards$lm.pairs, data = gdf, RRPP = TRUE, iter = 149)
 #' summary(liz.sym)
 #' 
 #' # Example of object symmetry in 3D and including semilandmarks
 #' 
 #' data(scallops)
-#' gdf <- geomorph.data.frame(shape = scallops$coorddata, ind = scallops$ind)
-#' scallop.sym <- bilat.symmetry(A = shape, ind = ind, object.sym = TRUE, 
+#' gdf <- geomorph.data.frame(shape = scallops$coorddata, 
+#' ind = scallops$ind)
+#' scallop.sym <- bilat.symmetry(A = shape, ind = ind, 
+#' object.sym = TRUE, 
 #' curves= scallops$curvslide, surfaces = scallops$surfslide,
 #' land.pairs=scallops$land.pairs, data = gdf, RRPP = TRUE, iter = 149)
 #' summary(scallop.sym)
@@ -253,10 +263,11 @@ bilat.symmetry <- function(A, ind = NULL, side = NULL, replicate = NULL, object.
   random.shape.F <- MS/MSE
   
   if(length(form.names) > 4) {
+    MS <- random.shape.F <- PSh$ANOVA$MS
     MS.mod <- PSh$ANOVA$RSS.model[3,]/PSh$ANOVA$df[4]
     random.shape.F[1,] <- MS[1,]/MS[3,]
     random.shape.F[2,] <- MS[2,]/MS[3,]
-    random.shape.F[3,] <- MS[3,]/MS.mod
+    random.shape.F[3,] <- PSh$ANOVA$Fs[3,]
     
     newZ <- apply(log(random.shape.F + 0.000001), 1, effect.size)
     newP <- apply(random.shape.F , 1, pval)
@@ -292,7 +303,7 @@ bilat.symmetry <- function(A, ind = NULL, side = NULL, replicate = NULL, object.
       MS.mod <- PSz$ANOVA$RSS.model[3,]/PSz$ANOVA$df[4]
       random.size.F[1,] <- MS[1,]/MS[3,]
       random.size.F[2,] <- MS[2,]/MS[3,]
-      random.size.F[3,] <- MS[3,]/MS.mod
+      random.size.F[3,] <- PSz$ANOVA$Fs[3,]
       newZ <- apply(log(random.size.F + 0.000001), 1, effect.size)
       newP <- apply(random.size.F , 1, pval)
       size.anova$F[1:3] <- random.size.F[1:3, 1]

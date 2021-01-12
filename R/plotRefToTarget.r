@@ -58,20 +58,26 @@
 #' Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
 #' ref<-mshape(Y.gpa$coords)
 #' plotRefToTarget(ref,Y.gpa$coords[,,39])
-#' plotRefToTarget(ref,Y.gpa$coords[,,39], mag=2, outline=plethodon$outline)   #magnify by 2X
+#' plotRefToTarget(ref,Y.gpa$coords[,,39], mag=2, outline=plethodon$outline)   
+#' #magnify by 2X
 #' plotRefToTarget(ref,Y.gpa$coords[,,39], method="vector", mag=3)
-#' plotRefToTarget(ref,Y.gpa$coords[,,39], method="points", outline=plethodon$outline)
-#' plotRefToTarget(ref,Y.gpa$coords[,,39], method="vector", outline=plethodon$outline, mag=2.5)
-#' plotRefToTarget(ref,Y.gpa$coords[,,39], gridPars=gridPar(pt.bg = "green", pt.size = 1),
+#' plotRefToTarget(ref,Y.gpa$coords[,,39], method="points", 
+#' outline=plethodon$outline)
+#' plotRefToTarget(ref,Y.gpa$coords[,,39], method="vector", 
+#' outline=plethodon$outline, mag=2.5)
+#' plotRefToTarget(ref,Y.gpa$coords[,,39], 
+#' gridPars=gridPar(pt.bg = "green", pt.size = 1),
 #' method="vector",mag=3)
 #'
 #' # Three dimensional data
 #' # data(scallops)
-#' # Y.gpa<-gpagen(A=scallops$coorddata, curves=scallops$curvslide, surfaces=scallops$surfslide)
+#' # Y.gpa<-gpagen(A=scallops$coorddata, curves=scallops$curvslide, 
+#' # surfaces=scallops$surfslide)
 #' # ref<-mshape(Y.gpa$coords)
 #' # plotRefToTarget(ref,Y.gpa$coords[,,1],method="points")
 #' # scallinks <- matrix(c(1,rep(2:16, each=2),1), nrow=16, byrow=TRUE)
-#' # plotRefToTarget(ref,Y.gpa$coords[,,1],gridPars=gridPar(tar.pt.bg = "blue", tar.link.col="blue",
+#' # plotRefToTarget(ref,Y.gpa$coords[,,1],
+#' # gridPars=gridPar(tar.pt.bg = "blue", tar.link.col="blue",
 #' # tar.link.lwd=2), method="points", links = scallinks)
 #' 
 plotRefToTarget<-function(M1, M2, mesh= NULL, outline=NULL, 
@@ -208,7 +214,7 @@ plotRefToTarget<-function(M1, M2, mesh= NULL, outline=NULL,
         }
       }
       if(label == TRUE){text3d(M2, texts = paste(1:dim(M2)[1]), adj=(gP$txt.adj+gP$pt.size),
-                               cex=gP$txt.cex,col=gP$txt.col)} #pos=(gP$txt.pos+gP$pt.size),
+                               pos=gP$txt.pos, cex=gP$txt.cex,col=gP$txt.col)} 
       if(!is.null(outline)){
         curve.warp <- tps2d(outline, M1[,1:2],M2[,1:2])
         points3d(cbind(curve.warp,0), size=gP$tar.out.cex, col=gP$tar.out.col) 
@@ -231,7 +237,7 @@ plotRefToTarget<-function(M1, M2, mesh= NULL, outline=NULL,
         }
       }
       if(label == TRUE){text3d(M2, texts = paste(1:dim(M2)[1]), adj=(gP$txt.adj+gP$pt.size),
-                               cex=gP$txt.cex,col=gP$txt.col)} #pos=(gP$txt.pos+gP$pt.size),
+                               pos=gP$txt.pos, cex=gP$txt.cex,col=gP$txt.col)}
       if(!is.null(outline)){
         curve.warp <- tps2d(outline, M1[,1:2],M2[,1:2])
         points3d(cbind(curve.warp,0), size=gP$tar.out.cex, col=gP$tar.out.col) 
@@ -251,7 +257,7 @@ plotRefToTarget<-function(M1, M2, mesh= NULL, outline=NULL,
         }
       }
       if(label == TRUE){text3d(M2[,c(1,3,2)], texts = paste(1:dim(M2)[1]), adj=(gP$txt.adj+gP$pt.size),
-                               cex=gP$txt.cex,col=gP$txt.col)} # doesn't work? #pos=(gP$txt.pos+gP$pt.size),
+                               pos=gP$txt.pos, cex=gP$txt.cex,col=gP$txt.col)} # doesn't work? #pos=(gP$txt.pos+gP$pt.size), <- ekb: doesn't work because pos can only be 1,2,3,or4 for 'below', 'left' ....
       if(!is.null(outline)){
         curve.warp <- tps2d(outline, M1[,b],M2[,b])
         points3d(cbind(curve.warp,0), size=gP$tar.out.cex, col=gP$tar.out.col) 
@@ -274,6 +280,10 @@ plotRefToTarget<-function(M1, M2, mesh= NULL, outline=NULL,
                    col=linkcol[i],lty=linklty[i],lwd=linklwd[i])
         }
       }
+      if (label) {
+        text(M2, label = paste(1:dim(M2)[1]), adj = gP$txt.adj, 
+             pos = gP$txt.pos, cex = gP$txt.cex, col = gP$txt.col)
+      }
       title("X,Y tps grid")
       b<-c(1,3)
       tps(M1[,b],M2[,b],gP$n.col.cell, sz=gP$tar.pt.size, pt.bg=gP$tar.pt.bg, grid.col=gP$grid.col, 
@@ -288,6 +298,10 @@ plotRefToTarget<-function(M1, M2, mesh= NULL, outline=NULL,
                    col=linkcol[i],lty=linklty[i],lwd=linklwd[i])
         }
       }
+      if (label) {
+        text(M2[,b], label = paste(1:dim(M2)[1]), adj = gP$txt.adj, 
+             pos = gP$txt.pos, cex = gP$txt.cex, col = gP$txt.col)
+      }
       title("Y,Z tps grid")
       layout(1)
       on.exit(par(old.par))
@@ -298,7 +312,7 @@ plotRefToTarget<-function(M1, M2, mesh= NULL, outline=NULL,
       if(!axes){
         plot3d(M1,type="s",col=gP$pt.bg,size=gP$pt.size,aspect=FALSE,xlab="",ylab="",zlab="",axes=F,...)}
       if(label){text3d(M1, texts = paste(1:dim(M1)[1]), adj=(gP$txt.adj+gP$pt.size),
-                               cex=gP$txt.cex,col=gP$txt.col)} #pos=(gP$txt.pos+gP$pt.size),
+                       pos=gP$txt.pos, cex=gP$txt.cex,col=gP$txt.col)}
       for (i in 1:nrow(M1)){
         segments3d(rbind(M1[i,],M2[i,]),lwd=2)
       }
@@ -321,7 +335,7 @@ plotRefToTarget<-function(M1, M2, mesh= NULL, outline=NULL,
         plot3d(M2,type="s",col=gP$tar.pt.bg,size=gP$tar.pt.size,add=TRUE)}
       
       if(label){text3d(M1, texts = paste(1:dim(M1)[1]), adj=(gP$txt.adj+gP$pt.size),
-                               cex=gP$txt.cex,col=gP$txt.col)} #pos=(gP$txt.pos+gP$pt.size),
+                       pos=gP$txt.pos, cex=gP$txt.cex,col=gP$txt.col)}
       if(!is.null(links)){
         linkcol <- rep(gP$link.col,nrow(links))[1:nrow(links)]
         linklwd <- rep(gP$link.lwd,nrow(links))[1:nrow(links)]

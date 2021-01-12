@@ -2,7 +2,7 @@
 #' @docType package
 #' @aliases geomorph
 #' @title Geometric morphometric analyses for 2D/3D data
-#' @author Dean C. Adams, Michael Collyer & Antigoni Kaliontzopoulou
+#' @author Dean C. Adams, Michael Collyer, Antigoni Kaliontzopoulou, and Erica Baken
 #' @description Functions in this package allow one to read, manipulate, and digitize landmark data; generate shape
 #'  variables via Procrustes analysis for points, curves and surface data, perform statistical analyses
 #'  of shape variation and covariation, and provide graphical depictions of shapes and patterns of
@@ -68,7 +68,7 @@ NULL
 #' @keywords datasets
 NULL
 
-#' Average head shape and phylogenetic relationships for several Plethodon salamander species
+#' Head shape and phylogenetic relationships for several Plethodon salamander species
 #'
 #' @name plethspecies
 #' @docType data
@@ -148,7 +148,7 @@ NULL
 #' Dataset includes superimposed landmarks (coords), centroid size (cs), an index of individuals (ind) and digitizing repetitions (rep), and a table of symmetrical matching
 #' landmarks (lm.pairs). The object is a \code{\link{geomorph.data.frame}}.
 #' The dataset corresponds to the data for population "b" from Lazic et al. 2015.
-#' @references Lazić, M., Carretero, M.A., Crnobrnja-Isailović, J. & Kaliontzopoulou, A. 2015. Effects of
+#' @references Lazic, M., Carretero, M.A., Crnobrnja-Isailovic, J. & Kaliontzopoulou, A. 2015. Effects of
 #' environmental disturbance on phenotypic variation: an integrated assessment of canalization, developmental 
 #' stability, modularity and allometry in lizard head shape. American Naturalist 185: 44-58.
 NULL
@@ -385,9 +385,11 @@ rotate.mat <- function(M,Y){
 # finds tangents in a matrix based on sliders
 # used in all functions associated with pPga.wCurves
 tangents = function(s,x, scaled=FALSE){ # s = curves, x = landmarks
-  ts <- x[s[,3],] - x[s[,1],]
+  if(nrow(s) > 1) { ts <- x[s[, 3], ] - x[s[, 1], ]} else { ts <- x[s[3]] - x[s[1]]}
   if(scaled==TRUE) {
-    ts.scale = sqrt(rowSums(ts^2))
+    if(nrow(as.matrix(ts)) > 1) {
+      ts.scale = sqrt(rowSums(ts^2))
+    } else {ts.scale = sqrt(sum(ts^2))} 
     ts <- ts/ts.scale
   }
   y <- matrix(0, nrow(x), ncol(x))
@@ -1060,7 +1062,7 @@ model.matrix.g <- function(f1, data = NULL) {
 # creates a permutation index for resampling, shuffling landmarks
 # used in all functions utilizing CR (modularity)
 
-perm.CR.index <- function(g, k, iter, seed=NULL){ # g is numeric partititon.gp
+perm.CR.index <- function(g, k, iter, seed=NULL){ # g is numeric partition.gp
   if(is.null(seed)) seed = iter else
     if(seed == "random") seed = sample(1:iter,1) else
       if(!is.numeric(seed)) seed = iter
@@ -1124,8 +1126,8 @@ pls <- function(x,y, RV=FALSE, verbose = FALSE){
 }
 
 # quick.pls
-# a streamlines pls code
-# used in: apply.pls
+# streamlines pls code
+# used in all pls analyses
 quick.pls <- function(x,y) {# no RV; no verbose output
   # assume parameters already found and assume x and y are centered
   S12 <- crossprod(x,y)/(dim(x)[1] - 1)
@@ -1137,60 +1139,9 @@ quick.pls <- function(x,y) {# no RV; no verbose output
   res
 }
 
-# apply.pls
-# run permutations of pls analysis
-# used in: two.b.pls, integration.test
-apply.pls <- function(x,y, RV=FALSE, iter, seed = NULL){
-  x <- as.matrix(x); y <- as.matrix(y)
-  px <- ncol(x); py <- ncol(y)
-  pmin <- min(px,py)
-  ind <- perm.index(nrow(x), iter, seed=seed)
-  RV.rand <- r.rand <- NULL
-  pb <- txtProgressBar(min = 0, max = ceiling(iter/100), initial = 0, style=3)
-  jj <- iter+1
-  step <- 1
-  if(jj > 100) j <- 1:100 else j <- 1:jj
-  while(jj > 0){
-    ind.j <- ind[j]
-    y.rand <-lapply(1:length(j), function(i) as.matrix(y[ind.j[[i]],]))
-    if(RV == TRUE) RV.rand <- c(RV.rand,sapply(1:length(j), function(i) pls(x,y.rand[[i]], RV=TRUE, verbose = TRUE)$RV)) else
-      r.rand <- c(r.rand, sapply(1:length(j), function(i) quick.pls(x,y.rand[[i]])))
-    jj <- jj-length(j)
-    if(jj > 100) kk <- 1:100 else kk <- 1:jj
-    j <- j[length(j)] +kk
-    setTxtProgressBar(pb,step)
-    step <- step+1
-  }
-  close(pb)
-  if(RV == TRUE) RV.rand else r.rand
-}
-
-# .apply.pls
-# same as apply.pls, but without progress bar option
-# used in: two.b.pls, integration.test
-.apply.pls <- function(x,y, RV=FALSE, iter, seed = NULL){
-  x <- as.matrix(x); y <- as.matrix(y)
-  px <- ncol(x); py <- ncol(y)
-  pmin <- min(px,py)
-  ind <- perm.index(nrow(x), iter, seed=seed)
-  RV.rand <- r.rand <- NULL
-  jj <- iter+1
-  if(jj > 100) j <- 1:100 else j <- 1:jj
-  while(jj > 0){
-    ind.j <- ind[j]
-    y.rand <-lapply(1:length(j), function(i) as.matrix(y[ind.j[[i]],]))
-    if(RV == TRUE) RV.rand <- c(RV.rand,sapply(1:length(j), function(i) pls(x,y.rand[[i]], RV=TRUE, verbose = TRUE)$RV)) else
-      r.rand <- c(r.rand, sapply(1:length(j), function(i) quick.pls(x,y.rand[[i]])))
-    jj <- jj-length(j)
-    if(jj > 100) kk <- 1:100 else kk <- 1:jj
-    j <- j[length(j)] +kk
-  }
-  if(RV == TRUE) RV.rand else r.rand
-}
-
 # pls.multi
 # obtain average of pairwise PLS analyses for 3+modules
-# used in: apply.plsmulti, integration.test
+# used in all pls analyses
 plsmulti<-function(x,gps){
   g<-factor(as.numeric(gps))
   ngps<-nlevels(g)
@@ -1209,73 +1160,6 @@ plsmulti<-function(x,gps){
   for(i in 1:length(pls.mat)) pls.mat[[i]] <- pls.gp[i]
   pls.obs <- mean(pls.gp)
   list(r.pls = pls.obs, r.pls.mat=pls.mat)
-}
-
-# quick.plsmulti
-# a streamlined plsmulti
-# used in apply.plsmulti
-quick.plsmulti <- function(x,g,gps.combo){
-  # assumed x is already centered
-  pls.gp <- sapply(1:ncol(gps.combo), function(j){ # no loops
-    xx <- x[,g==gps.combo[1,j]]
-    yy <- x[,g==gps.combo[2,j]]
-    S12<-crossprod(xx,yy)/(dim(xx)[1] - 1)
-    pls<-La.svd(S12, 1, 1)
-    U<-pls$u; V<-as.vector(pls$vt)
-    cor(xx%*%U, yy%*%V)
-  })
-  mean(pls.gp)
-}
-
-# apply.plsmulti
-# permutation for multipls
-# used in: integration.test
-apply.plsmulti <- function(x,gps, iter, seed = NULL){
-  g<-factor(as.numeric(gps))
-  ngps<-nlevels(g)
-  gps.combo <- combn(ngps, 2)
-  ind <- perm.index(nrow(x), iter, seed=seed)
-  pb <- txtProgressBar(min = 0, max = ceiling(iter/100), initial = 0, style=3)
-  jj <- iter+1
-  step <- 1
-  if(jj > 100) j <- 1:100 else j <- 1:jj
-  r.rand <- NULL
-  while(jj > 0){
-    ind.j <- ind[j]
-    x.r<-lapply(1:length(j), function(i) x[ind.j[[i]], g==1])
-    r.rand<-c(r.rand, sapply(1:length(j), function(i) quick.plsmulti(cbind(x.r[[i]],
-                                                  x[,g!=1]), g, gps.combo)))
-    jj <- jj-length(j)
-    if(jj > 100) kk <- 1:100 else kk <- 1:jj
-    j <- j[length(j)] +kk
-    setTxtProgressBar(pb,step)
-    step <- step+1
-  }
-  close(pb)
-  r.rand
-}
-
-# .apply.plsmulti
-# same as apply.plsmulti, but without progress bar option
-# used in: integration.test
-.apply.plsmulti <- function(x,gps, iter, seed = NULL){
-  g<-factor(as.numeric(gps))
-  ngps<-nlevels(g)
-  gps.combo <- combn(ngps, 2)
-  ind <- perm.index(nrow(x), iter, seed=seed)
-  jj <- iter+1
-  if(jj > 100) j <- 1:100 else j <- 1:jj
-  r.rand <- NULL
-  while(jj > 0){
-    ind.j <- ind[j]
-    x.r<-lapply(1:length(j), function(i) x[ind.j[[i]], g==1])
-    r.rand<-c(r.rand, sapply(1:length(j), function(i) quick.plsmulti(cbind(x.r[[i]],
-                                 x[,g!=1]), g, gps.combo)))
-    jj <- jj-length(j)
-    if(jj > 100) kk <- 1:100 else kk <- 1:jj
-    j <- j[length(j)] +kk
-  }
-  r.rand
 }
 
 # CR
@@ -1297,10 +1181,13 @@ CR <-function(x,gps){
     S12 <- crossprod(Xs[[a]], Xs[[b]])
     sqrt(sum(S12^2)/sqrt(sum(S11^2)*sum(S22^2)))
   })
-  if(length(CR.gp) > 1) CR.mat <- dist(matrix(0, ngps,)) else
-    CR.mat = 0 # may not be necessary
-  for(i in 1:length(CR.mat)) CR.mat[[i]] <- CR.gp[i]
-
+  if(length(CR.gp) > 1) {CR.mat <- dist(matrix(0, ngps,)) 
+    for(i in 1:length(CR.mat)) CR.mat[[i]] <- CR.gp[i]
+    CR.mat <- as.matrix(CR.mat) #added to specify which group is which (if out of numerical order)
+    rownames(CR.mat) <- colnames(CR.mat) <- levels(factor(g, levels = unique(g)))
+    CR.mat <- as.dist(CR.mat)
+  }
+  if(length(CR.gp)==1){  CR.mat <- NULL }
   CR.obs <- mean(CR.gp)
   list(CR = CR.obs, CR.mat=CR.mat)
 }
@@ -1420,150 +1307,6 @@ boot.CR <- function(x,gps, k,iter, seed = NULL){
   unlist(CR.boot)
 }
 
-# CR.phylo
-# phylogenetic CR analysis
-# used in: phylo.modularity
-CR.phylo<-function(x,invC,gps){
-  g <- gps
-  ngps <- length(unique(g))
-  gps.combo <- combn(ngps, 2)
-  one<-matrix(1,nrow(x),1)
-  a<-colSums(invC %*% x)*sum(invC)^-1
-  R<- t(x-one%*%a)%*%invC%*%(x-one%*%a)*(nrow(x)-1)^-1
-  diag(R)<-0
-  gps.combo <- combn(ngps, 2)
-  CR.gp <- sapply(1:ncol(gps.combo), function(j){
-    R11<-R[which(g==gps.combo[1,j]),which(g==gps.combo[1,j])]
-    R22<-R[which(g==gps.combo[2,j]),which(g==gps.combo[2,j])]
-    R12<-R[which(g==gps.combo[1,j]),which(g==gps.combo[2,j])]
-    sqrt(sum(colSums(R12^2))/sqrt(sum(R11^2)*sum(R22^2)))
-  })
-  if(length(CR.gp) > 1) CR.mat <- dist(matrix(0, ngps,)) else
-    CR.mat = 0
-  for(i in 1:length(CR.mat)) CR.mat[[i]] <- CR.gp[i]
-
-  CR.obs <- mean(CR.gp)
-  list(CR = CR.obs, CR.mat=CR.mat)
-}
-
-# quick.CR.phylo
-# streamlined phylo CR
-# used in: apply.phylo.CR
-quick.CR.phylo <- function(x,invC,gps){
-  x <- as.matrix(x); invC <- as.matrix(invC)
-  g <- gps
-  ngps <- length(unique(g))
-  gps.combo <- combn(ngps, 2)
-  one<-matrix(1,nrow(x),1)
-  a<-colSums(invC %*% x)*sum(invC)^-1
-  R<- t(x-one%*%a)%*%invC%*%(x-one%*%a)*(nrow(x)-1)^-1
-  diag(R)<-0
-  gps.combo <- combn(ngps, 2)
-  CR.gp <- sapply(1:ncol(gps.combo), function(j){
-    R11<-R[which(g==gps.combo[1,j]),which(g==gps.combo[1,j])]
-    R22<-R[which(g==gps.combo[2,j]),which(g==gps.combo[2,j])]
-    R12<-R[which(g==gps.combo[1,j]),which(g==gps.combo[2,j])]
-    sqrt(sum(colSums(R12^2))/sqrt(sum(R11^2)*sum(R22^2)))
-  })
-
-  mean(CR.gp)
-}
-
-# apply.phylo.CR
-# permutation for phylo.CR
-# used in: phylo.modularity
-apply.phylo.CR <- function(x,invC,gps, k, iter, seed=NULL){
-  ind <- perm.CR.index(g=gps,k, iter, seed=seed)
-  pb <- txtProgressBar(min = 0, max = ceiling(iter/100), initial = 0, style=3)
-  jj <- iter+1
-  step <- 1
-  if(jj > 100) j <- 1:100 else j <- 1:jj
-  CR.rand <- NULL
-  while(jj > 0){
-    ind.j <- ind[j]
-    CR.rand<-c(CR.rand, sapply(1:length(j), function(i) quick.CR.phylo(x,invC=invC,gps=ind.j[[i]])))
-    jj <- jj-length(j)
-    if(jj > 100) kk <- 1:100 else kk <- 1:jj
-    j <- j[length(j)] +kk
-    setTxtProgressBar(pb,step)
-    step <- step+1
-  }
-  close(pb)
-  CR.rand
-}
-
-# .apply.phylo.CR
-# same as apply.phylo.CR, but without progress bar option
-# used in: phylo.modularity
-.apply.phylo.CR <- function(x,invC,gps, k, iter, seed=NULL){
-  ind <- perm.CR.index(g=gps,k, iter, seed=seed)
-  jj <- iter+1
-  if(jj > 100) j <- 1:100 else j <- 1:jj
-  CR.rand <- NULL
-  while(jj > 0){
-    ind.j <- ind[j]
-    CR.rand<-c(CR.rand, sapply(1:length(j), function(i) quick.CR.phylo(x,invC=invC,gps=ind.j[[i]])))
-    jj <- jj-length(j)
-    if(jj > 100) kk <- 1:100 else kk <- 1:jj
-    j <- j[length(j)] +kk
-  }
-  CR.rand
-}
-
-# boot.phylo.CR
-# bootstrap for phylo.CR
-# phylo.modularity
-boot.phylo.CR <- function(x, invC, gps, k,iter, seed = NULL){
-  x<-as.matrix(x)
-  boot <- boot.index(nrow(x), iter, seed=seed)
-  if(k==1){
-    jj <- iter+1
-    if(jj > 100) j <- 1:100 else j <- 1:jj
-    CR.boot <- NULL
-    while(jj > 0){
-      boot.j <- boot[j]
-      x.r<-lapply(1:length(j), function(i) x[boot.j[[i]],])
-      invC.r <- lapply(1:length(j), function(i) invC[boot.j[[i]],boot.j[[i]]])
-      CR.boot<-c(CR.boot, sapply(1:length(j), function(i) quick.CR.phylo(x=x.r[[i]],invC=invC.r[[i]],gps=gps)))
-      jj <- jj-length(j)
-      if(jj > 100) kk <- 1:100 else kk <- 1:jj
-      j <- j[length(j)] +kk
-    }
-  }
-
-  if(k>1){  #for GM data
-    angle <- seq(-44,44,2)
-    if(k==2){
-      rot.mat<-lapply(1:(length(angle)), function(i) matrix(c(cos(angle[i]*pi/180),
-                                                              sin(angle[i]*pi/180),-sin(angle[i]*pi/180),cos(angle[i]*pi/180)),ncol=2))
-    }
-    if(k==3){
-      rot.mat<-lapply(1:(length(angle)), function(i) matrix(c(cos(angle[i]*pi/180),
-                                                              sin(angle[i]*pi/180),0,-sin(angle[i]*pi/180),cos(angle[i]*pi/180), 0,0,0,1),ncol=3))
-    }
-    jj <- iter+1
-    if(jj > 100) j <- 1:100 else j <- 1:jj
-    CR.boot <- NULL
-    while(jj > 0){
-      boot.j <- boot[j]
-      x.r<-lapply(1:length(j), function(i) x[boot.j[[i]],])
-      Alist.r <-lapply(1:length(x.r), function(i) { y <- x.r[[i]]; arrayspecs(y, ncol(y)/k,k)})
-      invC.r <- lapply(1:length(j), function(i) invC[boot.j[[i]],boot.j[[i]]])
-      CR.boot <- c(CR.boot, lapply(1:length(Alist.r), function(i){
-        A <- Alist.r[[i]]
-        A <- lapply(1:dim(A)[[3]], function(ii) A[,,ii])
-        B <- Map(function(r) t(mapply(function(a) matrix(t(a%*%r)), A)), rot.mat)
-        CRs <- Map(function(x) quick.CR.phylo(x=x.r[[i]],invC=invC.r[[i]],gps=gps), B)
-        Reduce("+", CRs)/length(CRs)
-      }))
-      jj <- jj-length(j)
-      if(jj > 100) kk <- 1:100 else kk <- 1:jj
-      j <- j[length(j)] +kk
-    }
-  }
-  unlist(CR.boot)
-}
-
 # phylo.mat
 # estimate BM phylo.cov.matrix and transform from phylogeny
 # used in: compare.evol.rates, compare.multi.evol.rates, phylo.integration, phylo.modularity, physignal
@@ -1580,13 +1323,12 @@ phylo.mat<-function(x,phy){
   }
   D.mat <- fast.solve(eigC$vectors%*% diag(sqrt(abs(eigC$values))) %*% t(eigC$vectors))
   rownames(D.mat) <- colnames(D.mat) <- colnames(C)
-  rownames(invC) <- colnames(invC) <- colnames(C)
   list(invC = invC, D.mat = D.mat,C = C)
 }
 
 # pls.phylo
 # phylogenetic pls
-# used in: phylo.integration, apply.pls.phylo
+# used in: phylo.integration
 pls.phylo <- function(x,y, Ptrans, verbose = FALSE){
   x <- as.matrix(x); y <- as.matrix(y)
   px <- ncol(x); py <- ncol(y); pmin <- min(px,py)
@@ -1605,61 +1347,6 @@ pls.phylo <- function(x,y, Ptrans, verbose = FALSE){
                 right.vectors=V, XScores=XScores,YScores=YScores)
   } else out <- r.pls
   out
-}
-
-# apply.pls.phylo
-# permutation for phylo.pls
-# used in: phylo.integration
-# CURRENTLY NOT IN USE - USING apply.pls BECAUSE OF TYPE I ERROR ISSUES
-apply.pls.phylo <- function(x,y,Ptrans, iter, seed = NULL){
-  n.x <- dim(x)[2]
-  ind <- perm.index(nrow(x), iter, seed=seed)
-  x <- Ptrans%*%x
-  pb <- txtProgressBar(min = 0, max = ceiling(iter/100), initial = 0, style=3)
-  jj <- iter+1
-  step <- 1
-  if(jj > 100) j <- 1:100 else j <- 1:jj
-  r.rand <- NULL
-  while(jj > 0){
-    ind.j <- ind[j]
-    y.rand <-lapply(1:length(j), function(i) y[ind.j[[i]],])
-    r.rand <- c(r.rand, sapply(1:length(j), function(i) {
-      yy <- Ptrans%*%y.rand[[i]]
-      quick.pls(x,yy)
-    }))
-    jj <- jj-length(j)
-    if(jj > 100) kk <- 1:100 else kk <- 1:jj
-    j <- j[length(j)] +kk
-    setTxtProgressBar(pb,step)
-    step <- step+1
-  }
-  close(pb)
-  r.rand
-}
-
-# .apply.pls.phylo
-# same as apply.phylo.pls, but without progress bar option
-# used in: phylo.integration
-# CURRENTLY NOT IN USE - USING .apply.pls BECAUSE OF TYPE I ERROR ISSUES
-.apply.pls.phylo <- function(x,y,Ptrans,iter, seed = NULL){
-  n.x <- dim(x)[2]
-  ind <- perm.index(nrow(x), iter, seed=seed)
-  x <- Ptrans%*%x
-  jj <- iter+1
-  if(jj > 100) j <- 1:100 else j <- 1:jj
-  r.rand <- NULL
-  while(jj > 0){
-    ind.j <- ind[j]
-    y.rand <-lapply(1:length(j), function(i) y[ind.j[[i]],])
-    r.rand <- c(r.rand, sapply(1:length(j), function(i) {
-      yy <- Ptrans%*%y.rand[[i]]
-      quick.pls(x,yy)
-    }))
-    jj <- jj-length(j)
-    if(jj > 100) kk <- 1:100 else kk <- 1:jj
-    j <- j[length(j)] +kk
-  }
-  r.rand
 }
 
 # plsmulti.phylo
@@ -1684,63 +1371,6 @@ plsmulti.phylo<-function(x,gps, Ptrans){
   for(i in 1:length(pls.mat)) pls.mat[[i]] <- pls.gp[i]
   pls.obs <- mean(pls.gp)
   list(r.pls = pls.obs, r.pls.mat=pls.mat)
-}
-
-# apply.plsmulti.phylo
-# permutations for plsmulti.phylo
-# used in: phylo.integration
-# CURRENTLY NOT IN USE - USING apply.plsmulti BECAUSE OF TYPE I ERROR ISSUES
-apply.plsmulti.phylo <- function(x, gps,Ptrans, iter=iter, seed=seed){
-  g<-factor(as.numeric(gps))
-  ngps<-nlevels(g)
-  gps.combo <- combn(ngps, 2)
-  xx <- Ptrans%*%x[,g==1]; yy <- Ptrans%*%x[,g!=1]
-  ind <- perm.index(nrow(x), iter, seed=seed)
-  pb <- txtProgressBar(min = 0, max = ceiling(iter/100), initial = 0, style=3)
-  jj <- iter+1
-  step <- 1
-  if(jj > 100) j <- 1:100 else j <- 1:jj
-  r.rand <- NULL
-  while(jj > 0){
-    ind.j <- ind[j]
-    x.r <-lapply(1:length(j), function(i) xx[ind.j[[i]],])
-    r.rand <- c(r.rand, sapply(1:length(j), function(i) {
-      quick.pls(x.r[[i]],yy)
-      }))
-    jj <- jj-length(j)
-    if(jj > 100) kk <- 1:100 else kk <- 1:jj
-    j <- j[length(j)] +kk
-    setTxtProgressBar(pb,step)
-    step <- step+1
-  }
-  close(pb)
-  r.rand
-}
-
-# .apply.plsmulti.phylo
-# same as apply.plsmulti.phylo, but without progress bar option
-# used in: phylo.integration
-# CURRENTLY NOT IN USE - USING .apply.plsmulti BECAUSE OF TYPE I ERROR ISSUES
-.apply.plsmulti.phylo <- function(x, gps,Ptrans, iter=iter, seed=seed){
-  g<-factor(as.numeric(gps))
-  ngps<-nlevels(g)
-  gps.combo <- combn(ngps, 2)
-  xx <- Ptrans%*%x[,g==1]; yy <- Ptrans%*%x[,g!=1]
-  ind <- perm.index(nrow(x), iter, seed=seed)
-  jj <- iter+1
-  if(jj > 100) j <- 1:100 else j <- 1:jj
-  r.rand <- NULL
-  while(jj > 0){
-    ind.j <- ind[j]
-    x.r <-lapply(1:length(j), function(i) xx[ind.j[[i]],])
-    r.rand <- c(r.rand, sapply(1:length(j), function(i) {
-      quick.pls(x.r[[i]],yy)
-    }))
-    jj <- jj-length(j)
-    if(jj > 100) kk <- 1:100 else kk <- 1:jj
-    j <- j[length(j)] +kk
-  }
-  r.rand
 }
 
 # sigma.d

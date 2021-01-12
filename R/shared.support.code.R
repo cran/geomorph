@@ -52,16 +52,16 @@ center.scale <- function(x) {
 # apply.pPsup
 # applies a partial Procrustes superimposition to matrices in a list
 # used in gpagen functions
-apply.pPsup <- function(M, Ya) {	# M = mean (reference); Ya all Y targets
+apply.pPsup<-function(M, Ya) {	# M = mean (reference); Ya all Y targets
   dims <- dim(Ya[[1]])
   k <- dims[2]; p <- dims[1]; n <- length(Ya)
   M <- cs.scale(M)
   lapply(1:n, function(j){
     y <- Ya[[j]]
-    MY <- crossprod(M, y)
-    sv <- La.svd(MY, k, k)
-    u <- sv$u; u[,k] <- u[,k] * determinant(MY)$sign
-    tcrossprod(y, u %*% sv$vt)
+    MY <- crossprod(M,y)
+    sv <- La.svd(MY,k,k)
+    u <- sv$u; u[,k] <- u[,k]*determinant(MY)$sign
+    tcrossprod(y,u%*%sv$vt)
   })
 }
 
@@ -69,7 +69,6 @@ apply.pPsup <- function(M, Ya) {	# M = mean (reference); Ya all Y targets
 # same as ginv, but without traps (faster)
 # used in any function requiring a generalized inverse
 fast.ginv <- function(X, tol = sqrt(.Machine$double.eps)){
-  X <- as.matrix(X)
   k <- ncol(X)
   Xsvd <- La.svd(X, k, k)
   Positive <- Xsvd$d > max(tol * Xsvd$d[1L], 0)
@@ -82,11 +81,10 @@ fast.ginv <- function(X, tol = sqrt(.Machine$double.eps)){
 # same as solve, but without traps (faster)
 # used in any function requiring a generalized inverse
 fast.solve <- function(x) { 
-  x <- as.matrix(x)
   if(det(x) > 1e-8) {
     res <- try(chol2inv(chol(x)), silent = TRUE)
     if(inherits(res, "try-error")) res <- fast.ginv(x)
-  } else res <- fast.ginv(x)
+  } else  res <- fast.ginv(x)
   return(res)
 }
 
@@ -169,15 +167,127 @@ pval = function(s){# s = sampling distribution
   pv
 }
 
+# box.cox
+# Box-Cox transformation for normalizing distributions.  Similar to MASS::boxcox
+# without unneeded arguments, plus faster
+# Used in effect.size
+box.cox.true <- function(y, eps = 0.001){
+  
+  if(any(y <= 0)) y = y - min(y) + 0.0001
+  
+  y.obs <- y[1]
+  y <- y[-1]
+  
+  # Note the code below (to get yy) is short-cut for Jacobian adjustment 
+  n <- length(y)
+  yy <- y / exp(mean(log(y)))
+  logy <- log(yy)
+  
+  lambda <- seq(-5, 5, 0.001)
+  m <- length(lambda)
+  
+  loglik <- sapply(1:m, function(j){ # same as MASS::boxcox loglik 
+    la <- lambda[j]
+    yt <- if(abs(la) > eps) yt <- (yy^la - 1)/la else
+      logy * (1 + (la * logy)/2 * (1 + (la * logy)/3 * (1 + (la * logy)/4)))
+    
+    -n/2 * log(sum(center(yt)^2))
+  })
+  
+  lambda.opt <- lambda[which.max(loglik)][[1]]
+  if(abs(lambda.opt) < eps) lambda.opt <- 0
+  y <- c(y.obs, y)
+  res <- if(lambda.opt == 0) log(y) else (y^lambda.opt - 1)/lambda.opt
+  
+  list(opt.lambda = lambda.opt, transformed = res, lambda = lambda, loglik = loglik)
+  
+}
+
+box.cox.spline <- function(y, eps = 0.001) {
+  
+  if(any(y <= 0)) y = y - min(y) + 0.0001
+  
+  y.obs <- y[1]
+  y <- y[-1]
+  
+  n <- length(y)
+  yy <- y / exp(mean(log(y)))
+  logy <- log(yy)
+  m <- 20
+  lambda <- seq(-0.5, 1.5, length.out = m)
+  
+  loglik <- sapply(1:m, function(j){ # same as MASS::boxcox loglik 
+    la <- lambda[j]
+    yt <- if(abs(la) > eps) yt <- (yy^la - 1)/la else
+      logy * (1 + (la * logy)/2 * (1 + (la * logy)/3 * (1 + (la * logy)/4)))
+    
+    -n/2 * log(sum(center(yt)^2))
+  })
+  
+  sp <- spline(lambda, loglik, n = 300)
+  lambda.opt <- sp$x[which.max(sp$y)]
+  if(abs(lambda.opt) < eps) lambda.opt <- 0
+  y <- c(y.obs, y)
+  res <- if(lambda.opt == 0) log(y) else (y^lambda.opt - 1)/lambda.opt
+  
+  list(opt.lambda = lambda.opt, transformed = res, lambda = sp$x, loglik = sp$y)
+  
+}
+
+box.cox.iter <- function(y, eps = 0.001) {
+  bc <- box.cox.spline(y, eps = eps)
+  if(bc$opt.lambda == -0.5 || bc$opt.lambda == 1.5) bc <- box.cox.true(y, eps = eps)
+  return(bc)
+}
+
+box.cox.fast <- function(y, eps = 0.001) {
+  if(any(y <= 0)) y = y - min(y) + 0.0001
+  y.obs <- y[1]
+  y <- y[-1]
+  
+  n <- length(y)
+  yy <- y / exp(mean(log(y)))
+  logy <- log(yy)
+  
+  logLik <- function(lambda) {
+    la <- lambda
+    yt <- if(abs(la) > eps) yt <- (yy^la - 1)/la else
+      logy * (1 + (la * logy)/2 * (1 + (la * logy)/3 * (1 + (la * logy)/4)))
+    
+    -n/2 * log(sum(center(yt)^2))
+  }
+  
+  result <- optimise(logLik, lower = -5, upper = 5, maximum = TRUE)
+  lambda.opt <- result$maximum
+  if(abs(lambda.opt) < eps) lambda.opt <- 0
+  y <- c(y.obs, y)
+  res <- if(lambda.opt == 0) log(y) else (y^lambda.opt - 1)/lambda.opt
+  list(opt.lambda = lambda.opt, transformed = res, lambda = NULL, loglik = NULL)
+}
+
+box.cox <- function(y, eps = 0.001, iterate = FALSE) {
+  result <- if(iterate) box.cox.iter(y, eps = eps) else
+    box.cox.fast(y, eps = eps)
+  return(result)
+}
+
 # effect.size
 # Effect sizes (standard deviates) form random outcomes
 # any analytical function
-effect.size <- function(x, center = TRUE) {
-  z = scale(x, center=center)
-  n <- length(z)
-  z[1]*sqrt((n-1)/(n))
-}
 
+effect.size <- function(x, center = TRUE) {
+  if(length(unique(x)) == 1) {
+    sdx <- 1
+    x <- 0
+  } else {
+    x <- box.cox(x)$transformed
+    n <- length(x)
+    if(center) x <- center(x)
+    sdx <- sqrt((sum(x^2)/n))
+  }
+
+  (x[1]- mean(x)) / sdx
+}
 
 # Pval.matrix
 # P-values form random outcomes that comprise matrices
@@ -400,4 +510,3 @@ getNodeDepth <- function(phy){
   
   c(tips.depths, nodes.depths)
 }
-

@@ -175,17 +175,30 @@ summary.morphol.disparity <- function(object, ...) {
 print.pls <- function (x, ...) {
   cat("\nCall:\n")
   cat(deparse(x$call), fill=TRUE, "\n\n")
-  if(x$method=="RV") {
-    cat(paste("\nRV:", round(x$RV, nchar(x$permutations)-1)))
-    cat(paste("\n\nP-value:", round(x$P.value, nchar(x$permutations)-1)))
-    cat(paste("\n\nBased on", x$permutations, "random permutations\n"))
+  
+  cat("\nr-PLS:", round(x$r.pls, nchar(x$permutations)-1))
+  cat("\n\nEffect Size (Z):", round(x$Z, nchar(x$permutations)))
+  cat("\n\nP-value:", x$P.value)
+  cat("\n\nBased on", x$permutations, "random permutations\n")
+  if(!is.null(x$pairwise.Z)) {
+    Z <- x$pairwise.Z
+    P <- x$pairwise.P.values
+    nms <- unique(unlist(strsplit(names(Z), "-")))
+    m <- matrix(0, length(nms), length(nms))
+    dimnames(m) <- list(nms, nms)
+    dz <- dp <- as.dist(m)
+    dz[1:length(Z)] <- Z
+    dp[1:length(P)] <- P
+    
+    cat("\nPairwise statistics\n")
+    cat("\nr-PLS:\n")
+    print(x$r.pls.mat)
+    cat("\nEffect Sizes (Z):\n")
+    print(dz)
+    cat("\nP-values::\n")
+    print(dp)
   }
-  if(x$method=="PLS") {
-    cat(paste("\nr-PLS:", round(x$r.pls, nchar(x$permutations)-1)))
-    cat(paste("\n\nP-value:", round(x$P.value, nchar(x$permutations)-1)))
-    cat(paste("\n\nEffect Size:", round(x$Z, nchar(x$permutations))))
-    cat(paste("\n\nBased on", x$permutations, "random permutations\n"))
-  }
+  
   invisible(x)
 }
 
@@ -302,52 +315,52 @@ plot.bilat.symmetry <- function(x, warpgrids = TRUE, mesh= NULL, ...){
         mtext("Mean directional (left) and fluctuating (right) asymmetry",side = 1, outer = TRUE)
         par(mfrow=c(1,1))
       }
-      if (k==3){
+      if(k==3){
         if (is.null(mesh)){
           open3d() ; mfrow3d(1, 2) 
-          plotRefToTarget(x$DA.mns[,,1],x$DA.mns[,,2],method="points",main="Directional Asymmetry",box=FALSE, axes=FALSE)
+          plotRefToTarget(x$DA.component[,,1],x$DA.component[,,2],method="points",main="Directional Asymmetry",box=FALSE, axes=FALSE)
           next3d()
-          plotRefToTarget(x$FA.mns[,,1],x$FA.mns[,,2],method="points",main="Fluctuating Asymmetry",box=FALSE, axes=FALSE)
+          plotRefToTarget(x$FA.component[,,1],x$FA.component[,,2],method="points",main="Fluctuating Asymmetry",box=FALSE, axes=FALSE)
         } 
         if(!is.null(mesh)){
           open3d() ; mfrow3d(1, 2) 
           cat("\nWarping mesh\n")
-          plotRefToTarget(x$DA.mns[,,1],x$DA.mns[,,2],mesh,method="surface")
+          plotRefToTarget(x$DA.component[,,1],x$DA.component[,,2],mesh,method="surface")
           title3d(main="Directional Asymmetry")
           next3d()
           cat("\nWarping mesh\n")
-          plotRefToTarget(x$FA.mns[,,1],x$FA.mns[,,2],mesh,method="surface")
+          plotRefToTarget(x$FA.component[,,1],x$FA.component[,,2],mesh,method="surface")
           title3d(main="Fluctuating Asymmetry")
         }
       }
       layout(1) 
     }
-    if(x$data.typ == "Object"){
+    if(x$data.type == "Object"){
       if(warpgrids==TRUE){
         if(k==2){  
           par(mfrow=c(2,2),oma=c(1.5,0,1.5,0))
           plotAllSpecimens(x$symm.shape)
           plotAllSpecimens(x$asymm.shape)
-          plotRefToTarget(x$DA.mns[,,1],x$DA.mns[,,2],method="TPS",main="Directional Asymmetry")
-          plotRefToTarget(x$FA.mns[,,1],x$FA.mns[,,2],method="TPS",main="Fluctuating Asymmetry")
+          plotRefToTarget(x$DA.component[,,1],x$DA.component[,,2],method="TPS",main="Directional Asymmetry")
+          plotRefToTarget(x$FA.component[,,1],x$FA.component[,,2],method="TPS",main="Fluctuating Asymmetry")
           mtext("Symmetric Shape Component (left) and Asymmetric Shape Component (right)",outer = TRUE,side=3)
           mtext("Mean directional (left) and fluctuating (right) asymmetry",side = 1, outer = TRUE)
         }
-        if (k==3){
+        if(k==3){
           if(is.null(mesh)) {
             open3d() ; mfrow3d(1, 2) 
-            plotRefToTarget(x$DA.mns[,,1],x$DA.mns[,,2],method="points",main="Directional Asymmetry",box=FALSE, axes=FALSE)
+            plotRefToTarget(x$DA.component[,,1],x$DA.component[,,2],method="points",main="Directional Asymmetry",box=FALSE, axes=FALSE)
             next3d()
-            plotRefToTarget(x$FA.mns[,,1],x$FA.mns[,,2],method="points",main="Fluctuating Asymmetry",box=FALSE, axes=FALSE)
+            plotRefToTarget(x$FA.component[,,1],x$FA.component[,,2],method="points",main="Fluctuating Asymmetry",box=FALSE, axes=FALSE)
           } 
           if(!is.null(mesh)){
             open3d() ; mfrow3d(1, 2) 
             cat("\nWarping mesh\n")
-            plotRefToTarget(x$DA.mns[,,1],x$DA.mns[,,2],mesh,method="surface")
+            plotRefToTarget(x$DA.component[,,1],x$DA.component[,,2],mesh,method="surface")
             title3d(main="Directional Asymmetry")
             next3d()
             cat("\nWarping mesh\n")
-            plotRefToTarget(x$FA.mns[,,1],x$FA.mns[,,2],mesh,method="surface")
+            plotRefToTarget(x$FA.component[,,1],x$FA.component[,,2],mesh,method="surface")
             title3d(main="Fluctuating Asymmetry")
           }  
         }
@@ -507,8 +520,9 @@ plot.physignal <- function(x, ...){
   K.val <- x$random.K
   K.obs <- x$phy.signal
   p <- x$pvalue
-  ndec <- nchar(p)-2
+  ndec <- nchar(1 / x$permutations) - 2
   K.obs <- round(K.obs, ndec)
+  p <- round(p, ndec)
   main.txt <- paste("Observed K =",K.obs,";", "P-value =", p)
   hist(K.val,30,freq=TRUE,col="gray",xlab="Phylogenetic Signal, K",
        main=main.txt, cex.main=0.8)
@@ -611,6 +625,38 @@ print.compare.pls <- function(x,...){
   cat("\nEffect sizes\n\n")
   print(z)
   cat("\nEffect sizes for pairwise differences in PLS effect size\n\n")
+  print(z.pw)
+  cat("\nP-values\n\n")
+  print(p)
+  invisible(x)
+}
+
+# compare.CR
+
+#' Print/Summary Function for geomorph
+#' 
+#' @param object print/summary object
+#' @param ... other arguments passed to print/summary
+#' @export
+#' @author Michael Collyer
+#' @keywords utilities
+summary.compare.CR<- function(object, ...) print.compare.CR(object,...)
+
+#' Print/Summary Function for geomorph
+#' 
+#' @param x print/summary object
+#' @param ... other arguments passed to print/summary
+#' @export
+#' @author Michael Collyer
+#' @keywords utilities
+print.compare.CR<- function(x,...){
+  cat("\n", x$comment, "\n\n")
+  z <- x$sample.z
+  z.pw <- x$pairwise.z
+  p <- x$pairwise.P
+  cat("\nEffect sizes\n\n")
+  print(z)
+  cat("\nEffect sizes for pairwise differences in CR effect size\n\n")
   print(z.pw)
   cat("\nP-values\n\n")
   print(p)
@@ -723,7 +769,7 @@ plot.mshape <- function(x, links=NULL,...){
 #' @keywords utilities
 print.gm.prcomp <- function (x, ...) {
   class(x) <- "ordinate"
-  summary(x)
+  xx <- summary(x)
   
   if(!is.null(x$ancestors)) {
     
@@ -747,8 +793,10 @@ print.gm.prcomp <- function (x, ...) {
     print(tab)
     cat("\n\n")
     
-  }
+  } else tab <- NULL
   
+  out <- list(PC.summary = xx, Ancestor.summary = tab)
+  invisible(out)
 }
 
 #' Print/Summary Function for geomorph
@@ -767,6 +815,9 @@ summary.gm.prcomp <- function (object, ...) {
 #' @param x An object of class \code{\link{gm.prcomp}}
 #' @param axis1 A value indicating which PC axis should be displayed as the X-axis (default = PC1)
 #' @param axis2 A value indicating which PC axis should be displayed as the Y-axis (default = PC2)
+#' @param flip An argument that if not NULL can be used to flip components in the plot.  
+#' The values need to match axis1 or axis2.  For example, if axis1 = 3 and axis2 = 4, flip = 1 will not
+#' change either axis; flip = 3 will flip only the horizontal axis; flip = c(3, 4) will flip both axes.
 #' @param phylo A logical value indicating whether the phylogeny should be projected to PC space
 #' @param time.plot A logical value indicating if a 3D plot with the phylogeny and time as the 
 #' z-axis is desired
@@ -791,20 +842,28 @@ summary.gm.prcomp <- function (object, ...) {
 #' @seealso  \code{\link{plotRefToTarget}} \code{\link{picknplot.shape}}
 
 
-plot.gm.prcomp <- function(x, axis1 = 1, axis2 = 2, phylo = FALSE, time.plot = FALSE,
-                           phylo.par = list(tip.labels = TRUE, node.labels = TRUE, anc.states = TRUE,
-                                            node.bg = "grey", node.cex = 1,
-                                            edge.color = "black", edge.width = 1,
-                                            tip.txt.cex = 1, tip.txt.col = "black", 
+plot.gm.prcomp <- function(x, axis1 = 1, axis2 = 2, flip = NULL, phylo = FALSE, 
+                           time.plot = FALSE, 
+                           phylo.par = list(tip.labels = TRUE, 
+                                            node.labels = TRUE, 
+                                            anc.states = TRUE,
+                                            node.pch = 21, 
+                                            node.bg = "grey", 
+                                            node.cex = 1, 
+                                            edge.color = "black", 
+                                            edge.width = 1,
+                                            tip.txt.cex = 1, 
+                                            tip.txt.col = "black", 
                                             tip.txt.adj = c(-0.1,-0.1),
-                                            node.txt.cex = 1, node.txt.col = "grey",
+                                            node.txt.cex = 1, 
+                                            node.txt.col = "grey",
                                             node.txt.adj = c(-0.1, -0.1)), 
-                           ...) {
+                           ...){
 
   class(x) <- "ordinate"
   pcdata <- as.matrix(x$x[, c(axis1, axis2)])
   Pcov <- x$Pcov
-  xx <- plot(x, axis1 = axis1, axis2 = axis2, ...)
+  xx <- plot(x, axis1 = axis1, axis2 = axis2, flip = flip, ...)
   plot.args <- xx$plot.args
   if(!is.null(plot.args$axes)) axes <- plot.args$axes else axes <- TRUE
 
@@ -827,10 +886,10 @@ plot.gm.prcomp <- function(x, axis1 = 1, axis2 = 2, phylo = FALSE, time.plot = F
   if(phylo) {
     
     p.p <- list(tip.labels = TRUE, node.labels = TRUE, anc.states = TRUE,
-                            node.bg = "grey", node.cex = 1,
+                            node.bg = "grey", node.pch = 21, node.cex = 1,
                             edge.color = "black", edge.width = 1,
                             tip.txt.cex = 1, tip.txt.col = "black", 
-                            tip.txt.adj = c(-0.1,-0.1),
+                            tip.txt.adj = c(-0.1, -0.1),
                             node.txt.cex = 1, node.txt.col = "grey",
                             node.txt.adj = c(-0.1, -0.1))
     
@@ -841,17 +900,15 @@ plot.gm.prcomp <- function(x, axis1 = 1, axis2 = 2, phylo = FALSE, time.plot = F
     p.p[m.p] <- phylo.par
     
     phy <- x$phy
-    tp <- add.tree(xx, phy, edge.col = phylo.par$edge.color,
+    tp <- add.tree(xx, phy, edge.col = p.p$edge.color,
                    edge.lwd = p.p$edge.width,
                    edge.lty = p.p$edge.lty, 
-                   anc.pts = FALSE,
-                   cex = 0.5 * p.p$edge.width, 
-                   col = p.p$edge.color, return.ancs = TRUE)
-    
-    if(p.p$anc.states) {
-      points(tp, pch = 21, bg = p.p$node.bg, 
-             col = p.p$edge.color, lwd = p.p$edge.width)
-    }
+                   anc.pts = p.p$anc.states,
+                   cex = p.p$node.cex,
+                   pch = p.p$node.pch,
+                   col = p.p$edge.color, 
+                   bg = p.p$node.bg,
+                   return.ancs = TRUE)
     
     if(p.p$tip.labels) {
       text(xx$points, rownames(xx$points), adj = p.p$tip.txt.adj,
@@ -863,7 +920,7 @@ plot.gm.prcomp <- function(x, axis1 = 1, axis2 = 2, phylo = FALSE, time.plot = F
            cex = p.p$node.txt.cex, col = p.p$node.txt.col)
     }
     
-    phy.pcdata <- rbind(xx$points, tp)
+    phy.pcdata <- rbind(xx$points[phy$tip.label,], tp)
     N.tips <- length(phy$tip.label)
     
   }

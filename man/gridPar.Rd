@@ -23,8 +23,8 @@ gridPar(
   grid.col = "black",
   grid.lwd = 1,
   grid.lty = 1,
-  txt.adj = 0.5,
-  txt.pos = 1,
+  txt.adj = NULL,
+  txt.pos = NULL,
   txt.cex = 0.8,
   txt.col = "black"
 )
@@ -66,13 +66,13 @@ gridPar(
 
 \item{grid.lty}{The line type for grid lines (single numerical value, as in base R \code{\link{plot}})}
 
-\item{txt.adj}{The adjustment value of the landmark label (one or two values, as in base R \code{\link{text}})}
+\item{txt.adj}{The adjustment value of the landmark label (one or two values, as in base R \code{\link{text}} and \code{\link{text3d}})}
 
-\item{txt.pos}{The position of the landmark label (single numerical value, as in base R \code{\link{text}})}
+\item{txt.pos}{The position of the landmark label, overrides txt.adj (single numerical value, as in base R \code{\link{text}} and \code{\link{text3d}})}
 
-\item{txt.cex}{The size of the landmark label text (single numerical value, as in base R \code{\link{text}})}
+\item{txt.cex}{The size of the landmark label text (single numerical value, as in base R \code{\link{text}} and \code{\link{text3d}})}
 
-\item{txt.col}{The color of the landmark label text (single numerical value, as in base R \code{\link{text}})}
+\item{txt.col}{The color of the landmark label text (single numerical value, as in base R \code{\link{text}} and \code{\link{text3d}})}
 }
 \description{
 Function produces a list of parameter changes within \code{\link{plotRefToTarget}}.
@@ -88,17 +88,21 @@ ref<-mshape(Y.gpa$coords)
 plotRefToTarget(ref,Y.gpa$coords[,,39]) # default settings
 
 # Altering points and links
-GP1 <- gridPar(pt.bg = "red", pt.size = 1, link.col="blue", link.lwd=2, n.col.cell=50)
+GP1 <- gridPar(pt.bg = "red", pt.size = 1, link.col="blue", link.lwd=2, 
+n.col.cell=50)
 plotRefToTarget(ref,Y.gpa$coords[,,39], gridPars=GP1, mag=2, 
 links=plethodon$links, method="TPS")
 
 # Altering point color
 GP2 <- gridPar(pt.bg = "green", pt.size = 1) 
-plotRefToTarget(ref,Y.gpa$coords[,,39], gridPars=GP2, mag=3, method="vector")
+plotRefToTarget(ref,Y.gpa$coords[,,39], gridPars=GP2, mag=3, 
+method="vector")
 
 # Altering ref and target points
-GP3 <- gridPar(pt.bg = "blue", pt.size = 1.5, tar.pt.bg = "orange", tar.pt.size = 1) 
-plotRefToTarget(ref,Y.gpa$coords[,,39], gridPars=GP3, mag=3, method="points")
+GP3 <- gridPar(pt.bg = "blue", pt.size = 1.5, tar.pt.bg = "orange", 
+tar.pt.size = 1) 
+plotRefToTarget(ref,Y.gpa$coords[,,39], gridPars=GP3, mag=3, 
+method="points")
 
 # Altering outline color
 GP4 <- gridPar(tar.out.col = "red", tar.out.cex = 0.3) 
@@ -107,10 +111,11 @@ outline=plethodon$outline, method="TPS")
 
 # Altering text labels
 GP5 <- gridPar(txt.pos = 3, txt.col = "red") 
-plotRefToTarget(ref,Y.gpa$coords[,,39], gridPars=GP5, mag=3, method="vector", label=TRUE)
+plotRefToTarget(ref,Y.gpa$coords[,,39], gridPars=GP5, mag=3, 
+method="vector", label=TRUE)
 }
 \seealso{
-\code{\link{plotRefToTarget}}
+\code{\link{plotRefToTarget}}, \code{\link{text}}, \code{\link{text3d}}
 }
 \author{
 Michael Collyer & Emma Sherratt
