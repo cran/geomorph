@@ -1,4 +1,20 @@
-# CHANGES IN GEOMORPH VERSION 4.0.0
+# CHANGES IN GEOMORPH VERSION 4.0.1
+
+### NEW FEATURES
+* Added a transform argument to `morphol.disparity` for PGLS models, consistent with `gm.prcomp` approaches.
+* New function, `module.eigen`, plus S3 generic associated functions.
+* New function, `na.omit.geomorph.data.frame`.
+
+### BUG FIXES
+* Fixed some `as.matrix` names dropping in support code.
+* Fixed pairwise Z-scores in `compare.pls` and `compare.CR` to use box-cox transformed values.
+* Added Pcov as needed output `phylo.integration` and `phylo.modularity`.
+* Fixed small issue with label plotting in `gridPar.r`.
+* Fixed bug in `readmulti.tps` to allow for any kind of tps input and correctly combine them into an array
+* Fixed typo bug in `integration.test` (only affected separate matrices).
+* Fixed bug in `estimate.missing` (only affecting method = "Reg").
+
+# CHANGES IN GEOMORPH VERSION 4.0.0 
 
 ### NEW FEATURES
 * Included calculation of individual asymmetry indices to `bilat.symmetry` output

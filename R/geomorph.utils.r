@@ -259,6 +259,7 @@ plot.pls <- function(x, label = NULL, ...) {
   out$plot.args <- plot.args
   out$A1 <- x$A1
   out$A2 <- x$A2
+  out$Pcov <- x$Pcov
   class(out) <- "plot.pls"
   invisible(out)
 }
@@ -1078,3 +1079,31 @@ print.geomorphShapes <- function (x, ...) {
 summary.geomorphShapes <- function (object, ...) {
   print.geomorphShapes(object, ...)
 }
+
+## geomorph.data.frame
+
+#' Handle missing values in rrpp.data.frame objects
+#'
+#' @param object object (from \code{\link{geomorph.data.frame}})
+#' @param ... further arguments (currently not used)
+#' @method na.omit geomorph.data.frame
+#' @export
+#' @author Michael Collyer
+#' @keywords utilities
+#' @examples
+#' data(plethspecies)
+#' Y.gpa <- gpagen(plethspecies$land, verbose = TRUE)
+#' gdf <- geomorph.data.frame(Y.gpa)
+#' gdf$d <- Y.gpa$procD
+#' gdf$group <- c(rep(1, 4), rep(2, 4), NA) # one unknown group designation
+#' gdf
+#' ndf <- na.omit(gdf)
+#' ndf
+
+na.omit.geomorph.data.frame <- function(object, ...) {
+  class(object) <- "rrpp.data.frame"
+  out <- na.omit(object)
+  class(out) <- "geomorph.data.frame"
+  out
+}
+

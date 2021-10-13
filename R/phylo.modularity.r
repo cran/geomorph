@@ -48,6 +48,7 @@
 #'   \item{Effect.Size}{The multivariate effect size associated with sigma.d.ratio.}
 #'    \item{CR.mat}{For more than two partitions, the pairwise CRs among partitions.}
 #'    \item{random.CR}{The CR calculated in each of the random permutations of the resampling procedure.}
+#'    \item{Pcov}{The phylogenetic transformation matrix, needed for certain other analyses.}
 #'    \item{permutations}{The number of random permutations used in the resampling procedure.}
 #'    \item{call}{The match call.}
 #'    
@@ -79,6 +80,7 @@ phylo.modularity<-function(A, partition.gp, phy, CI = FALSE,
     p<-dim(A)[1]; k<-dim(A)[2];n<-dim(A)[3]
     gps<-as.factor(partition.gp)
     gps.obs <- as.factor(rep(gps,k,each = k, length=p*k))
+    if(any(table(gps.obs)==1)){stop("Must have at least two variables per partition.")}
     angle <- seq(0,89.95,0.05)
     if(k==2){
       rot.mat<-lapply(1:(length(angle)), function(i) matrix(c(cos(angle[i]*pi/180),
@@ -132,6 +134,7 @@ phylo.modularity<-function(A, partition.gp, phy, CI = FALSE,
   out <- list(CR=res$CR, CInterval=res$CInterval, CR.boot = res$CR.boot, 
               P.value=res$P.value, Z = res$Z,
               CR.mat = res$CR.mat, random.CR = res$random.CR,
+              Pcov = Ptrans,
               permutations=iter+1, call=match.call())
   class(out) <- "CR"
   out  

@@ -142,11 +142,12 @@ integration.test <-function(A, A2 = NULL,
            call. = FALSE) 
     
     y <- try(two.d.array(A2), silent = TRUE)
-    if(inherits(y, "try-error")) y <- try(as.matrix(A), silent = TRUE)
+    if(inherits(y, "try-error")) y <- try(as.matrix(A2), silent = TRUE)
     if(inherits(y, "try-error"))
       stop("\nA2 is not a suitable data array for analysis. ", call. = FALSE)
     
     namesY <- rownames(y)
+    cnamesY <- colnames(y)
     if (is.null(namesY)) {
       namesY <- 1:NROW(y)
       cat("\nNo names for A2.  Data are assumed to be ordered as in A.\n")
@@ -192,7 +193,7 @@ integration.test <-function(A, A2 = NULL,
   
   if(!is.null(A2)){
     ngps <- 2
-    y <- as.matrix(y[match(namesX, namesY),])  
+    y <- as.matrix(y[match(namesX, namesY), ]); colnames(y) <- cnamesY 
   }
   
   n <- NROW(x)
@@ -225,7 +226,7 @@ integration.test <-function(A, A2 = NULL,
       step <- j
       if(print.progress) setTxtProgressBar(pb,step)
       s <- ind[[j]]
-      quick.pls(x[s,], y)
+      quick.pls(as.matrix(x[s,]), y)
     })
     
     names(pls.rand) <- c("obs", paste("iter", 1:iter, sep = "."))
