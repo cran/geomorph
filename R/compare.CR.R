@@ -28,7 +28,7 @@
 #' \item{pairwise.z}{A matrix of pairwise, two-sample z scores between all pairs of effect sizes.}
 #' \item{pairwise.p}{A matrix of corresponding P-values.}
 #' @references Adams, D.C. and M.L. Collyer. 2019.  Comparing the strength of modular signal, and evaluating alternative modular hypotheses,
-#' using covariance ratio effect sizes for morphometric data. *Evolution*. 73:2352-2367.
+#' using covariance ratio effect sizes for morphometric data. Evolution. 73:2352-2367.
 #' @examples
 #' 
 #' #NOT RUN
@@ -147,7 +147,7 @@ compare.CR <- function(..., CR.null = TRUE, two.tailed = TRUE){
       pairwise.P <- as.matrix(p12.pw); rownames(pairwise.P) <- colnames(pairwise.P)<-c("No_Modules",list.names)
       pairwise.se <- as.matrix(se12.pw); rownames(pairwise.se) <- colnames(pairwise.se)<-c("No_Modules",list.names)
       diag(pairwise.P) <- 1
-      diag(pairwise.se) <- c(0, list.sds)
+      diag(pairwise.se) <- list.sds
    }
    comment <- c("NOTE: more negative effects represent stronger modular signal!")
    out <- list(comment=comment, sample.z = list.zs,
