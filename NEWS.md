@@ -1,9 +1,23 @@
+# CHANGES IN GEOMORPH VERSION 4.0.4
+
+### NEW FEATURES
+
+* New function, `integration.Vrel`
+* New function, `compare.ZVrel`
+* Added a `lambda` argument to `procD.pgls`.
+
 # CHANGES IN GEOMORPH VERSION 4.0.3
 
 ### OTHER CHANGES
 * Updated `Cov.proj` function to work with `RRPP`
 
 # CHANGES IN GEOMORPH VERSION 4.0.2
+
+### BUG FIXES
+* Fixed issue in `compare.CR` when CR.null = TRUE.
+* Added catch to `anc.BM` for singleton nodes
+
+# CHANGES IN GEOMORPH VERSION 4.0.1
 
 ### BUG FIXES
 * Fixed issue in `compare.CR` when CR.null = TRUE.
