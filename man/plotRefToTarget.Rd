@@ -80,13 +80,12 @@ The function generates a plot of the shape differences of a target specimen rela
  This function combines numerous plotting functions found in Claude (2008).
 }
 \examples{
+# Not Run
 # Two dimensional data
-data(plethodon) 
-Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
-ref<-mshape(Y.gpa$coords)
-plotRefToTarget(ref,Y.gpa$coords[,,39])
-
-# NOT RUN
+# data(plethodon) 
+# Y.gpa<-gpagen(plethodon$land)    #GPA-alignment
+# ref<-mshape(Y.gpa$coords)
+# plotRefToTarget(ref,Y.gpa$coords[,,39])
 # plotRefToTarget(ref,Y.gpa$coords[,,39], mag=2, outline=plethodon$outline)   
 #magnify by 2X
 # plotRefToTarget(ref,Y.gpa$coords[,,39], method="vector", mag=3)

@@ -44,7 +44,7 @@
 #' The function also provides individual measures of signed and unsigned asymmetry, calculated as the
 #' Procrustes distance between the right and left element (for paired structures, as detailed in 
 #' Klingenberg and McIntyre 1998) or side of the structure (for object symmetry, following Lazić 
-#' et al 2015). The computational difference betwen the two approaches consists in that, for object
+#' et al 2015). The computational difference between the two approaches consists in that, for object
 #' symmetry, only paired landmarks are considered, excluding the landmarks of the midline.
 #'  
 #' \subsection{Notes for geomorph 3.0}{ 
@@ -147,48 +147,48 @@
 #' Naturalist 185:44–58.
 #' @examples
 #' #Example of matching symmetry
-#'
-#' data(mosquito)
-#' gdf <- geomorph.data.frame(wingshape = mosquito$wingshape, 
-#' ind=mosquito$ind, 
-#' side=mosquito$side,
-#' replicate=mosquito$replicate)
-#' mosquito.sym <- bilat.symmetry(A = wingshape, ind = ind, side = side,
-#' replicate = replicate, object.sym = FALSE, RRPP = TRUE, iter = 149, 
-#' data = gdf)
-#' summary(mosquito.sym)
-#' plot(mosquito.sym, warpgrids = TRUE)
-#' mosquito.sym$shape.anova # extract just the anova table on shape
+#' # NOT RUN
+#' # data(mosquito)
+#' # gdf <- geomorph.data.frame(wingshape = mosquito$wingshape, 
+#' # ind=mosquito$ind, 
+#' # side=mosquito$side,
+#' # replicate=mosquito$replicate)
+#' # mosquito.sym <- bilat.symmetry(A = wingshape, ind = ind, side = side,
+#' # replicate = replicate, object.sym = FALSE, RRPP = TRUE, iter = 149, 
+#' # data = gdf)
+#' # summary(mosquito.sym)
+#' # plot(mosquito.sym, warpgrids = TRUE)
+#' # mosquito.sym$shape.anova # extract just the anova table on shape
 #' 
 #' # Previous example, performing GPA first
-#' Y.gpa <- gpagen(mosquito$wingshape)
-#' mosquito.sym2 <- bilat.symmetry(A = Y.gpa, ind = ind, side = side,
-#' replicate = replicate, object.sym = FALSE, RRPP = TRUE, iter = 149, 
-#' data = gdf)
-#' summary(mosquito.sym2)
-#' summary(mosquito.sym) # same results
+#' # Y.gpa <- gpagen(mosquito$wingshape)
+#' # mosquito.sym2 <- bilat.symmetry(A = Y.gpa, ind = ind, side = side,
+#' # replicate = replicate, object.sym = FALSE, RRPP = TRUE, iter = 149, 
+#' # data = gdf)
+#' # summary(mosquito.sym2)
+#' # summary(mosquito.sym) # same results
 #'
 #' #Example of object symmetry
 #'
-#' data(lizards)
-#' gdf <- geomorph.data.frame(shape = lizards$coords, 
-#' ind = lizards$ind, 
-#' replicate = lizards$rep)
-#' liz.sym <- bilat.symmetry(A = shape, ind = ind, rep = rep, 
-#' object.sym = TRUE, 
-#' land.pairs = lizards$lm.pairs, data = gdf, RRPP = TRUE, iter = 149)
-#' summary(liz.sym)
+#' # data(lizards)
+#' # gdf <- geomorph.data.frame(shape = lizards$coords, 
+#' # ind = lizards$ind, 
+#' # replicate = lizards$rep)
+#' # liz.sym <- bilat.symmetry(A = shape, ind = ind, rep = rep, 
+#' # object.sym = TRUE, 
+#' # land.pairs = lizards$lm.pairs, data = gdf, RRPP = TRUE, iter = 149)
+#' # summary(liz.sym)
 #' 
 #' # Example of object symmetry in 3D and including semilandmarks
 #' 
-#' data(scallops)
-#' gdf <- geomorph.data.frame(shape = scallops$coorddata, 
-#' ind = scallops$ind)
-#' scallop.sym <- bilat.symmetry(A = shape, ind = ind, 
-#' object.sym = TRUE, 
-#' curves= scallops$curvslide, surfaces = scallops$surfslide,
-#' land.pairs=scallops$land.pairs, data = gdf, RRPP = TRUE, iter = 149)
-#' summary(scallop.sym)
+#' # data(scallops)
+#' # gdf <- geomorph.data.frame(shape = scallops$coorddata, 
+#' # ind = scallops$ind)
+#' # scallop.sym <- bilat.symmetry(A = shape, ind = ind, 
+#' # object.sym = TRUE, 
+#' # curves= scallops$curvslide, surfaces = scallops$surfslide,
+#' # land.pairs=scallops$land.pairs, data = gdf, RRPP = TRUE, iter = 149)
+#' # summary(scallop.sym)
 #' # NOTE one can also: plot(scallop.sym, warpgrids = TRUE, mesh = NULL)
 #' # NOTE one can also: scallop.sym$data.type # recall the symmetry type
 
