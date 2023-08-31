@@ -1,3 +1,20 @@
+# CHANGES IN GEOMORPH VERSION 4.0.6
+
+### Bug fixes
+* Fixed issue with `readland.tps` when `warnmsg = FALSE`
+* Fixed issue with `bilat.symmetry` (updated nested model computations)
+* Fixed issue with `readland.tps` when curves exist but are not to be read
+* Fixed issue with bootstrap CI for `modularity.test` and `phylo.modularity`
+* Fixed a bug in `logLikh` internal function that required `matrix` class objects for calculation.
+* Fixed a typo bug in `procD.lm` that caused lost results.
+* Fixed names being dropped from shape components in `bilat.symmetry`
+* Fixed `readland.fcsv` to be consistent with SlicerMorph updates.
+
+### OTHER CHANGES
+* Additional error checking in `modularity.test` and `phylo.modularity` `rgl`
+* Added better warning for `estimate.missing` for failing with `method = "Reg"` to estimate landmarks.
+* Added `shape.predictor` examples to PLS functions.
+
 # CHANGES IN GEOMORPH VERSION 4.0.5
 
 ### NEW FEATURES

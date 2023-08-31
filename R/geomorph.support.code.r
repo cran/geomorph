@@ -1383,20 +1383,6 @@ tps2d3d <- function(M, matr, matt, PB=TRUE){		#DCA: altered from J. Claude 2008
   return(matg)
 }
 
-
-# In development for various functions
-
-model.matrix.g <- function(f1, data = NULL) {
-  f1 <- as.formula(f1)
-  Terms <- terms(f1)
-  labs <- attr(Terms, "term.labels")
-  if(!is.null(data)) {
-    matches <- na.omit(match(labs, names(data)))
-    dat <- as.data.frame(data[matches])
-  } else dat <- NULL
-  model.matrix(f1, data=dat)
-}
-
 # perm.CR.index
 # creates a permutation index for resampling, shuffling landmarks
 # used in all functions utilizing CR (modularity)
@@ -1414,10 +1400,10 @@ perm.CR.index <- function(g, k, iter, seed=NULL){ # g is numeric partition.gp
       ind
 }
 
-# boot.index
+# boot.indexCR
 # creates a bootstrap index for resampling
 # used in modularity test functions
-boot.index <-function(n, iter, seed=NULL){
+boot.indexCR <-function(n, iter, seed=NULL){
   if(is.null(seed)) seed = iter else
     if(seed == "random") seed = sample(1:iter,1) else
       if(!is.numeric(seed)) seed = iter
@@ -1599,7 +1585,7 @@ apply.CR <- function(x,g,k, iter, seed = NULL){# g = partition.gp
 # used in: modularity.test
 boot.CR <- function(x,gps, k,iter, seed = NULL){
   x<-as.matrix(x)
-  boot <- boot.index(nrow(x), iter, seed=seed)
+  boot <- boot.indexCR(nrow(x), iter, seed=seed)
   if(k==1){
     jj <- iter+1
     if(jj > 100) j <- 1:100 else j <- 1:jj
@@ -2373,6 +2359,7 @@ updateCov <- function(Cov, lambda) {
 }
 
 logLikh <- function(y, Cov = NULL, Pcov = NULL){
+  Pcov <- as.matrix(Pcov)
   y <- as.matrix(y)
   n <- nrow(y)
   p <- ncol(y)
