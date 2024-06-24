@@ -8,7 +8,7 @@
 #' characteristics might be converted.  Nonetheless, a ggplot will be coerced and could
 #' be updated, according to user preference.
 #' 
-#' This function assumes no responsibility for arguments made by \code{\link{ggplot}}.
+#' This function assumes no responsibility for arguments made by \code{\link[ggplot2]{ggplot}}.
 #' It merely produces a ggplot object that should resemble a geomorph plot default.  Any 
 #' augmentation of ggplot objects can be done either by direct intervention of the ggplot 
 #' produced or reformatting the initial geomorph plot produced.  One should not expect direct
@@ -62,7 +62,7 @@
 make_ggplot <- function(object){
   
   x <- y <- lbl <- NULL
-  pa <- object$plot.args
+  pa <- object$plot_args
   
   if(is.null(pa)) 
     stop("Plot object does not appear to be a type that can be converted to ggplot.\n",

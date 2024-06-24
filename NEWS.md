@@ -1,3 +1,19 @@
+# CHANGES IN GEOMORPH VERSION 4.0.8
+
+### NEW FEATURES
+
+* Improved `anc.BM`
+
+### OTHER CHANGES
+
+* Internal changes for compliance with RRPP and Matrix changes
+
+### Bug fixes
+* Fixed issue with `integration.Vrel` and phylogeny checks
+* Fixed issue with unsigned.AI in `bilat.symmetry` and removed signed.AI
+* Fixed issue with `readland.tps` and negNA = TRUE
+* Fixed issue with `plot.gm.prcomp` `phylo.par` default
+
 # CHANGES IN GEOMORPH VERSION 4.0.7
 
 ### NEW FEATURES
