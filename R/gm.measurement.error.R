@@ -65,6 +65,7 @@
 #' @param verbose A logical value to indicate if all the output from an
 #' \code{\link[RRPP]{lm.rrpp}} analysis should be retained.  If FALSE, only the needed
 #' output for summaries and plotting is retained.
+#' @param ... Arguments passed on to \code{\link[RRPP]{lm.rrpp.ws}}.
 #' @export
 #' @keywords analysis
 #' @author Michael Collyer and Dean Adams
@@ -145,7 +146,7 @@ gm.measurement.error <- function(coords,
                                  Parallel = FALSE,
                                  turbo = TRUE,
                                  print.progress = FALSE,
-                                 verbose = FALSE) {
+                                 verbose = FALSE, ...) {
   
   if(!inherits(data, "geomorph.data.frame")){
     if(!inherits(data, "data.frame") && 
@@ -172,7 +173,7 @@ gm.measurement.error <- function(coords,
   } else{
     stop("Data not a 3D array.\n")
   } 
-  
+  me.args <- c(as.list(environment()), list(...))
   me.args <- list(
     Y = "Y.2D",
     subjects = subjects, 

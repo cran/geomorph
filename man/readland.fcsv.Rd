@@ -7,10 +7,16 @@
 readland.fcsv(file = NULL)
 }
 \arguments{
-\item{file}{the name of a *.fcsv file containing three-dimensional landmark data to be read in}
+\item{file}{The name of a *.fcsv file containing three-dimensional landmark data to be read in}
 }
 \value{
 Function returns a p x 3 matrix of x, y, z coordinates for p landmarks.
+
+Note: to read in multiple files the following is useful:
+
+filelist <- list.files(path = "PATH TO FOLDER with FILES", pattern = "*.fcsv", full.names = TRUE)
+
+mydata <- simplify2array(lapply(filelist, readland.fcsv))
 }
 \description{
 Read landmark data for a single specimen from an fcsv file obtained from SlicerMorph.
@@ -19,6 +25,6 @@ Read landmark data for a single specimen from an fcsv file obtained from SlicerM
 This function merely extracts x, y, z coordinates from an fcsv file.
 }
 \author{
-Murat Maga and Michael Collyer
+Murat Maga, Michael Collyer and Dean Adams
 }
 \keyword{IO}

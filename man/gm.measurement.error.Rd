@@ -18,7 +18,8 @@ gm.measurement.error(
   Parallel = FALSE,
   turbo = TRUE,
   print.progress = FALSE,
-  verbose = FALSE
+  verbose = FALSE,
+  ...
 )
 }
 \arguments{
@@ -75,6 +76,8 @@ bar should be printed to the screen.}
 \item{verbose}{A logical value to indicate if all the output from an
 \code{\link[RRPP]{lm.rrpp}} analysis should be retained.  If FALSE, only the needed
 output for summaries and plotting is retained.}
+
+\item{...}{Arguments passed on to \code{\link[RRPP]{lm.rrpp.ws}}.}
 }
 \value{
 Objects of class "measurement.error" return the same objects

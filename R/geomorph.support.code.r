@@ -14,6 +14,7 @@
 #' @importFrom graphics abline arrows hist identify layout lines locator mtext par plot.new plot.window plot.xy points rasterImage segments text title legend
 #' @importFrom stats na.omit .lm.fit anova as.dist as.formula cmdscale coef cor cov dist formula kmeans lm lm.fit model.matrix optimise pnorm prcomp predict quantile rnorm sd spline terms var
 #' @importFrom utils combn object.size read.csv read.table setTxtProgressBar txtProgressBar write.csv write.table
+#' @importFrom graphics polygon
 #' @import RRPP
 #' @import parallel
 #' @import rgl
@@ -153,6 +154,23 @@ NULL
 #' @references Lazic, M., Carretero, M.A., Crnobrnja-Isailovic, J. & Kaliontzopoulou, A. 2015. Effects of
 #' environmental disturbance on phenotypic variation: an integrated assessment of canalization, developmental 
 #' stability, modularity and allometry in lizard head shape. American Naturalist 185: 44-58.
+NULL
+
+#' Landmarks on pupfish
+#'
+#' @name pupfish.ws
+#' @docType data
+#' @author Dean Adams and Michael Collyer
+#' @keywords datasets
+#' @description Landmark data from pupfish body shapes, with indication of Sex, Population and
+#' Species from which fish were sampled. Landmarks represent a subset of those from the 
+#' original publication. A phylogeny and phylogenetic covariance matrix are
+#' included. 
+#' @details These data were previously aligned
+#' with GPA.  Centroid size (CS) is also provided.
+#' @references Adams, D.C and M.L Collyer. 2024. Extending phylogenetic regression models for 
+#' comparing within-species patterns across the tree of life. 
+#' Methods in Ecology and Evolution. DOI: 10.1111/2041-210X.14438
 NULL
 
 #' Estimate mean shape for a set of aligned specimens
