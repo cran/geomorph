@@ -11,6 +11,7 @@ gm.prcomp(
   unit.tree = TRUE,
   GLS = FALSE,
   transform = FALSE,
+  unit.size = TRUE,
   ...
 )
 }
@@ -29,6 +30,9 @@ Alternatively, this can be an n x p matrix of any data, but output will not cont
 \item{transform}{A logical value to indicate if transformed residuals should be projected.  This is only applicable if 
 GLS = TRUE.  If TRUE, an orthogonal projection of transformed data is made; if FALSE an oblique projection of untransformed 
 data is made.}
+
+\item{unit.size}{Logical value for whether shapes estimated at axis extremes should be unit size (divided by centroid size).
+If input coordinates are not unit size (e.g., Boas coordinates), this argument should be changed to FALSE.}
 
 \item{...}{Other arguments passed to \code{\link[RRPP]{ordinate}} and \code{\link{scale}}.  The most common
 arguments are scale., tol, and rank.}
@@ -63,7 +67,7 @@ the capability of performing analyses generally referred to as:
 states and phylogenetic branches projected into ordination plots.}
 \item{\bold{phyloPCA}}{  PCA based on GLS-centering and projection of data.  Also possible to 
 project ancestral states into plots. Note that if transformed GLS-residuals are used for projection, the ancestral states
-might not appear logical, as the projection is independent of phylogeny.  With OLS-centering, a phyloPCA as described by 
+might not appear logical, as the projection is independent of phylogeny.  With GLS-centering (but not transformation), a phyloPCA as described by 
 Revell (2009) is produced.}
 \item{\bold{PaCA}}{  Phylogenetically-aligned component analysis.  Data are aligned to an axis of greatest phylogenetic
 signal rather than axis of greatest dispersion.  This analysis can use either OLS- or GLS-centering and projection.  

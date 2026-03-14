@@ -1,3 +1,20 @@
+# CHANGES IN GEOMORPH VERSION 4.1.0
+
+### MAJOR CHANGES
+
+* Internal switch to `plotly` for 3D graphics (was previously `RGL`)
+* All 3D digitizing functions now deprecated (previously depended on `RGL`)
+
+### NEW FEATURES 
+
+* New argument in `shape.predictor` and `gm.prcomp` to indicate if estimated configurations
+should be scaled to unit size.
+* Updates `plotOutliers` to allow distances from limited PCs.
+
+### BUG FIXES
+
+* Fixed unused tol argument in `physignal.eigen`.
+
 # CHANGES IN GEOMORPH VERSION 4.0.10
 
 ### NEW FEATURES
