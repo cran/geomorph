@@ -197,7 +197,7 @@ boot.index <-function(n, iter, block = NULL, seed = NULL){
           out <- array(NA, n)
           r <- unlist(lapply(loc.list, sample, replace = TRUE))
           for(i in indx) out[rindx[i]] <- r[i]
-        } else  out <- sample.int(n, n)
+        } else  out <- sample.int(n, n, replace = TRUE)
         out
       }
       ind <- c(list(1:n), (Map(function(x) get.samp(n), 
@@ -223,141 +223,6 @@ fastLM<- function(U, y){
   p <- dim(y)[2]; n <- dim(y)[1]
   yh <- fastFit(U,y,n,p)
   list(fitted = yh, residuals = y-yh)
-}
-
-# pval
-# P-values form random outcomes
-# any analytical function
-pval = function(s){# s = sampling distribution
-  p = length(s)
-  r = rank(s)[1]-1
-  pv = 1-r/p
-  pv
-}
-
-# box.cox
-# Box-Cox transformation for normalizing distributions.  Similar to MASS::boxcox
-# without unneeded arguments, plus faster
-# Used in effect.size
-box.cox.true <- function(y, eps = 0.001){
-  
-  if(any(y <= 0)) y = y - min(y) + 0.0001
-  
-  y.obs <- y[1]
-  y <- y[-1]
-  
-  # Note the code below (to get yy) is short-cut for Jacobian adjustment 
-  n <- length(y)
-  yy <- y / exp(mean(log(y)))
-  logy <- log(yy)
-  
-  lambda <- seq(-5, 5, 0.001)
-  m <- length(lambda)
-  
-  loglik <- sapply(1:m, function(j){ # same as MASS::boxcox loglik 
-    la <- lambda[j]
-    yt <- if(abs(la) > eps) yt <- (yy^la - 1)/la else
-      logy * (1 + (la * logy)/2 * (1 + (la * logy)/3 * (1 + (la * logy)/4)))
-    
-    -n/2 * log(sum(center(yt)^2))
-  })
-  
-  lambda.opt <- lambda[which.max(loglik)][[1]]
-  if(abs(lambda.opt) < eps) lambda.opt <- 0
-  y <- c(y.obs, y)
-  res <- if(lambda.opt == 0) log(y) else (y^lambda.opt - 1)/lambda.opt
-  
-  list(opt.lambda = lambda.opt, transformed = res, lambda = lambda, 
-       loglik = loglik)
-  
-}
-
-box.cox.spline <- function(y, eps = 0.001) {
-  
-  if(any(y <= 0)) y = y - min(y) + 0.0001
-  
-  y.obs <- y[1]
-  y <- y[-1]
-  
-  n <- length(y)
-  yy <- y / exp(mean(log(y)))
-  logy <- log(yy)
-  m <- 20
-  lambda <- seq(-0.5, 1.5, length.out = m)
-  
-  loglik <- sapply(1:m, function(j){ # same as MASS::boxcox loglik 
-    la <- lambda[j]
-    yt <- if(abs(la) > eps) yt <- (yy^la - 1)/la else
-      logy * (1 + (la * logy)/2 * (1 + (la * logy)/3 * (1 + (la * logy)/4)))
-    
-    -n/2 * log(sum(center(yt)^2))
-  })
-  
-  sp <- spline(lambda, loglik, n = 300)
-  lambda.opt <- sp$x[which.max(sp$y)]
-  if(abs(lambda.opt) < eps) lambda.opt <- 0
-  y <- c(y.obs, y)
-  res <- if(lambda.opt == 0) log(y) else (y^lambda.opt - 1)/lambda.opt
-  
-  list(opt.lambda = lambda.opt, transformed = res, lambda = sp$x, loglik = sp$y)
-  
-}
-
-box.cox.iter <- function(y, eps = 0.001) {
-  bc <- box.cox.spline(y, eps = eps)
-  if(bc$opt.lambda == -0.5 || bc$opt.lambda == 1.5) 
-    bc <- box.cox.true(y, eps = eps)
-  return(bc)
-}
-
-box.cox.fast <- function(y, eps = 0.001) {
-  if(any(y <= 0)) y = y - min(y) + 0.0001
-  y.obs <- y[1]
-  y <- y[-1]
-  
-  n <- length(y)
-  yy <- y / exp(mean(log(y)))
-  logy <- log(yy)
-  
-  logLik <- function(lambda) {
-    la <- lambda
-    yt <- if(abs(la) > eps) yt <- (yy^la - 1)/la else
-      logy * (1 + (la * logy)/2 * (1 + (la * logy)/3 * (1 + (la * logy)/4)))
-    
-    -n/2 * log(sum(center(yt)^2))
-  }
-  
-  result <- optimise(logLik, lower = -5, upper = 5, maximum = TRUE)
-  lambda.opt <- result$maximum
-  if(abs(lambda.opt) < eps) lambda.opt <- 0
-  y <- c(y.obs, y)
-  res <- if(lambda.opt == 0) log(y) else (y^lambda.opt - 1)/lambda.opt
-  list(opt.lambda = lambda.opt, transformed = res, lambda = NULL, loglik = NULL)
-}
-
-box.cox <- function(y, eps = 0.001, iterate = FALSE) {
-  result <- if(iterate) box.cox.iter(y, eps = eps) else
-    box.cox.fast(y, eps = eps)
-  return(result)
-}
-
-
-# effect.size
-# Effect sizes (standard deviates) form random outcomes
-# any analytical function
-
-effect.size <- function(x, center = TRUE) {
-  if(length(unique(x)) == 1) {
-    sdx <- 1
-    x <- 0
-  } else {
-    x <- box.cox(x)$transformed
-    n <- length(x)
-    if(center) x <- center(x)
-    sdx <- sqrt((sum(x^2)/n))
-  }
-  
-  (x[1]- mean(x)) / sdx
 }
 
 # Pval.matrix
@@ -479,6 +344,7 @@ fast.phy.vcv <- function (phy) {
 
 # reorder.phy
 # same as reorder function, but without options
+
 reorder.phy <- function(phy){
   edge <- phy$edge
   edge.length <- phy$edge.length
@@ -518,7 +384,8 @@ pic.prep <- function(phy, nx, px){
 
 ace.pics <- function(ntip, nnode, edge1, edge2, edge_len, phe, contr,
                      var_contr, tip.label, i.seq, x) {
-  phe[1:ntip,] <- if (is.null(rownames(x))) x else x[tip.label,]
+  phe[1:ntip, ] <- if (is.null(rownames(x))) x else 
+    x[tip.label, , drop = FALSE]
   N <- ntip + nnode
   for(ii in 1:nnode) {
     anc <- edge1[i.seq[ii]]
@@ -532,7 +399,8 @@ ace.pics <- function(ntip, nnode, edge1, edge2, edge_len, phe, contr,
     ya <- (phe[d1,] - phe[d2,])/sqrt(sumbl)
     contr[ic, ] <- ya
     var_contr[ic] <- sumbl
-    phe[anc,] <- (phe[d1, ] * edge_len[j] + phe[d2, ] * edge_len[i])/sumbl
+    phe[anc,] <- (phe[d1, , drop = FALSE] * edge_len[j] + 
+                    phe[d2, , drop = FALSE] * edge_len[i])/sumbl
     k <- which(edge2 == anc)
     edge_len[k] <- edge_len[k] + edge_len[i] * edge_len[j] / sumbl
   }
@@ -547,10 +415,10 @@ anc.BM <- function(phy, Y){
   phy <- reorder.phy(phy)
   Y <- as.matrix(Y)
   N <- length(phy$tip.label)
-  Y <- as.matrix(Y[phy$tip.label, ])
+  Y <- as.matrix(Y[phy$tip.label, , drop = FALSE])
   edge <- cbind(phy$edge, phy$edge.length)
   ind <-rank(edge[,1], ties.method = "last")
-  edge <- edge[order(ind, decreasing = TRUE), ]
+  edge <- edge[order(ind, decreasing = TRUE), , drop = FALSE]
   ev <- edge[,3]
   anc <- edge[, 1]
   des <- edge[, 2]
@@ -572,18 +440,18 @@ anc.BM <- function(phy, Y){
     
     if(d <= N){
       p[d] <- 1 / len
-      Z[d, ] <- Y[d, ]
+      Z[d, ] <- Y[d, , drop = FALSE]
     } else {
       pA <- p[d]
-      Z[d, ] <- Z[d, ] / pA
+      Z[d, ] <- Z[d, , drop = FALSE] / pA
       p[d] <- pA / (1 + len * pA)
     }
     
     p[a] <- p[a] + p[d]
-    Z[a, ] <- Z[a, ] + Z[d, ] * p[d]
+    Z[a, ] <- Z[a, , drop = FALSE] + Z[d, , drop = FALSE] * p[d]
   }
   
-  Z[a, ] <- Z[a, ] / p[a]
+  Z[a, ] <- Z[a, , drop = FALSE] / p[a]
   
   for(i in ne:1){
     a <- anc[i] 
@@ -591,8 +459,8 @@ anc.BM <- function(phy, Y){
     len <- ev[i]
     
     if(d > N) {
-      Z[d, ] <-  Z[d, ] * p[d] * len + 
-        Z[a, ] - Z[a, ] * p[d] * len
+      Z[d, ] <-  Z[d, , drop = FALSE] * p[d] * len + 
+        Z[a, ] - Z[a, , drop = FALSE] * p[d] * len
     }
   }
   Z <- Z[-(1:N), , drop = FALSE]
