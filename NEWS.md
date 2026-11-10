@@ -1,14 +1,24 @@
+# CHANGES IN GEOMORPH VERSION 4.1.2
+
+### NEW  
+* Added a `plotly` object output to `gm.prcomp` 
+plots to allow further augmentatiomn.
+
 # CHANGES IN GEOMORPH VERSION 4.1.1
 
 ### BUG FIXES
 
+* Updated `plot.gm.prcomp` for 3D time plots using `plotly`
+* Added catch for CI line plot in `plotOutliers`
+* Updated calculation of unsigned.AI in `bilat.symmetry`
+* Updated `warpRefOutline` to use `tps2d3d`.
 * Fixed 3D plotting for points in `plotAllSpecimens`.
 
 ### NEW  
 * `pls` objects with pairwise comparisons now use a weighted mean of r_pls
 values to account for disparate module sizes.
 
-# CHANGES IN GEOMORPH VERSION 4.1.0
+# CHANGES IN GEOMORPH VERSION 4.1.0 
 
 ### MAJOR CHANGES
 
